@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optics Lab - Light & Logic</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Optics Lab</h1>
+            <p>Direct the laser to the target.</p>
+        </header>
+        
+        <div class="game-area">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            
+            <div class="controls">
+                <div class="tool-panel">
+                    <h2>Tools</h2>
+                    <div class="tool active" data-type="none">Select</div>
+                    <!-- Tools will be added in Phase 2 -->
+                    <div class="tool" data-type="mirror" style="opacity: 0.5; pointer-events: none;">Mirror (Coming Soon)</div>
+                </div>
+                <div class="info-panel">
+                    <button id="resetBtn">Reset Level</button>
+                    <p id="status">Level 1: System Online</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
