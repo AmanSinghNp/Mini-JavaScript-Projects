@@ -30,3 +30,6 @@ function generateQuote() {
     break;
   }
 }
+// Reference
+// https://www.youtube.com/watch?v=2ml4x0rO1PQ
+// https://github.com/techwithtim/5-Mini-JS-Projects-for-Beginners
