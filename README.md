@@ -24,6 +24,15 @@ Display random quotes.
 
 Basic timer with start, stop, reset.
 
+### 6. QR Code Generator
+
+Generate QR codes from text or URLs with download functionality.
+
+- Enter any text or URL
+- Generate QR code instantly
+- Download QR code as PNG image
+- Clean, modern interface
+
 ## Usage
 
 Open `main.html` in any project folder to run it.
@@ -38,6 +47,7 @@ _More projects coming soon..._
 - CSS3
 - Vanilla JavaScript
 - Local Storage (for TODO list)
+- QR Server API (for QR code generation)
 
 ## Project Structure
 
@@ -48,6 +58,7 @@ Mini-JavaScript-Projects/
 ├── Persistent TODO List/
 ├── Random Quote Generator/
 ├── Stop Watch/
+├── QR Code generator/
 └── README.md
 ```
 
