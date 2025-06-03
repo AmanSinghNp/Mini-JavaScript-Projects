@@ -8,23 +8,34 @@ A collection of JavaScript projects for practicing web development.
 
 Change background colors with buttons or generate random colors.
 
-### 2. Palindrome Checker
+### 2. Digital Notebook
+
+A beautiful paper-like digital notebook with numbered tabs.
+
+- Create, edit, and delete notes with auto-save
+- Grid paper background with handwritten-style fonts
+- 12 numbered tabs for organization
+- localStorage persistence
+- Responsive design
+- Beautiful analog-inspired UI
+
+### 3. Palindrome Checker
 
 Check if text reads the same forwards and backwards.
 
-### 3. Persistent TODO List
+### 4. Persistent TODO List
 
 Add and manage tasks with localStorage.
 
-### 4. Random Quote Generator
+### 5. Random Quote Generator
 
 Display random quotes.
 
-### 5. Stop Watch
+### 6. Stop Watch
 
 Basic timer with start, stop, reset.
 
-### 6. QR Code Generator
+### 7. QR Code Generator
 
 Generate QR codes from text or URLs with download functionality.
 
@@ -46,14 +57,16 @@ _More projects coming soon..._
 - HTML5
 - CSS3
 - Vanilla JavaScript
-- Local Storage (for TODO list)
+- Local Storage (for TODO list and Digital Notebook)
 - QR Server API (for QR code generation)
+- Google Fonts (Crimson Text, Inter, Kalam for Digital Notebook)
 
 ## Project Structure
 
 ```
 Mini-JavaScript-Projects/
 ├── Color Flipper/
+├── Notebook (Simple)/
 ├── Palindrome Checker/
 ├── Persistent TODO List/
 ├── Random Quote Generator/
