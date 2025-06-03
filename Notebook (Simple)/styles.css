@@ -129,6 +129,7 @@ body::before {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  counter-reset: tab-counter;
 }
 
 /* Numbered Tab Items */
@@ -193,10 +194,6 @@ body::before {
   font-weight: 500;
   font-size: 14px;
   color: #333333;
-}
-
-.notes-list {
-  counter-reset: tab-counter;
 }
 
 /* Grid Paper Content Area */
