@@ -333,8 +333,6 @@ body::before {
   height: 100%;
   color: #666;
   text-align: center;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="150" viewBox="0 0 200 150"><path d="M50 75 Q 100 50 150 75" stroke="%23E8DDD4" stroke-width="2" fill="none" opacity="0.3"/><circle cx="100" cy="75" r="30" stroke="%23E8DDD4" stroke-width="2" fill="none" opacity="0.2"/></svg>')
-    center center no-repeat;
   background-size: 200px 150px;
   padding-top: 180px;
 }
