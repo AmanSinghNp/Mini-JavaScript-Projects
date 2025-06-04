@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Physics Sandbox</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <!-- Minimal debug info overlay -->
+    <div id="debug"></div>
+
+    <!-- Temporary help overlay that fades -->
+    <div id="helpOverlay">
+      Drag & throw balls • Scroll to resize • Max 10 balls • +/- keys
+    </div>
+
+    <!-- Hover trigger area at top of screen -->
+    <div id="hoverTrigger"></div>
+
+    <!-- Keyboard shortcuts overlay -->
+    <div id="keyboardShortcuts">
+      <div class="shortcuts-title">Controls</div>
+      <div class="shortcut-item">
+        <span class="key">Space</span>
+        <span class="description">Create random ball</span>
+      </div>
+      <div class="shortcut-item">
+        <span class="key">R</span>
+        <span class="description">Drop ball from top</span>
+      </div>
+      <div class="shortcut-item">
+        <span class="key">C</span>
+        <span class="description">Clear all balls</span>
+      </div>
+      <div class="shortcut-item">
+        <span class="key">P</span>
+        <span class="description">Pause/Resume</span>
+      </div>
+      <div class="shortcut-item">
+        <span class="key">+/-</span>
+        <span class="description">Adjust ball size</span>
+      </div>
+      <div class="shortcut-item">
+        <span class="key">Scroll</span>
+        <span class="description">Change ball size</span>
+      </div>
+      <div class="shortcuts-note">
+        Drag balls to throw with inertia • Max 10 balls
+      </div>
+    </div>
+
+    <!-- Load scripts in order -->
+    <script src="utils.js"></script>
+    <script src="physics.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
