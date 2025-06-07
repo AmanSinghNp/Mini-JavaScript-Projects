@@ -35,7 +35,7 @@ const MAX_BALL_SIZE = 40;
 class Ball {
   constructor(x, y, radius = null, color = null) {
     this.position = new Vector2D(x, y);
-    this.velocity = new Vector2D(random(-4, 4), random(-2, 2));
+    this.velocity = new Vector2D(random(-15, 15), random(-10, 5)); // Much higher initial velocity for dramatic bouncing
     this.radius = radius || currentBallSize;
     this.mass = this.radius * 0.1; // Mass based on radius
     this.color = color || this.getRandomColor();

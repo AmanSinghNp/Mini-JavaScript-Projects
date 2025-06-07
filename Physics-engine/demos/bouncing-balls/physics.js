@@ -1,10 +1,44 @@
 /**
- * Advanced Physics Engine for Bouncing Ball Demo
- * Implements Velocity Verlet integration, sophisticated force modeling, and improved collision response
+ * Optimized Physics Engine for Bouncing Ball Demo
+ * Performance-focused implementation with object pooling and optimized calculations
  */
 
+// Object pool for Vector2D to reduce garbage collection
+const vector2DPool = [];
+const POOL_SIZE = 100;
+
+// Pre-allocate vectors for the pool
+for (let i = 0; i < POOL_SIZE; i++) {
+  vector2DPool.push({ x: 0, y: 0, inUse: false });
+}
+
 /**
- * Enhanced Vector2D class with comprehensive vector operations
+ * Get a vector from the pool
+ */
+function getVector(x = 0, y = 0) {
+  for (let i = 0; i < vector2DPool.length; i++) {
+    if (!vector2DPool[i].inUse) {
+      vector2DPool[i].x = x;
+      vector2DPool[i].y = y;
+      vector2DPool[i].inUse = true;
+      return vector2DPool[i];
+    }
+  }
+  // Fallback if pool is exhausted
+  return { x, y, inUse: true };
+}
+
+/**
+ * Release a vector back to the pool
+ */
+function releaseVector(v) {
+  if (v && v.inUse) {
+    v.inUse = false;
+  }
+}
+
+/**
+ * Optimized Vector2D class with minimal object creation
  */
 class Vector2D {
   constructor(x = 0, y = 0) {
@@ -12,374 +46,267 @@ class Vector2D {
     this.y = y;
   }
 
-  /**
-   * Add another vector to this vector
-   * @param {Vector2D} other - Vector to add
-   * @returns {Vector2D} New vector result
-   */
+  // Mutating methods for better performance
+  addMut(other) {
+    this.x += other.x;
+    this.y += other.y;
+    return this;
+  }
+
+  subtractMut(other) {
+    this.x -= other.x;
+    this.y -= other.y;
+    return this;
+  }
+
+  multiplyMut(scalar) {
+    this.x *= scalar;
+    this.y *= scalar;
+    return this;
+  }
+
+  divideMut(scalar) {
+    if (scalar !== 0) {
+      this.x /= scalar;
+      this.y /= scalar;
+    }
+    return this;
+  }
+
+  // Non-mutating methods when needed
   add(other) {
     return new Vector2D(this.x + other.x, this.y + other.y);
   }
 
-  /**
-   * Subtract another vector from this vector
-   * @param {Vector2D} other - Vector to subtract
-   * @returns {Vector2D} New vector result
-   */
   subtract(other) {
     return new Vector2D(this.x - other.x, this.y - other.y);
   }
 
-  /**
-   * Multiply vector by a scalar
-   * @param {number} scalar - Number to multiply by
-   * @returns {Vector2D} New vector result
-   */
   multiply(scalar) {
     return new Vector2D(this.x * scalar, this.y * scalar);
   }
 
-  /**
-   * Divide vector by a scalar
-   * @param {number} scalar - Number to divide by
-   * @returns {Vector2D} New vector result
-   */
   divide(scalar) {
     if (scalar === 0) return new Vector2D(0, 0);
     return new Vector2D(this.x / scalar, this.y / scalar);
   }
 
-  /**
-   * Get the magnitude (length) of the vector
-   * @returns {number} Vector magnitude
-   */
   magnitude() {
     return Math.sqrt(this.x * this.x + this.y * this.y);
   }
 
-  /**
-   * Get the squared magnitude (faster than magnitude for comparisons)
-   * @returns {number} Squared magnitude
-   */
   magnitudeSquared() {
     return this.x * this.x + this.y * this.y;
   }
 
-  /**
-   * Normalize the vector (make it unit length)
-   * @returns {Vector2D} Normalized vector
-   */
+  normalizeMut() {
+    const mag = this.magnitude();
+    if (mag > 0) {
+      this.x /= mag;
+      this.y /= mag;
+    }
+    return this;
+  }
+
   normalize() {
     const mag = this.magnitude();
     if (mag === 0) return new Vector2D(0, 0);
     return new Vector2D(this.x / mag, this.y / mag);
   }
 
-  /**
-   * Get dot product with another vector
-   * @param {Vector2D} other - Other vector
-   * @returns {number} Dot product
-   */
   dot(other) {
     return this.x * other.x + this.y * other.y;
   }
 
-  /**
-   * Get cross product with another vector (2D cross product returns scalar)
-   * @param {Vector2D} other - Other vector
-   * @returns {number} Cross product magnitude
-   */
   cross(other) {
     return this.x * other.y - this.y * other.x;
   }
 
-  /**
-   * Get the angle of this vector in radians
-   * @returns {number} Angle in radians
-   */
   angle() {
     return Math.atan2(this.y, this.x);
   }
 
-  /**
-   * Rotate vector by given angle in radians
-   * @param {number} angle - Angle in radians
-   * @returns {Vector2D} Rotated vector
-   */
-  rotate(angle) {
+  rotateMut(angle) {
     const cos = Math.cos(angle);
     const sin = Math.sin(angle);
-    return new Vector2D(
-      this.x * cos - this.y * sin,
-      this.x * sin + this.y * cos
-    );
+    const x = this.x * cos - this.y * sin;
+    const y = this.x * sin + this.y * cos;
+    this.x = x;
+    this.y = y;
+    return this;
   }
 
-  /**
-   * Get perpendicular vector (rotated 90 degrees)
-   * @returns {Vector2D} Perpendicular vector
-   */
-  perpendicular() {
-    return new Vector2D(-this.y, this.x);
+  set(x, y) {
+    this.x = x;
+    this.y = y;
+    return this;
   }
 
-  /**
-   * Linear interpolation to another vector
-   * @param {Vector2D} other - Target vector
-   * @param {number} t - Interpolation factor (0-1)
-   * @returns {Vector2D} Interpolated vector
-   */
-  lerp(other, t) {
-    return this.add(other.subtract(this).multiply(t));
-  }
-
-  /**
-   * Create a copy of this vector
-   * @returns {Vector2D} Copy of the vector
-   */
   copy() {
     return new Vector2D(this.x, this.y);
   }
 
-  /**
-   * Set this vector's components
-   * @param {number} x - X component
-   * @param {number} y - Y component
-   */
-  set(x, y) {
-    this.x = x;
-    this.y = y;
-  }
-
-  /**
-   * Check if this vector is approximately equal to another
-   * @param {Vector2D} other - Other vector
-   * @param {number} epsilon - Tolerance
-   * @returns {boolean} True if approximately equal
-   */
-  equals(other, epsilon = 0.001) {
-    return (
-      Math.abs(this.x - other.x) < epsilon &&
-      Math.abs(this.y - other.y) < epsilon
-    );
+  copyTo(target) {
+    target.x = this.x;
+    target.y = this.y;
+    return target;
   }
 }
 
 /**
- * EXAGGERATED physics constants for dramatic motion and interactions
+ * Optimized physics constants for proper bouncing
  */
 const PHYSICS = {
-  // Basic physics - EXTREME VALUES
-  GRAVITY: 20000.5, // Gravitational acceleration (pixels/frame²) - INSANE GRAVITY!
-  TIME_STEP: 1 / 60, // Fixed time step for consistent physics (60 FPS)
-
-  // Collision response - SUPER BOUNCY
-  BOUNCE_DAMPING: 1.2, // Energy GAIN on boundary bounce (>1 = gaining energy!)
-  COLLISION_RESTITUTION: 1.5, // Energy amplification in ball-ball collisions (>1 = explosive!)
-  COLLISION_DAMPING: 1.1, // Overall energy multiplication in collisions
-
-  // Environmental forces - MINIMAL RESISTANCE
-  AIR_DENSITY: 0.0001, // Extremely low air density (almost no drag)
-  DRAG_COEFFICIENT: 0.1, // Very low drag coefficient
-  FLOOR_FRICTION: 0.99, // Almost no friction when rolling on floor
+  GRAVITY: 200, // Reduced for better bouncing
+  TIME_STEP: 1 / 60,
+  BOUNCE_DAMPING: 1.9, // Increased for better bounce retention
+  COLLISION_RESTITUTION: 0.95, // Increased for bouncier collisions
+  COLLISION_DAMPING: 0.98, // Reduced energy loss
+  AIR_DENSITY: 0.0002, // Reduced air resistance
+  DRAG_COEFFICIENT: 0.02, // Much lower drag
+  FLOOR_FRICTION: 0.995, // Almost no friction
   ROLLING_FRICTION: 0.999, // Almost no rolling resistance
+  POSITION_CORRECTION: 0.8,
+  VELOCITY_THRESHOLD: 0.1, // Lower threshold for continuous bouncing
+  MAX_VELOCITY: 50, // Higher speed limit
+  MAX_VELOCITY_SQUARED: 2500, // Pre-calculated
+  MIN_SEPARATION: 0.1,
+  COLLISION_AMPLIFICATION: 1.0,
+  CHAOS_FACTOR: 0.0,
+  ENERGY_INJECTION: 1.0,
 
-  // Numerical integration - AGGRESSIVE
-  POSITION_CORRECTION: 1.2, // Aggressive position correction for overlaps
-  VELOCITY_THRESHOLD: 0.01, // Very low minimum velocity before rest
-
-  // Stability - HIGH SPEED LIMITS
-  MAX_VELOCITY: 50, // Much higher maximum velocity magnitude
-  MIN_SEPARATION: 0.01, // Tighter minimum separation distance
-
-  // NEW: Exaggeration factors
-  COLLISION_AMPLIFICATION: 2.0, // Amplify collision forces
-  CHAOS_FACTOR: 0.1, // Random chaos injection
-  ENERGY_INJECTION: 1.05, // Continuous energy injection
+  // Pre-calculated constants
+  HALF_AIR_DENSITY: 0.0001,
+  DRAG_CONSTANT: 0.000002, // Much lower drag constant
+  PI: Math.PI,
+  TWO_PI: Math.PI * 2,
 };
 
-/**
- * Calculate gravitational force on an object
- * @param {Object} ball - Ball object with mass
- * @returns {Vector2D} Gravitational force vector
- */
-function calculateGravityForce(ball) {
-  return new Vector2D(0, PHYSICS.GRAVITY * ball.mass);
-}
+// Pre-allocated temporary vectors to avoid creation in hot paths
+const temp1 = new Vector2D();
+const temp2 = new Vector2D();
+const temp3 = new Vector2D();
+const netForceTemp = new Vector2D();
 
 /**
- * Calculate air drag force using quadratic drag equation (but much weaker)
- * @param {Vector2D} velocity - Current velocity
- * @param {number} radius - Object radius for cross-sectional area
- * @returns {Vector2D} Drag force vector
- */
-function calculateDragForce(velocity, radius) {
-  const speed = velocity.magnitude();
-  if (speed === 0) return new Vector2D(0, 0);
-
-  // F_drag = 0.5 * ρ * C_d * A * v² (but much weaker for dramatic effect)
-  const crossSectionalArea = Math.PI * radius * radius;
-  const dragMagnitude =
-    0.5 *
-    PHYSICS.AIR_DENSITY *
-    PHYSICS.DRAG_COEFFICIENT *
-    crossSectionalArea *
-    speed *
-    speed;
-
-  // Apply drag opposite to velocity direction
-  const dragDirection = velocity.normalize().multiply(-1);
-  return dragDirection.multiply(dragMagnitude);
-}
-
-/**
- * Calculate rolling friction force (minimal for dramatic sliding)
- * @param {Vector2D} velocity - Current velocity
- * @param {number} mass - Object mass
- * @param {boolean} onGround - Whether object is on ground
- * @returns {Vector2D} Rolling friction force
- */
-function calculateRollingFriction(velocity, mass, onGround) {
-  if (!onGround || velocity.magnitude() < PHYSICS.VELOCITY_THRESHOLD) {
-    return new Vector2D(0, 0);
-  }
-
-  const frictionMagnitude =
-    mass * PHYSICS.GRAVITY * (1 - PHYSICS.ROLLING_FRICTION) * 0.1; // Much weaker
-  const frictionDirection = velocity.normalize().multiply(-1);
-  return frictionDirection.multiply(frictionMagnitude);
-}
-
-/**
- * Inject random chaos for unpredictable motion
- * @param {Object} ball - Ball object
- * @returns {Vector2D} Chaos force vector
- */
-function calculateChaosForce(ball) {
-  if (Math.random() < 0.02) {
-    // 2% chance per frame
-    const angle = Math.random() * Math.PI * 2;
-    const magnitude =
-      (Math.random() - 0.5) * PHYSICS.CHAOS_FACTOR * ball.mass * 100;
-    return new Vector2D(Math.cos(angle), Math.sin(angle)).multiply(magnitude);
-  }
-  return new Vector2D(0, 0);
-}
-
-/**
- * Apply all forces to calculate net force on a ball
- * @param {Object} ball - Ball object
- * @param {boolean} onGround - Whether ball is touching ground
- * @returns {Vector2D} Net force vector
+ * Optimized force calculations using pre-allocated vectors
  */
 function calculateNetForce(ball, onGround = false) {
-  let netForce = new Vector2D(0, 0);
+  // Reset net force
+  netForceTemp.set(0, 0);
 
-  // Skip forces if ball is being dragged
   if (ball.isDragging) {
-    return netForce;
+    return netForceTemp;
   }
 
-  // Gravitational force (EXTREME)
-  netForce = netForce.add(calculateGravityForce(ball));
+  // Gravity (simplified)
+  netForceTemp.y += PHYSICS.GRAVITY * ball.mass;
 
-  // Air drag force (minimal)
-  const dragForce = calculateDragForce(ball.velocity, ball.radius);
-  netForce = netForce.add(dragForce);
+  // Air drag (optimized)
+  const vx = ball.velocity.x;
+  const vy = ball.velocity.y;
+  const speedSquared = vx * vx + vy * vy;
 
-  // Rolling friction (minimal when on ground)
-  if (onGround) {
-    const rollingFriction = calculateRollingFriction(
-      ball.velocity,
-      ball.mass,
-      onGround
-    );
-    netForce = netForce.add(rollingFriction);
+  if (speedSquared > 1) {
+    // Only apply drag at higher speeds for bouncy action
+    const speed = Math.sqrt(speedSquared);
+    const dragMagnitude =
+      PHYSICS.DRAG_CONSTANT * ball.crossSection * speedSquared;
+    netForceTemp.x -= (vx / speed) * dragMagnitude * 0.3; // Reduce drag significantly
+    netForceTemp.y -= (vy / speed) * dragMagnitude * 0.3;
   }
 
-  // Chaos force for unpredictability
-  const chaosForce = calculateChaosForce(ball);
-  netForce = netForce.add(chaosForce);
+  // Rolling friction (minimal for bouncy action)
+  if (
+    onGround &&
+    speedSquared > 4 // Only apply at higher speeds
+  ) {
+    const frictionMagnitude = ball.mass * PHYSICS.GRAVITY * 0.001; // Much lower friction
+    const speed = Math.sqrt(speedSquared);
+    netForceTemp.x -= (vx / speed) * frictionMagnitude;
+  }
 
-  // Energy injection to maintain excitement
-  const energyBoost = ball.velocity.multiply(PHYSICS.ENERGY_INJECTION - 1);
-  netForce = netForce.add(energyBoost.multiply(ball.mass));
-
-  return netForce;
+  return netForceTemp;
 }
 
 /**
- * Velocity Verlet integration for improved accuracy and stability
- * @param {Object} ball - Ball object to update
- * @param {Object} boundaries - Canvas boundaries
- * @returns {Object} Updated ball state
+ * Optimized Velocity Verlet integration
  */
 function integrateMotion(ball, boundaries) {
-  if (ball.isDragging) {
-    return ball;
-  }
+  if (ball.isDragging) return ball;
 
   const dt = PHYSICS.TIME_STEP;
+  const halfDt = dt * 0.5;
+  const dtSquared = dt * dt;
   const onGround = ball.position.y + ball.radius >= boundaries.bottom - 5;
 
-  // Store previous acceleration
-  const previousAcceleration = ball.acceleration || new Vector2D(0, 0);
-
-  // Calculate current net force and acceleration
-  const netForce = calculateNetForce(ball, onGround);
-  const currentAcceleration = netForce.divide(ball.mass);
-
-  // Velocity Verlet position update
-  // x(t+dt) = x(t) + v(t)*dt + 0.5*a(t)*dt²
-  const velocityTerm = ball.velocity.multiply(dt);
-  const accelerationTerm = previousAcceleration.multiply(0.5 * dt * dt);
-  ball.position = ball.position.add(velocityTerm).add(accelerationTerm);
-
-  // Average acceleration for velocity update
-  const averageAcceleration = previousAcceleration
-    .add(currentAcceleration)
-    .multiply(0.5);
-
-  // Velocity Verlet velocity update
-  // v(t+dt) = v(t) + 0.5*(a(t) + a(t+dt))*dt
-  ball.velocity = ball.velocity.add(averageAcceleration.multiply(dt));
-
-  // Store acceleration for next frame
-  ball.acceleration = currentAcceleration;
-
-  // Apply velocity limits for stability (but much higher limits)
-  const speed = ball.velocity.magnitude();
-  if (speed > PHYSICS.MAX_VELOCITY) {
-    ball.velocity = ball.velocity.normalize().multiply(PHYSICS.MAX_VELOCITY);
+  // Pre-calculate cross section if not exists
+  if (!ball.crossSection) {
+    ball.crossSection = PHYSICS.PI * ball.radius * ball.radius;
   }
 
-  // Much lower velocity threshold for continuous motion
-  if (speed < PHYSICS.VELOCITY_THRESHOLD && onGround) {
-    ball.velocity = ball.velocity.multiply(0.999); // Barely any damping
+  // Initialize acceleration if needed
+  if (!ball.acceleration) {
+    ball.acceleration = new Vector2D(0, 0);
+  }
+
+  // Store previous acceleration
+  const ax = ball.acceleration.x;
+  const ay = ball.acceleration.y;
+
+  // Calculate forces and new acceleration
+  const force = calculateNetForce(ball, onGround);
+  ball.acceleration.x = force.x / ball.mass;
+  ball.acceleration.y = force.y / ball.mass;
+
+  // Update position (Velocity Verlet)
+  ball.position.x += ball.velocity.x * dt + ax * halfDt * dt;
+  ball.position.y += ball.velocity.y * dt + ay * halfDt * dt;
+
+  // Update velocity
+  ball.velocity.x += (ax + ball.acceleration.x) * halfDt;
+  ball.velocity.y += (ay + ball.acceleration.y) * halfDt;
+
+  // Velocity limiting (optimized)
+  const speedSquared =
+    ball.velocity.x * ball.velocity.x + ball.velocity.y * ball.velocity.y;
+  if (speedSquared > PHYSICS.MAX_VELOCITY_SQUARED) {
+    const scale = PHYSICS.MAX_VELOCITY / Math.sqrt(speedSquared);
+    ball.velocity.x *= scale;
+    ball.velocity.y *= scale;
+  }
+
+  // Minimal damping when on ground
+  if (
+    speedSquared < PHYSICS.VELOCITY_THRESHOLD * PHYSICS.VELOCITY_THRESHOLD &&
+    onGround
+  ) {
+    ball.velocity.x *= 0.999;
+    ball.velocity.y *= 0.999;
   }
 
   return ball;
 }
 
 /**
- * Enhanced collision detection between two balls
- * @param {Object} ballA - First ball
- * @param {Object} ballB - Second ball
- * @returns {Object|null} Collision info or null if no collision
+ * Optimized collision detection
  */
 function detectBallCollision(ballA, ballB) {
-  const displacement = ballB.position.subtract(ballA.position);
-  const distance = displacement.magnitude();
+  const dx = ballB.position.x - ballA.position.x;
+  const dy = ballB.position.y - ballA.position.y;
+  const distanceSquared = dx * dx + dy * dy;
   const minDistance = ballA.radius + ballB.radius;
+  const minDistanceSquared = minDistance * minDistance;
 
-  if (distance < minDistance) {
-    const normal = distance > 0 ? displacement.normalize() : new Vector2D(1, 0);
-    const penetration = minDistance - distance;
+  if (distanceSquared < minDistanceSquared) {
+    const distance = Math.sqrt(distanceSquared);
+    const invDistance = distance > 0 ? 1 / distance : 1;
 
     return {
-      normal,
-      penetration,
-      contactPoint: ballA.position.add(normal.multiply(ballA.radius)),
+      normalX: dx * invDistance,
+      normalY: dy * invDistance,
+      penetration: minDistance - distance,
+      distance: distance,
     };
   }
 
@@ -387,140 +314,220 @@ function detectBallCollision(ballA, ballB) {
 }
 
 /**
- * EXPLOSIVE collision response with amplified momentum conservation
- * @param {Object} ballA - First ball
- * @param {Object} ballB - Second ball
- * @param {Object} collision - Collision information
+ * Optimized collision resolution
  */
 function resolveCollision(ballA, ballB, collision) {
-  const { normal, penetration } = collision;
+  const { normalX, normalY, penetration } = collision;
 
-  // Aggressive separation to prevent overlap
-  const correctionPercent = PHYSICS.POSITION_CORRECTION;
+  // Position correction
+  const totalMass = ballA.mass + ballB.mass;
   const correctionMagnitude =
-    (penetration / (ballA.mass + ballB.mass)) * correctionPercent;
-  const correction = normal.multiply(correctionMagnitude);
+    (penetration / totalMass) * PHYSICS.POSITION_CORRECTION;
+  const correctionX = normalX * correctionMagnitude;
+  const correctionY = normalY * correctionMagnitude;
 
-  ballA.position = ballA.position.subtract(correction.multiply(ballB.mass));
-  ballB.position = ballB.position.add(correction.multiply(ballA.mass));
+  ballA.position.x -= correctionX * ballB.mass;
+  ballA.position.y -= correctionY * ballB.mass;
+  ballB.position.x += correctionX * ballA.mass;
+  ballB.position.y += correctionY * ballA.mass;
 
-  // Calculate relative velocity
-  const relativeVelocity = ballA.velocity.subtract(ballB.velocity);
-  const velocityAlongNormal = relativeVelocity.dot(normal);
+  // Relative velocity
+  const rvx = ballA.velocity.x - ballB.velocity.x;
+  const rvy = ballA.velocity.y - ballB.velocity.y;
+  const velocityAlongNormal = rvx * normalX + rvy * normalY;
 
-  // Don't resolve if velocities are separating
   if (velocityAlongNormal > 0) return;
 
-  // Calculate EXPLOSIVE collision impulse with amplification
+  // Impulse calculation
   const restitution = PHYSICS.COLLISION_RESTITUTION;
-  const impulseScalar =
-    (-(1 + restitution) * velocityAlongNormal) / (ballA.mass + ballB.mass);
-  const impulse = normal.multiply(
-    impulseScalar * PHYSICS.COLLISION_AMPLIFICATION
-  );
+  const impulseScalar = (-(1 + restitution) * velocityAlongNormal) / totalMass;
+  const impulseX = normalX * impulseScalar * PHYSICS.COLLISION_AMPLIFICATION;
+  const impulseY = normalY * impulseScalar * PHYSICS.COLLISION_AMPLIFICATION;
 
-  // Apply amplified impulse to velocities
-  ballA.velocity = ballA.velocity.add(impulse.multiply(ballB.mass));
-  ballB.velocity = ballB.velocity.subtract(impulse.multiply(ballA.mass));
+  // Apply impulse
+  const massRatio = ballB.mass / ballA.mass;
+  ballA.velocity.x += impulseX * ballB.mass;
+  ballA.velocity.y += impulseY * ballB.mass;
+  ballB.velocity.x -= impulseX * ballA.mass;
+  ballB.velocity.y -= impulseY * ballA.mass;
 
-  // Apply energy multiplication instead of damping
-  ballA.velocity = ballA.velocity.multiply(PHYSICS.COLLISION_DAMPING);
-  ballB.velocity = ballB.velocity.multiply(PHYSICS.COLLISION_DAMPING);
-
-  // Add random collision chaos
-  const chaosA = new Vector2D(
-    (Math.random() - 0.5) * 2,
-    (Math.random() - 0.5) * 2
-  );
-  const chaosB = new Vector2D(
-    (Math.random() - 0.5) * 2,
-    (Math.random() - 0.5) * 2
-  );
-  ballA.velocity = ballA.velocity.add(chaosA);
-  ballB.velocity = ballB.velocity.add(chaosB);
+  // Damping
+  ballA.velocity.x *= PHYSICS.COLLISION_DAMPING;
+  ballA.velocity.y *= PHYSICS.COLLISION_DAMPING;
+  ballB.velocity.x *= PHYSICS.COLLISION_DAMPING;
+  ballB.velocity.y *= PHYSICS.COLLISION_DAMPING;
 }
 
 /**
- * Enhanced boundary collision handling with SUPER BOUNCE
- * @param {Object} ball - Ball object
- * @param {Object} boundaries - Canvas boundaries
- * @returns {Object} Updated ball state
+ * Optimized boundary collision handling
  */
 function handleBoundaryCollisions(ball, boundaries) {
-  let collided = false;
+  const radius = ball.radius;
+  const damping = PHYSICS.BOUNCE_DAMPING;
 
-  // Left wall collision - SUPER BOUNCE
-  if (ball.position.x - ball.radius <= boundaries.left) {
-    ball.position.x = boundaries.left + ball.radius;
-    ball.velocity.x = -ball.velocity.x * PHYSICS.BOUNCE_DAMPING;
-    collided = true;
+  // Left wall
+  if (ball.position.x <= boundaries.left + radius) {
+    ball.position.x = boundaries.left + radius;
+    ball.velocity.x = -ball.velocity.x * damping;
+  }
+  // Right wall
+  else if (ball.position.x >= boundaries.right - radius) {
+    ball.position.x = boundaries.right - radius;
+    ball.velocity.x = -ball.velocity.x * damping;
   }
 
-  // Right wall collision - SUPER BOUNCE
-  if (ball.position.x + ball.radius >= boundaries.right) {
-    ball.position.x = boundaries.right - ball.radius;
-    ball.velocity.x = -ball.velocity.x * PHYSICS.BOUNCE_DAMPING;
-    collided = true;
+  // Ceiling
+  if (ball.position.y <= boundaries.top + radius) {
+    ball.position.y = boundaries.top + radius;
+    ball.velocity.y = -ball.velocity.y * damping;
   }
-
-  // Ceiling collision - SUPER BOUNCE
-  if (ball.position.y - ball.radius <= boundaries.top) {
-    ball.position.y = boundaries.top + ball.radius;
-    ball.velocity.y = -ball.velocity.y * PHYSICS.BOUNCE_DAMPING;
-    collided = true;
-  }
-
-  // Floor collision - SUPER BOUNCE with minimal friction
-  if (ball.position.y + ball.radius >= boundaries.bottom) {
-    ball.position.y = boundaries.bottom - ball.radius;
-    ball.velocity.y = -ball.velocity.y * PHYSICS.BOUNCE_DAMPING;
-
-    // Minimal floor friction for sliding action
+  // Floor
+  else if (ball.position.y >= boundaries.bottom - radius) {
+    ball.position.y = boundaries.bottom - radius;
+    ball.velocity.y = -ball.velocity.y * damping;
     ball.velocity.x *= PHYSICS.FLOOR_FRICTION;
 
-    // Allow tiny bounces for continuous action
-    // No velocity zeroing - keep the action going!
-
-    collided = true;
-  }
-
-  // Add collision energy boost
-  if (collided) {
-    ball.velocity = ball.velocity.multiply(1.02); // 2% energy boost on collision
+    // Add minimum bounce to keep balls active
+    if (Math.abs(ball.velocity.y) < 2) {
+      ball.velocity.y = ball.velocity.y > 0 ? 2 : -2;
+    }
   }
 
   return ball;
 }
 
 /**
- * Handle collisions between all balls in an array with EXPLOSIVE collision response
- * @param {Array} balls - Array of ball objects
+ * Spatial partitioning for collision detection optimization
  */
-function handleBallCollisions(balls) {
-  for (let i = 0; i < balls.length; i++) {
-    for (let j = i + 1; j < balls.length; j++) {
-      const collision = detectBallCollision(balls[i], balls[j]);
-      if (collision) {
-        resolveCollision(balls[i], balls[j], collision);
+class SpatialGrid {
+  constructor(width, height, cellSize) {
+    this.cellSize = cellSize;
+    this.cols = Math.ceil(width / cellSize);
+    this.rows = Math.ceil(height / cellSize);
+    this.grid = new Array(this.cols * this.rows);
+    this.clear();
+  }
+
+  clear() {
+    for (let i = 0; i < this.grid.length; i++) {
+      this.grid[i] = [];
+    }
+  }
+
+  getIndex(x, y) {
+    const col = Math.floor(x / this.cellSize);
+    const row = Math.floor(y / this.cellSize);
+    if (col < 0 || col >= this.cols || row < 0 || row >= this.rows) {
+      return -1;
+    }
+    return row * this.cols + col;
+  }
+
+  insert(ball) {
+    const minX = Math.floor((ball.position.x - ball.radius) / this.cellSize);
+    const maxX = Math.floor((ball.position.x + ball.radius) / this.cellSize);
+    const minY = Math.floor((ball.position.y - ball.radius) / this.cellSize);
+    const maxY = Math.floor((ball.position.y + ball.radius) / this.cellSize);
+
+    for (let y = minY; y <= maxY; y++) {
+      for (let x = minX; x <= maxX; x++) {
+        const idx = this.getIndex(x * this.cellSize, y * this.cellSize);
+        if (idx >= 0 && idx < this.grid.length) {
+          this.grid[idx].push(ball);
+        }
+      }
+    }
+  }
+
+  getPotentialCollisions(ball) {
+    const nearby = new Set();
+    const minX = Math.floor((ball.position.x - ball.radius) / this.cellSize);
+    const maxX = Math.floor((ball.position.x + ball.radius) / this.cellSize);
+    const minY = Math.floor((ball.position.y - ball.radius) / this.cellSize);
+    const maxY = Math.floor((ball.position.y + ball.radius) / this.cellSize);
+
+    for (let y = minY; y <= maxY; y++) {
+      for (let x = minX; x <= maxX; x++) {
+        const idx = this.getIndex(x * this.cellSize, y * this.cellSize);
+        if (idx >= 0 && idx < this.grid.length) {
+          this.grid[idx].forEach((b) => nearby.add(b));
+        }
+      }
+    }
+
+    nearby.delete(ball);
+    return Array.from(nearby);
+  }
+}
+
+// Global spatial grid (initialize based on canvas size)
+let spatialGrid = null;
+
+/**
+ * Optimized collision detection with spatial partitioning
+ */
+function handleBallCollisions(balls, boundaries) {
+  if (balls.length < 2) return;
+
+  // Initialize spatial grid if needed
+  if (!spatialGrid) {
+    const maxRadius = Math.max(...balls.map((b) => b.radius));
+    spatialGrid = new SpatialGrid(
+      boundaries.right - boundaries.left,
+      boundaries.bottom - boundaries.top,
+      maxRadius * 4
+    );
+  }
+
+  // Use spatial partitioning for many balls
+  if (balls.length > 10) {
+    spatialGrid.clear();
+    balls.forEach((ball) => spatialGrid.insert(ball));
+
+    for (let i = 0; i < balls.length; i++) {
+      const ballA = balls[i];
+      const nearby = spatialGrid.getPotentialCollisions(ballA);
+
+      for (const ballB of nearby) {
+        if (ballA.id < ballB.id) {
+          // Avoid duplicate checks
+          const collision = detectBallCollision(ballA, ballB);
+          if (collision) {
+            resolveCollision(ballA, ballB, collision);
+          }
+        }
+      }
+    }
+  } else {
+    // Brute force for small numbers
+    for (let i = 0; i < balls.length; i++) {
+      for (let j = i + 1; j < balls.length; j++) {
+        const collision = detectBallCollision(balls[i], balls[j]);
+        if (collision) {
+          resolveCollision(balls[i], balls[j], collision);
+        }
       }
     }
   }
 }
 
 /**
- * Update physics for multiple balls using EXTREME integration
- * @param {Array} balls - Array of ball objects
- * @param {Object} boundaries - Canvas boundaries
+ * Main physics update with optimizations
  */
 function updateMultipleBallPhysics(balls, boundaries) {
-  // Integrate motion for all balls
-  balls.forEach((ball) => {
-    integrateMotion(ball, boundaries);
-    handleBoundaryCollisions(ball, boundaries);
+  // Ensure balls have IDs for spatial partitioning
+  balls.forEach((ball, i) => {
+    if (!ball.id) ball.id = i;
   });
 
-  // Handle EXPLOSIVE ball-to-ball collisions
-  handleBallCollisions(balls);
+  // Update physics
+  for (let i = 0; i < balls.length; i++) {
+    integrateMotion(balls[i], boundaries);
+    handleBoundaryCollisions(balls[i], boundaries);
+  }
+
+  // Handle collisions
+  handleBallCollisions(balls, boundaries);
 }
 
 // Legacy function for single ball physics (backwards compatibility)
