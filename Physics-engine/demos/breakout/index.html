@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Breakout • Physics-engine demos</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="game-container">
+      <header>
+        <h1>🧱 Breakout</h1>
+        <p>Physics-based brick breaking game</p>
+      </header>
+
+      <main>
+        <canvas id="game"></canvas>
+
+        <div class="controls-info">
+          <div class="control-group">
+            <h3>🎮 Controls</h3>
+            <div class="control-item">
+              <span class="key">A/D</span>
+              <span class="desc">Move paddle</span>
+            </div>
+            <div class="control-item">
+              <span class="key">Arrow Keys</span>
+              <span class="desc">Move paddle</span>
+            </div>
+            <div class="control-item">
+              <span class="key">Mouse</span>
+              <span class="desc">Move paddle</span>
+            </div>
+            <div class="control-item">
+              <span class="key">P</span>
+              <span class="desc">Pause/Resume</span>
+            </div>
+            <div class="control-item">
+              <span class="key">R</span>
+              <span class="desc">Restart (when game over)</span>
+            </div>
+          </div>
+
+          <div class="game-info">
+            <h3>🎯 Objective</h3>
+            <p>
+              Break all the bricks without letting the ball fall off the screen!
+            </p>
+            <ul>
+              <li>
+                Hit the ball with different parts of the paddle to control angle
+              </li>
+              <li>Higher rows of bricks give more points</li>
+              <li>You have 3 lives - use them wisely!</li>
+            </ul>
+          </div>
+        </div>
+      </main>
+
+      <footer>
+        <p>Part of the <strong>Physics-engine</strong> demo collection</p>
+        <p>
+          <a href="../bouncing-balls/index.html">← Back to Ball Demo</a> |
+          <a href="../../README.md">📋 Project Overview</a> |
+          <a href="https://github.com/your-repo/Mini-JavaScript-Projects"
+            >🔗 View Source</a
+          >
+        </p>
+      </footer>
+    </div>
+
+    <script type="module" src="main.js"></script>
+  </body>
+</html>
