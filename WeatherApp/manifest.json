@@ -1,0 +1,31 @@
+{
+  "name": "Weather Now",
+  "short_name": "Weather",
+  "description": "Minimalistic weather app with current conditions and hourly forecast",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#0e1116",
+  "background_color": "#0e1116",
+  "orientation": "portrait-primary",
+  "scope": "./",
+  "icons": [
+    {
+      "src": "icons/clear.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/clear.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "icons/clear.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["weather", "utilities"],
+  "lang": "en-US"
+}

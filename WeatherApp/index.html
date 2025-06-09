@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="manifest" href="manifest.json" />
+    <title>Weather Now</title>
+  </head>
+  <body>
+    <!-- Theme Toggle Button -->
+    <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
+      <span class="theme-icon">🌙</span>
+      <span class="theme-text">Auto</span>
+    </button>
+
+    <main class="weatherShell">
+      <section id="hero" class="hero" aria-label="Current weather">
+        <div class="heroContent">
+          <h2 id="temp" class="temp" aria-live="polite">--°</h2>
+          <img id="heroIcon" src="" alt="" width="48" height="48" />
+          <p id="condition" class="cond">—</p>
+          <time id="datetime" datetime=""></time>
+          <p id="cityName" class="cityName">—</p>
+        </div>
+      </section>
+
+      <!-- GLASS PANEL -->
+      <aside id="glass" class="glass">
+        <form id="searchForm">
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="Another location"
+            autocomplete="off"
+            aria-label="Search city"
+          />
+        </form>
+
+        <ul
+          id="searchResults"
+          class="searchResults"
+          role="listbox"
+          aria-label="Search results"
+        ></ul>
+
+        <h3 class="savedLabel">Saved Cities</h3>
+        <ul id="savedList" class="saved"></ul>
+
+        <h3 class="detailsLabel">Weather Details</h3>
+        <ul class="detailList">
+          <li><span>Feels like</span><span id="feelsLike">--°</span></li>
+          <li><span>Humidity</span><span id="humidity">--%</span></li>
+          <li><span>Wind</span><span id="wind">-- km/h</span></li>
+          <li><span>Pressure</span><span id="pressure">-- hPa</span></li>
+          <li><span>UV Index</span><span id="uvIndex">--</span></li>
+        </ul>
+
+        <h3 class="forecastLabel">Today's Forecast</h3>
+        <div id="hourlyForecast" class="hourlyForecast">
+          <!-- Hourly forecast items will be populated here -->
+        </div>
+      </aside>
+    </main>
+
+    <!-- Template for hourly forecast items -->
+    <template id="hourlyTpl">
+      <div class="hourlyItem">
+        <time class="hourTime"></time>
+        <img class="hourIcon" alt="" width="24" height="24" />
+        <span class="hourTemp"></span>
+      </div>
+    </template>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>

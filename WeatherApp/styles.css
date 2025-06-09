@@ -1,0 +1,610 @@
+/* Weather App - Glass Morphism Design with Time-Based Theme */
+
+:root {
+  /* Dark theme (default) */
+  --glass-bg: rgba(20, 20, 20, 0.35);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --text-primary: #ffffff;
+  --text-secondary: #dbe2e8;
+  --text-muted: rgba(255, 255, 255, 0.65);
+  --search-border: rgba(255, 255, 255, 0.15);
+  --accent-color: #4c9be8;
+  --divider: rgba(255, 255, 255, 0.1);
+  --body-bg: #111;
+}
+
+/* Light theme */
+body.light-mode {
+  --glass-bg: rgba(255, 255, 255, 0.5);
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --text-primary: #1a1a1a;
+  --text-secondary: #1a1a1a;
+  --text-muted: rgba(0, 0, 0, 0.65);
+  --search-border: rgba(0, 0, 0, 0.15);
+  --divider: rgba(0, 0, 0, 0.1);
+  --body-bg: #fbfbfb;
+}
+
+/* Fallback for system preference when auto mode is disabled */
+@media (prefers-color-scheme: light) {
+  body:not(.dark-mode):not(.light-mode) {
+    --glass-bg: rgba(255, 255, 255, 0.5);
+    --glass-border: rgba(0, 0, 0, 0.06);
+    --text-primary: #1a1a1a;
+    --text-secondary: #1a1a1a;
+    --text-muted: rgba(0, 0, 0, 0.65);
+    --search-border: rgba(0, 0, 0, 0.15);
+    --divider: rgba(0, 0, 0, 0.1);
+    --body-bg: #fbfbfb;
+  }
+}
+
+/* Reset & Base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  background: var(--body-bg);
+  color: var(--text-primary);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 1000;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  min-width: 120px;
+  justify-content: center;
+}
+
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.theme-toggle:active {
+  transform: translateY(0);
+}
+
+.theme-icon {
+  font-size: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.theme-toggle:hover .theme-icon {
+  transform: scale(1.1);
+}
+
+/* Two-column shell - Improved ratio */
+.weatherShell {
+  display: grid;
+  grid-template-columns: 2fr 1.2fr; /* ~62% | 38% for better balance */
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* HERO (big background image) */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  /* Fallback gradient in case image doesn't load */
+  background-image: linear-gradient(
+    135deg,
+    #74b9ff 0%,
+    #0984e3 50%,
+    #74b9ff 100%
+  );
+}
+
+/* Dynamic overlay based on theme */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1;
+  transition: background 0.3s ease;
+}
+
+/* Lighter overlay for light mode */
+body.light-mode .hero::before {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* Vertically centered hero content */
+.heroContent {
+  position: absolute;
+  top: 50%;
+  left: 4rem;
+  transform: translateY(-50%);
+  color: #ffffff;
+  text-shadow: 0 3px 12px rgba(0, 0, 0, 0.9);
+  z-index: 2;
+}
+
+/* Stronger shadow for light mode */
+body.light-mode .heroContent {
+  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.8);
+}
+
+/* Improved typography scale - base 14px with 1.25x modular scale */
+.temp {
+  font: 200 7rem/0.9 "Inter", sans-serif;
+  margin: 0 0 1rem 0;
+}
+
+/* Larger main weather icon */
+#heroIcon {
+  width: 64px;
+  height: 64px;
+  margin: 0 0 1rem 0;
+  filter: brightness(0) invert(1);
+}
+
+.cond {
+  margin: 0 0 1rem 0;
+  font: 600 1.375rem/1.2 "Inter", sans-serif;
+  text-transform: capitalize;
+}
+
+#datetime {
+  font-size: 1rem;
+  opacity: 0.8;
+  display: block;
+  margin-bottom: 0.75rem;
+  font-weight: 400;
+}
+
+.cityName {
+  font-size: 1.25rem;
+  font-weight: 600;
+  opacity: 0.95;
+}
+
+/* GLASS PANEL - Enhanced styling */
+.glass {
+  backdrop-filter: blur(16px);
+  background: var(--glass-bg);
+  border-left: 1px solid var(--glass-border);
+  border-radius: 0 8px 8px 0;
+  display: flex;
+  flex-direction: column;
+  padding: 3rem 2.5rem 3rem 2.5rem;
+  color: var(--text-secondary);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+/* Enhanced search field */
+#searchInput {
+  width: 80%;
+  margin: 0 auto 0 0;
+  padding: 0.875rem 2.5rem 0.875rem 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--search-border);
+  color: inherit;
+  font: 400 1rem "Inter";
+  outline: none;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+/* Search icon */
+.glass form {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.glass form::after {
+  content: "🔍";
+  position: absolute;
+  right: calc(20% + 0.5rem);
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.5;
+  font-size: 0.875rem;
+}
+
+#searchInput:focus {
+  border-bottom-color: var(--accent-color);
+  border-bottom-width: 3px;
+}
+
+#searchInput::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+/* Search Results - Enhanced */
+.searchResults {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.searchResults li {
+  padding: 0.875rem 0;
+  cursor: pointer;
+  opacity: 0.85;
+  border-bottom: 1px solid var(--divider);
+  transition: all 0.2s ease;
+  padding-left: 0.5rem;
+}
+
+.searchResults li:hover {
+  opacity: 1;
+  color: var(--accent-color);
+  background: rgba(255, 255, 255, 0.05);
+  padding-left: 1rem;
+}
+
+/* Light mode search results hover */
+body.light-mode .searchResults li:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Section headings - Improved hierarchy */
+.savedLabel,
+.detailsLabel,
+.forecastLabel {
+  margin: 2rem 0 0.75rem 0;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  opacity: 0.9;
+  color: var(--text-primary);
+}
+
+.savedLabel:first-of-type {
+  margin-top: 1rem;
+}
+
+/* Saved Cities - Enhanced with active indicator */
+.saved {
+  margin: 0 0 2rem 0;
+  list-style: none;
+  padding: 0;
+}
+
+.saved li {
+  padding: 0.875rem 0 0.875rem 1rem;
+  cursor: pointer;
+  opacity: 0.85;
+  border-bottom: 1px solid var(--divider);
+  transition: all 0.3s ease;
+  position: relative;
+  border-radius: 6px;
+}
+
+.saved li:hover {
+  opacity: 1;
+  color: var(--accent-color);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateX(4px);
+}
+
+/* Light mode saved cities hover */
+body.light-mode .saved li:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Active city indicator */
+.saved li.active {
+  color: var(--accent-color);
+  background: rgba(76, 155, 232, 0.1);
+}
+
+.saved li.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--accent-color);
+  border-radius: 0 2px 2px 0;
+}
+
+/* Weather Details - Grid layout with dividers */
+.detailList {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 2rem;
+  display: grid;
+  gap: 0;
+}
+
+.detailList li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 0.875rem 0;
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--divider);
+}
+
+.detailList li:last-child {
+  border-bottom: none;
+}
+
+.detailList li span:first-child {
+  opacity: 0.7;
+  font-weight: 400;
+}
+
+.detailList li span:last-child {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Hourly Forecast - Enhanced with visual variation */
+.hourlyForecast {
+  display: flex;
+  gap: 0.875rem;
+  overflow-x: auto;
+  padding-bottom: 1.5rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hourlyForecast::-webkit-scrollbar {
+  display: none;
+}
+
+.hourlyItem {
+  flex: 0 0 auto;
+  text-align: center;
+  padding: 1rem 0.875rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  min-width: 70px;
+  transition: all 0.2s ease;
+}
+
+/* Light mode hourly items */
+body.light-mode .hourlyItem {
+  background: rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.hourlyItem:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+body.light-mode .hourlyItem:hover {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+/* Highlight changed values in hourly forecast */
+.hourlyItem.changed {
+  background: rgba(76, 155, 232, 0.15);
+  border-color: rgba(76, 155, 232, 0.3);
+}
+
+.hourTime {
+  display: block;
+  font-size: 0.75rem;
+  opacity: 0.8;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.hourIcon {
+  margin: 0.375rem 0;
+  opacity: 0.95;
+  width: 24px;
+  height: 24px;
+}
+
+.hourTemp {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+/* Responsive Design - Adjusted for new proportions */
+@media (max-width: 1024px) {
+  .weatherShell {
+    grid-template-columns: 1.8fr 1fr;
+  }
+
+  .glass {
+    padding: 2.5rem 2rem 3rem 2rem;
+  }
+
+  .theme-toggle {
+    top: 1rem;
+    right: 1rem;
+    padding: 0.5rem;
+    min-width: 100px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .weatherShell {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    background-attachment: scroll;
+    background-position: center center;
+    background-size: cover;
+  }
+
+  .heroContent {
+    top: auto;
+    bottom: 3rem;
+    left: 2rem;
+    transform: none;
+  }
+
+  .glass {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 65vh;
+    border-left: none;
+    border-radius: 16px 16px 0 0;
+    border-top: 1px solid var(--glass-border);
+    padding: 2rem 1.5rem 2rem 1.5rem;
+  }
+
+  .temp {
+    font-size: 5rem;
+  }
+
+  .theme-toggle {
+    top: 0.75rem;
+    right: 0.75rem;
+    padding: 0.5rem;
+    min-width: 90px;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero {
+    background-position: center top;
+    background-size: cover;
+  }
+
+  .heroContent {
+    bottom: 2rem;
+    left: 1.5rem;
+  }
+
+  .temp {
+    font-size: 4rem;
+  }
+
+  #heroIcon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .glass {
+    height: 60vh;
+    padding: 1.5rem 1rem 2rem 1rem;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .glass form::after {
+    right: calc(20% + 0.25rem);
+  }
+
+  .theme-toggle {
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.375rem;
+    min-width: 80px;
+    font-size: 0.7rem;
+  }
+
+  .theme-icon {
+    font-size: 0.875rem;
+  }
+}
+
+/* Performance optimizations for images */
+@media (prefers-reduced-motion: reduce) {
+  .hero {
+    background-attachment: scroll;
+  }
+
+  .hourlyItem:hover {
+    transform: none;
+  }
+
+  .saved li:hover {
+    transform: none;
+  }
+
+  .theme-toggle:hover {
+    transform: none;
+  }
+
+  .theme-toggle:hover .theme-icon {
+    transform: none;
+  }
+
+  * {
+    transition: none !important;
+  }
+}
+
+/* High DPI displays - optimize image quality */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .hero {
+    background-size: cover;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Accessibility - Motion Safe */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus Indicators - Enhanced */
+input:focus-visible,
+li:focus-visible,
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .glass {
+    background: rgba(0, 0, 0, 0.85);
+  }
+
+  body.light-mode .glass {
+    background: rgba(255, 255, 255, 0.95);
+  }
+}
