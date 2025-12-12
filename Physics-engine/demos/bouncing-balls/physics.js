@@ -157,19 +157,19 @@ class Vector2D {
  * Optimized physics constants for proper bouncing
  */
 const PHYSICS = {
-  GRAVITY: 200, // Reduced for better bouncing
+  GRAVITY: 400, // Realistic gravity for canvas scale
   TIME_STEP: 1 / 60,
-  BOUNCE_DAMPING: 1.9, // Increased for better bounce retention
-  COLLISION_RESTITUTION: 0.95, // Increased for bouncier collisions
-  COLLISION_DAMPING: 0.98, // Reduced energy loss
-  AIR_DENSITY: 0.0002, // Reduced air resistance
-  DRAG_COEFFICIENT: 0.02, // Much lower drag
-  FLOOR_FRICTION: 0.995, // Almost no friction
-  ROLLING_FRICTION: 0.999, // Almost no rolling resistance
+  BOUNCE_DAMPING: 0.85, // FIXED: Must be < 1 to lose energy on wall bounce (was 1.9 which amplified!)
+  COLLISION_RESTITUTION: 0.9, // Slightly reduced for more realistic collisions
+  COLLISION_DAMPING: 0.99, // Minor damping after collision
+  AIR_DENSITY: 0.0002,
+  DRAG_COEFFICIENT: 0.02,
+  FLOOR_FRICTION: 0.98, // Reasonable floor friction
+  ROLLING_FRICTION: 0.999,
   POSITION_CORRECTION: 0.8,
-  VELOCITY_THRESHOLD: 0.1, // Lower threshold for continuous bouncing
-  MAX_VELOCITY: 50, // Higher speed limit
-  MAX_VELOCITY_SQUARED: 2500, // Pre-calculated
+  VELOCITY_THRESHOLD: 0.5, // Threshold for settling
+  MAX_VELOCITY: 50,
+  MAX_VELOCITY_SQUARED: 2500,
   MIN_SEPARATION: 0.1,
   COLLISION_AMPLIFICATION: 1.0,
   CHAOS_FACTOR: 0.0,
@@ -177,7 +177,7 @@ const PHYSICS = {
 
   // Pre-calculated constants
   HALF_AIR_DENSITY: 0.0001,
-  DRAG_CONSTANT: 0.000002, // Much lower drag constant
+  DRAG_CONSTANT: 0.000002,
   PI: Math.PI,
   TWO_PI: Math.PI * 2,
 };
@@ -338,18 +338,18 @@ function resolveCollision(ballA, ballB, collision) {
 
   if (velocityAlongNormal > 0) return;
 
-  // Impulse calculation
+  // Impulse calculation - FIXED: Use correct formula with inverse mass sum
   const restitution = PHYSICS.COLLISION_RESTITUTION;
-  const impulseScalar = (-(1 + restitution) * velocityAlongNormal) / totalMass;
-  const impulseX = normalX * impulseScalar * PHYSICS.COLLISION_AMPLIFICATION;
-  const impulseY = normalY * impulseScalar * PHYSICS.COLLISION_AMPLIFICATION;
+  const invMassSum = 1 / ballA.mass + 1 / ballB.mass;
+  const impulseScalar = (-(1 + restitution) * velocityAlongNormal) / invMassSum;
+  const impulseX = normalX * impulseScalar;
+  const impulseY = normalY * impulseScalar;
 
-  // Apply impulse
-  const massRatio = ballB.mass / ballA.mass;
-  ballA.velocity.x += impulseX * ballB.mass;
-  ballA.velocity.y += impulseY * ballB.mass;
-  ballB.velocity.x -= impulseX * ballA.mass;
-  ballB.velocity.y -= impulseY * ballA.mass;
+  // Apply impulse - FIXED: Divide by each ball's own mass (not multiply by other's mass)
+  ballA.velocity.x += impulseX / ballA.mass;
+  ballA.velocity.y += impulseY / ballA.mass;
+  ballB.velocity.x -= impulseX / ballB.mass;
+  ballB.velocity.y -= impulseY / ballB.mass;
 
   // Damping
   ballA.velocity.x *= PHYSICS.COLLISION_DAMPING;
@@ -386,11 +386,6 @@ function handleBoundaryCollisions(ball, boundaries) {
     ball.position.y = boundaries.bottom - radius;
     ball.velocity.y = -ball.velocity.y * damping;
     ball.velocity.x *= PHYSICS.FLOOR_FRICTION;
-
-    // Add minimum bounce to keep balls active
-    if (Math.abs(ball.velocity.y) < 2) {
-      ball.velocity.y = ball.velocity.y > 0 ? 2 : -2;
-    }
   }
 
   return ball;
