@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Music Player</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#36e27b",
+              "background-light": "#f6f8f7",
+              "background-dark": "#112117",
+              "surface-dark": "#1a2c22",
+              "surface-hover": "#254632",
+            },
+            fontFamily: {
+              display: ["Spline Sans", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "1rem",
+              lg: "2rem",
+              xl: "3rem",
+              full: "9999px",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body
+    class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display h-screen flex flex-col overflow-hidden"
+  >
+    <div class="flex flex-1 h-full overflow-hidden">
+      <aside
+        class="w-64 bg-[#0d1811] border-r border-[#254632] flex-shrink-0 flex flex-col h-full overflow-y-auto hidden md:flex"
+      >
+        <div class="p-6 flex flex-col gap-8 h-full">
+          <div class="flex items-center gap-3 px-2">
+            <div
+              class="bg-gradient-to-br from-primary to-green-800 rounded-lg size-8 flex items-center justify-center text-background-dark"
+            >
+              <span class="material-symbols-outlined" style="font-size: 20px"
+                >music_note</span
+              >
+            </div>
+            <h1 class="text-white text-lg font-bold tracking-tight">Music</h1>
+          </div>
+          <nav class="flex flex-col gap-9 flex-1">
+            <div class="flex flex-col gap-1">
+              <div
+                class="px-3 py-1 text-[#95c6a9] text-xs font-bold uppercase tracking-wider mb-1"
+              >
+                Discover
+              </div>
+              <a
+                class="flex items-center gap-3 px-3 py-2 rounded-lg bg-surface-hover text-primary group transition-colors"
+                href="#"
+              >
+                <span class="material-symbols-outlined">home</span>
+                <span class="text-sm font-medium">Home</span>
+              </a>
+              <a
+                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-surface-hover/50 transition-colors group"
+                href="#"
+              >
+                <span
+                  class="material-symbols-outlined regular text-gray-400 opacity-75 group-hover:opacity-100 group-hover:text-white transition-opacity"
+                  >grid_view</span
+                >
+                <span class="text-sm font-medium">Browse</span>
+              </a>
+              <a
+                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-surface-hover/50 transition-colors group"
+                href="#"
+              >
+                <span
+                  class="material-symbols-outlined regular text-gray-400 opacity-75 group-hover:opacity-100 group-hover:text-white transition-opacity"
+                  >radio</span
+                >
+                <span class="text-sm font-medium">Radio</span>
+              </a>
+            </div>
+            <div class="flex flex-col gap-1">
+              <div
+                class="px-3 py-1 text-[#95c6a9] text-xs font-bold uppercase tracking-wider mb-1"
+              >
+                Library
+              </div>
+              <a
+                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-surface-hover/50 transition-colors group"
+                href="#"
+              >
+                <span
+                  class="material-symbols-outlined regular text-gray-400 opacity-75 group-hover:opacity-100 group-hover:text-white transition-opacity"
+                  >schedule</span
+                >
+                <span class="text-sm font-medium">Recently Added</span>
+              </a>
+              <a
+                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-surface-hover/50 transition-colors group"
+                href="#"
+              >
+                <span
+                  class="material-symbols-outlined regular text-gray-400 opacity-75 group-hover:opacity-100 group-hover:text-white transition-opacity"
+                  >mic</span
+                >
+                <span class="text-sm font-medium">Artists</span>
+              </a>
+              <a
+                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-surface-hover/50 transition-colors group"
+                href="#"
+              >
+                <span
+                  class="material-symbols-outlined regular text-gray-400 opacity-75 group-hover:opacity-100 group-hover:text-white transition-opacity"
+                  >album</span
+                >
+                <span class="text-sm font-medium">Albums</span>
+              </a>
+              <a
+                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-surface-hover/50 transition-colors group"
+                href="#"
+              >
+                <span
+                  class="material-symbols-outlined regular text-gray-400 opacity-75 group-hover:opacity-100 group-hover:text-white transition-opacity"
+                  >music_note</span
+                >
+                <span class="text-sm font-medium">Songs</span>
+              </a>
+            </div>
+            <div class="flex flex-col gap-1 overflow-y-auto">
+              <div
+                class="px-3 py-1 text-[#95c6a9] text-xs font-bold uppercase tracking-wider mb-1"
+              >
+                Playlists
+              </div>
+              <a
+                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-surface-hover/50 transition-colors group"
+                href="#"
+              >
+                <span
+                  class="material-symbols-outlined regular text-gray-400 opacity-75 group-hover:opacity-100 group-hover:text-white transition-opacity"
+                  >queue_music</span
+                >
+                <span class="text-sm font-medium">Workout Mix</span>
+              </a>
+              <a
+                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-surface-hover/50 transition-colors group"
+                href="#"
+              >
+                <span
+                  class="material-symbols-outlined regular text-gray-400 opacity-75 group-hover:opacity-100 group-hover:text-white transition-opacity"
+                  >queue_music</span
+                >
+                <span class="text-sm font-medium">Chill Vibes</span>
+              </a>
+              <a
+                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-surface-hover/50 transition-colors group"
+                href="#"
+              >
+                <span
+                  class="material-symbols-outlined regular text-gray-400 opacity-75 group-hover:opacity-100 group-hover:text-white transition-opacity"
+                  >queue_music</span
+                >
+                <span class="text-sm font-medium">Top 50 Global</span>
+              </a>
+            </div>
+          </nav>
+        </div>
+      </aside>
+      <main
+        class="flex-1 flex flex-col h-full overflow-hidden bg-background-light dark:bg-background-dark relative"
+      >
+        <header
+          class="h-16 flex items-center justify-between px-8 border-b border-[#254632] shrink-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md z-10"
+        >
+          <div class="flex items-center gap-4">
+            <button class="md:hidden text-white">
+              <span class="material-symbols-outlined">menu</span>
+            </button>
+            <div class="hidden md:flex gap-2">
+              <button
+                class="w-8 h-8 rounded-full bg-[#1a2c22] flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+              >
+                <span class="material-symbols-outlined" style="font-size: 20px"
+                  >chevron_left</span
+                >
+              </button>
+              <button
+                class="w-8 h-8 rounded-full bg-[#1a2c22] flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+              >
+                <span class="material-symbols-outlined" style="font-size: 20px"
+                  >chevron_right</span
+                >
+              </button>
+            </div>
+          </div>
+          <div class="flex items-center gap-6">
+            <div class="relative group">
+              <div
+                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+              >
+                <span
+                  class="material-symbols-outlined text-[#95c6a9]"
+                  style="font-size: 20px"
+                  >search</span
+                >
+              </div>
+              <input
+                id="search-input"
+                class="bg-[#254632] text-white text-sm rounded-full pl-10 pr-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-primary/50 border-none placeholder-[#95c6a9]"
+                placeholder="Search"
+                type="text"
+              />
+            </div>
+            <button
+              class="w-9 h-9 rounded-full overflow-hidden border-2 border-[#254632]"
+            >
+              <div
+                class="w-full h-full bg-cover bg-center"
+                data-alt="User profile picture showing a smiling person"
+                style="
+                  background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDAeMoDk-Wt4IpmbhUuTy-ewvIoSACq9Wse7Uzo7bJ2n2hKDrWgRaTSC9SJR9p2bMHA8uRNuX5l3eSN5Tb9ECl28-k6DLf0p1-cL4BzF2dVcPS2C-fBY3fmOJFX1vme1SP6X6bWMNRyy1CiluqoEqrSHMchReaUcL1yaug-mlE1OADNq5bFwYxU2-vkJFZN5AWh02ulsnINyDt3QkMHYwEGefoXWNG-NqaOYQ1yZynJm9LHnbi7_AadTgoDuVQxmAGGUl1-u-O8kx4');
+                "
+              ></div>
+            </button>
+          </div>
+        </header>
+        <div class="flex-1 overflow-y-auto pb-32" id="main-content">
+          <div class="px-8 py-8 max-w-7xl mx-auto flex flex-col gap-10">
+            <section class="w-full">
+              <div
+                class="relative w-full h-[300px] rounded-xl overflow-hidden group cursor-pointer"
+              >
+                <div
+                  class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                  data-alt="Large promotional banner for a new album release featuring abstract colorful waves"
+                  style="
+                    background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDTOw8Te1FVp8BtrWGQFImzOlKO8sLzkCzxKtbGcaEX0uTD2GLKP49NwJD8vAiKOvosWqadRDu1kt9axXAqgLY6ya1GR21YEbHMANvCcY3nEB96d_JMXTz1zaaRDAjOwBJ3MK5BkmwhdDOTYPSIrIInXPH0czDxwSsr7A3MBBbYbj62bGpI51KNCSom5cvYdHVXJtl5h9B297XO-XkeVB2avh7KlkGdQcPDhSsqcd2BoZp7nUtNhdatN7RjAsItO7aGIyQHJxBlNIg');
+                  "
+                >
+                  <div
+                    class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"
+                  ></div>
+                </div>
+                <div
+                  class="absolute bottom-0 left-0 p-8 flex flex-col gap-3 items-start"
+                >
+                  <span
+                    class="px-3 py-1 bg-primary text-[#122118] text-xs font-bold uppercase tracking-wider rounded-full"
+                    >Featured</span
+                  >
+                  <h1
+                    class="text-4xl md:text-5xl font-bold text-white leading-tight"
+                  >
+                    Sounds of Summer
+                  </h1>
+                  <p class="text-lg text-gray-200 font-medium">
+                    The ultimate collection of upbeat tracks to keep you moving.
+                  </p>
+                  <div class="flex gap-4 mt-2">
+                    <button
+                      id="featured-play-btn"
+                      class="bg-primary hover:bg-primary/90 text-[#122118] px-8 py-3 rounded-full font-bold flex items-center gap-2 transition-transform active:scale-95"
+                    >
+                      <span class="material-symbols-outlined fill"
+                        >play_arrow</span
+                      >
+                      Play
+                    </button>
+                    <button
+                      class="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white px-8 py-3 rounded-full font-bold transition-colors"
+                    >
+                      Add to Library
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+            <section>
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-bold text-white">New Releases</h2>
+                <button
+                  class="text-primary text-sm font-semibold hover:underline"
+                >
+                  See All
+                </button>
+              </div>
+              <div
+                class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
+                id="new-releases-grid"
+              >
+                <!-- Content will be injected by JS -->
+                <div class="group flex flex-col gap-3 cursor-pointer">
+                  <div
+                    class="relative aspect-square rounded-lg overflow-hidden bg-[#254632]"
+                  >
+                    <div
+                      class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                      data-alt="Album art showing a moody blue landscape"
+                      style="
+                        background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDscUb3kJQAunA1gwZY2F6CR7J7OnXQSTWzuzoceZkxbKnD4BabFcsaGVp11TjejpblsP4X57wbr8kmuCppfmCLoCND0yKw0JP-aLjnn6XG1Istv5o-B_G0GYQ3yeunDLWTlzdJS_Z3r2FxjM_brC3RuqZ1bNC-Cx6lIuEYPJ1nHRM9F3Hxijd1MZHghHMImSmxCoQlSIwSvLLz9qnFxY0qX1oW_LPG7bWGdoc9URYUtusv_KtVKt0LHpwo_Fqlcnv0m0qqK8mNvxk');
+                      "
+                    ></div>
+                    <div
+                      class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center"
+                    >
+                      <div
+                        class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-background-dark shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300"
+                      >
+                        <span class="material-symbols-outlined fill"
+                          >play_arrow</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h3
+                      class="text-white font-semibold truncate group-hover:text-primary transition-colors"
+                    >
+                      Midnight Echoes
+                    </h3>
+                    <p class="text-gray-400 text-sm truncate">The Weeknd</p>
+                  </div>
+                </div>
+                <!-- More items... -->
+              </div>
+            </section>
+            <section>
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-bold text-white">Made For You</h2>
+              </div>
+              <div
+                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                id="made-for-you-grid"
+              >
+                <!-- Content will be injected by JS -->
+              </div>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+    <div
+      class="fixed bottom-0 left-0 right-0 h-[90px] bg-[#1a2c22]/90 backdrop-blur-xl border-t border-[#254632] flex items-center justify-between px-4 z-50"
+      id="player-bar"
+    >
+      <div class="flex items-center gap-4 w-[30%] min-w-[200px]">
+        <div class="relative group">
+          <div
+            class="size-14 rounded-md bg-cover bg-center shadow-lg"
+            id="current-track-art"
+            data-alt="Current track album art"
+            style="
+              background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB1E_eirXHrf8OH-skwn8dJT3TEuvRHynFe8tgACq7NDivsR_TuE8D0tzPbaYnnloEYeqcgnWfV_gEdrV8R07uahAqcwNnznNpW1iFbdDQGoKe6f0XEBygp2ckph4lWPbcSM64KMVOgOwvNpJrFKUA8TTjFRUrrWsV_OMHHLL8ju7iGe-ptwe0KyQQQYWQEUC3_6AfGNDmdejaq81Q_PWHjgiEocwvHCtPFj2vwz7NbAFIQXNm3kQy42ze6syh0mcCQ4G21GJJUTZg');
+            "
+          ></div>
+          <button
+            class="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center rounded-md"
+          >
+            <span
+              class="material-symbols-outlined text-white"
+              style="font-size: 24px"
+              >expand_less</span
+            >
+          </button>
+        </div>
+        <div class="flex flex-col justify-center overflow-hidden">
+          <div class="flex items-center gap-2">
+            <a
+              class="text-white font-semibold text-sm truncate hover:underline"
+              href="#"
+              id="current-track-title"
+              >Midnight Echoes</a
+            >
+            <button class="text-gray-400 hover:text-primary transition-colors">
+              <span class="material-symbols-outlined" style="font-size: 16px"
+                >favorite</span
+              >
+            </button>
+          </div>
+          <a
+            class="text-gray-400 text-xs hover:text-white hover:underline truncate"
+            href="#"
+            id="current-track-artist"
+            >The Weeknd</a
+          >
+        </div>
+      </div>
+      <div
+        class="flex flex-col items-center justify-center w-[40%] max-w-2xl gap-1"
+      >
+        <div class="flex items-center gap-6">
+          <button
+            class="text-gray-400 hover:text-white transition-colors"
+            title="Shuffle"
+            id="shuffle-btn"
+          >
+            <span class="material-symbols-outlined" style="font-size: 20px"
+              >shuffle</span
+            >
+          </button>
+          <button
+            class="text-gray-200 hover:text-white transition-colors hover:scale-110"
+            title="Previous"
+            id="prev-btn"
+          >
+            <span class="material-symbols-outlined fill" style="font-size: 28px"
+              >skip_previous</span
+            >
+          </button>
+          <button
+            class="bg-white text-black rounded-full size-10 flex items-center justify-center hover:scale-105 transition-transform shadow-lg shadow-white/10"
+            title="Play"
+            id="play-pause-btn"
+          >
+            <span class="material-symbols-outlined fill" style="font-size: 28px"
+              >play_arrow</span
+            >
+          </button>
+          <button
+            class="text-gray-200 hover:text-white transition-colors hover:scale-110"
+            title="Next"
+            id="next-btn"
+          >
+            <span class="material-symbols-outlined fill" style="font-size: 28px"
+              >skip_next</span
+            >
+          </button>
+          <button
+            class="text-gray-400 hover:text-white transition-colors"
+            title="Repeat"
+            id="repeat-btn"
+          >
+            <span class="material-symbols-outlined" style="font-size: 20px"
+              >repeat</span
+            >
+          </button>
+        </div>
+        <div
+          class="w-full flex items-center gap-3 text-xs font-medium text-gray-400 mt-1"
+        >
+          <span id="current-time">0:00</span>
+          <div
+            class="flex-1 h-1 bg-[#374f40] rounded-full relative group cursor-pointer"
+            id="progress-container"
+          >
+            <div
+              class="absolute inset-y-0 left-0 bg-primary w-[0%] rounded-full group-hover:bg-primary/80"
+              id="progress-bar"
+            ></div>
+            <div
+              class="absolute top-1/2 -translate-y-1/2 left-[0%] w-3 h-3 bg-white rounded-full shadow opacity-0 group-hover:opacity-100"
+              id="progress-thumb"
+            ></div>
+          </div>
+          <span id="total-duration">0:00</span>
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-4 w-[30%] min-w-[200px]">
+        <button
+          class="text-gray-400 hover:text-white transition-colors hidden sm:block"
+        >
+          <span
+            class="material-symbols-outlined regular"
+            style="font-size: 20px"
+            >mic</span
+          >
+        </button>
+        <button
+          class="text-gray-400 hover:text-white transition-colors hidden sm:block"
+        >
+          <span
+            class="material-symbols-outlined regular"
+            style="font-size: 20px"
+            >queue_music</span
+          >
+        </button>
+        <div class="flex items-center gap-2 group w-32">
+          <button
+            class="text-gray-400 hover:text-white transition-colors"
+            id="mute-btn"
+          >
+            <span class="material-symbols-outlined" style="font-size: 20px"
+              >volume_up</span
+            >
+          </button>
+          <div
+            class="flex-1 h-1 bg-[#374f40] rounded-full relative cursor-pointer"
+            id="volume-container"
+          >
+            <div
+              class="absolute inset-y-0 left-0 bg-gray-400 group-hover:bg-primary w-[70%] rounded-full"
+              id="volume-bar"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
