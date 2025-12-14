@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Apple-Style Calculator</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "apple-bg": "#F2F2F7", // System Gray 6 (iOS/macOS background vibe)
+              "calc-surface": "#FFFFFF",
+              "key-light": "#F7F7F7", // Numbers
+              "key-light-hover": "#E5E5EA",
+              "key-func": "#EBEBF0", // Top row function keys
+              "key-func-hover": "#DBDBE0",
+              "key-accent": "#FFDBC2", // Pastel Orange/Peach
+              "key-accent-hover": "#FFCCAA",
+              "key-accent-text": "#F97316", // Orange 500 for contrast
+              "text-main": "#1C1C1E",
+              "text-secondary": "#8E8E93",
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              display: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              "3xl": "1.5rem",
+              "4xl": "2.5rem",
+            },
+            boxShadow: {
+              glass:
+                "0 20px 40px -10px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0,0,0,0.02)",
+              key: "0 2px 5px rgba(0,0,0,0.05), 0 1px 1px rgba(0,0,0,0.03)",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body
+    class="bg-apple-bg text-text-main font-sans h-screen flex flex-col overflow-hidden selection:bg-orange-100 selection:text-orange-900"
+  >
+    <header
+      class="w-full bg-white/60 backdrop-blur-md sticky top-0 z-20 border-b border-gray-200/50"
+    >
+      <div
+        class="px-6 py-4 max-w-7xl mx-auto flex items-center justify-between"
+      >
+        <div class="flex items-center gap-3">
+          <div
+            class="size-8 bg-gradient-to-br from-orange-100 to-orange-200 rounded-lg flex items-center justify-center text-orange-600 shadow-sm border border-orange-200/50"
+          >
+            <span class="material-symbols-outlined text-[20px]">calculate</span>
+          </div>
+          <h1 class="text-lg font-medium tracking-tight text-text-main">
+            Calculator
+          </h1>
+        </div>
+        <div class="flex gap-2 relative">
+          <button
+            id="history-btn"
+            class="flex size-9 items-center justify-center rounded-full bg-transparent text-text-main hover:bg-black/5 transition-colors"
+          >
+            <span class="material-symbols-outlined text-[20px]">history</span>
+          </button>
+          <div
+            id="history-panel"
+            class="hidden absolute top-12 right-0 w-64 bg-white rounded-2xl shadow-xl border border-gray-200 p-4 z-50 max-h-80 overflow-y-auto"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-semibold text-text-main">History</h3>
+              <button
+                id="clear-history"
+                class="text-xs text-red-500 hover:text-red-600 font-medium"
+              >
+                Clear
+              </button>
+            </div>
+            <div id="history-list" class="flex flex-col gap-2">
+              <!-- History items will be injected here -->
+              <div class="text-xs text-text-secondary text-center py-4">
+                No history yet
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <main class="flex-1 flex flex-col items-center justify-center p-4">
+      <div
+        class="relative w-full max-w-[340px] bg-calc-surface rounded-4xl shadow-glass border border-white/60 flex flex-col overflow-hidden p-1"
+      >
+        <div
+          class="flex flex-col items-end justify-end p-7 pb-4 h-40 bg-transparent rounded-t-3xl"
+        >
+          <div
+            id="expression-display"
+            class="text-text-secondary text-lg font-normal mb-1 tracking-normal opacity-80 min-h-[1.75rem]"
+          ></div>
+          <div
+            id="main-display"
+            class="text-text-main text-6xl font-light tracking-tight break-all leading-none"
+          >
+            0
+          </div>
+        </div>
+        <div class="p-3 bg-transparent flex-1">
+          <div class="grid grid-cols-4 gap-3" id="keypad">
+            <button
+              data-action="clear"
+              class="group flex items-center justify-center aspect-square w-full rounded-full bg-key-func text-text-main font-medium text-lg hover:bg-key-func-hover transition-all active:scale-95 shadow-key"
+            >
+              AC
+            </button>
+            <button
+              data-action="negate"
+              class="group flex items-center justify-center aspect-square w-full rounded-full bg-key-func text-text-main font-medium text-xl hover:bg-key-func-hover transition-all active:scale-95 shadow-key"
+            >
+              <span class="text-xl">+/-</span>
+            </button>
+            <button
+              data-action="percent"
+              class="group flex items-center justify-center aspect-square w-full rounded-full bg-key-func text-text-main font-medium text-xl hover:bg-key-func-hover transition-all active:scale-95 shadow-key"
+            >
+              <span class="material-symbols-outlined text-[22px]">percent</span>
+            </button>
+            <button
+              data-action="operator"
+              data-value="/"
+              class="group flex items-center justify-center aspect-square w-full rounded-full bg-key-accent text-key-accent-text font-semibold text-2xl hover:bg-key-accent-hover transition-all active:scale-95 shadow-key"
+            >
+              <span class="leading-none pb-1">÷</span>
+            </button>
+            <button
+              data-action="number"
+              data-value="7"
+              class="group flex items-center justify-center aspect-square w-full rounded-full bg-key-light text-text-main font-normal text-2xl hover:bg-key-light-hover transition-all active:scale-95 shadow-key"
+            >
+              7
+            </button>
+            <button
+              data-action="number"
+              data-value="8"
+              class="group flex items-center justify-center aspect-square w-full rounded-full bg-key-light text-text-main font-normal text-2xl hover:bg-key-light-hover transition-all active:scale-95 shadow-key"
+            >
+              8
+            </button>
+            <button
+              data-action="number"
+              data-value="9"
+              class="group flex items-center justify-center aspect-square w-full rounded-full bg-key-light text-text-main font-normal text-2xl hover:bg-key-light-hover transition-all active:scale-95 shadow-key"
+            >
+              9
+            </button>
+            <button
+              data-action="operator"
+              data-value="*"
+              class="group flex items-center justify-center aspect-square w-full rounded-full bg-key-accent text-key-accent-text font-semibold text-xl hover:bg-key-accent-hover transition-all active:scale-95 shadow-key"
+            >
+              <span class="material-symbols-outlined text-[24px]">close</span>
+            </button>
+            <button
+              data-action="number"
+              data-value="4"
+              class="group flex items-center justify-center aspect-square w-full rounded-full bg-key-light text-text-main font-normal text-2xl hover:bg-key-light-hover transition-all active:scale-95 shadow-key"
+            >
+              4
+            </button>
+            <button
+              data-action="number"
+              data-value="5"
+              class="group flex items-center justify-center aspect-square w-full rounded-full bg-key-light text-text-main font-normal text-2xl hover:bg-key-light-hover transition-all active:scale-95 shadow-key"
+            >
+              5
+            </button>
+            <button
+              data-action="number"
+              data-value="6"
+              class="group flex items-center justify-center aspect-square w-full rounded-full bg-key-light text-text-main font-normal text-2xl hover:bg-key-light-hover transition-all active:scale-95 shadow-key"
+            >
+              6
+            </button>
+            <button
+              data-action="operator"
+              data-value="-"
+              class="group flex items-center justify-center aspect-square w-full rounded-full bg-key-accent text-key-accent-text font-semibold text-xl hover:bg-key-accent-hover transition-all active:scale-95 shadow-key"
+            >
+              <span class="material-symbols-outlined text-[24px]">remove</span>
+            </button>
+            <button
+              data-action="number"
+              data-value="1"
+              class="group flex items-center justify-center aspect-square w-full rounded-full bg-key-light text-text-main font-normal text-2xl hover:bg-key-light-hover transition-all active:scale-95 shadow-key"
+            >
+              1
+            </button>
+            <button
+              data-action="number"
+              data-value="2"
+              class="group flex items-center justify-center aspect-square w-full rounded-full bg-key-light text-text-main font-normal text-2xl hover:bg-key-light-hover transition-all active:scale-95 shadow-key"
+            >
+              2
+            </button>
+            <button
+              data-action="number"
+              data-value="3"
+              class="group flex items-center justify-center aspect-square w-full rounded-full bg-key-light text-text-main font-normal text-2xl hover:bg-key-light-hover transition-all active:scale-95 shadow-key"
+            >
+              3
+            </button>
+            <button
+              data-action="operator"
+              data-value="+"
+              class="group flex items-center justify-center aspect-square w-full rounded-full bg-key-accent text-key-accent-text font-semibold text-xl hover:bg-key-accent-hover transition-all active:scale-95 shadow-key"
+            >
+              <span class="material-symbols-outlined text-[24px]">add</span>
+            </button>
+            <button
+              data-action="number"
+              data-value="0"
+              class="col-span-2 group flex items-center justify-start pl-[1.7rem] h-full w-full rounded-full bg-key-light text-text-main font-normal text-2xl hover:bg-key-light-hover transition-all active:scale-95 shadow-key"
+            >
+              0
+            </button>
+            <button
+              data-action="decimal"
+              class="group flex items-center justify-center aspect-square w-full rounded-full bg-key-light text-text-main font-normal text-2xl hover:bg-key-light-hover transition-all active:scale-95 shadow-key"
+            >
+              .
+            </button>
+            <button
+              data-action="calculate"
+              class="group flex items-center justify-center aspect-square w-full rounded-full bg-key-accent text-key-accent-text font-semibold text-xl hover:bg-key-accent-hover transition-all active:scale-95 shadow-key"
+            >
+              <span class="material-symbols-outlined text-[28px]">equal</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <p
+        class="mt-8 text-sm text-text-secondary text-center max-w-sm font-medium opacity-70"
+      >
+        Press
+        <span
+          class="font-semibold bg-white px-1.5 py-0.5 rounded-md border border-gray-200 text-text-main mx-0.5 shadow-sm text-xs"
+          >Enter</span
+        >
+        to calculate
+      </p>
+    </main>
+    <script src="script.js"></script>
+  </body>
+</html>
