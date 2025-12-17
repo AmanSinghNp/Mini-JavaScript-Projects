@@ -1,121 +1,91 @@
 # Mini JavaScript Projects
 
-A collection of JavaScript projects for practicing web development.
+A curated collection of vanilla JavaScript applications demonstrating modern web development concepts, from DOM manipulation and API integration to complex physics simulations and game logic.
 
-## Current Projects
+## 🚀 Featured Projects
 
-### 1. Color Flipper
+### [Physics Engine](./Physics-engine/)
+A modular 2D physics engine built from scratch with HTML5 Canvas.
+- **Key Features:** Custom vector mathematics library, collision detection system, and multiple interactive demos (Bouncing Balls, Breakout).
+- **Tech Stack:** ES6 Modules, Canvas API, Vector Math.
 
-Change background colors with buttons or generate random colors.
+### [Weather Now](./WeatherApp/)
+A minimalistic, offline-capable weather application.
+- **Key Features:** Real-time data via Open-Meteo API, 12-hour forecast, city search, local persistence, and PWA support (installable).
+- **Tech Stack:** Service Workers, Fetch API, CSS Grid, Glassmorphism.
 
-### 2. Digital Notebook
+### [Digital Notebook](./Notebook%20(Simple)/)
+A beautiful, distraction-free note-taking application.
+- **Key Features:** Create/Edit/Delete notes, auto-save functionality, full-text search, and responsive sidebar navigation.
+- **Tech Stack:** LocalStorage, DOM Manipulation, CSS Flexbox.
 
-A beautiful paper-like digital notebook with numbered tabs.
-
-- Create, edit, and delete notes with auto-save
-- Grid paper background with handwritten-style fonts
-- 12 numbered tabs for organization
-- localStorage persistence
-- Responsive design
-- Beautiful analog-inspired UI
-
-### 3. Palindrome Checker
-
-Check if text reads the same forwards and backwards.
-
-### 4. Persistent TODO List
-
-Add and manage tasks with localStorage.
-
-### 5. Random Quote Generator
-
-Display random quotes.
-
-### 6. Stop Watch
-
-Basic timer with start, stop, reset.
-
-### 7. QR Code Generator
-
-Generate QR codes from text or URLs with download functionality.
-
-- Enter any text or URL
-- Generate QR code instantly
-- Download QR code as PNG image
-- Clean, modern interface
-
-### 8. Weather Now
-
-A minimalistic weather web app with real-time weather data and forecasts.
-
-- Current weather display with temperature and conditions
-- 12-hour hourly forecast with weather icons
-- City search and save multiple locations
-- Automatic dark/light mode switching based on local time
-- Works offline after first visit (PWA)
-- Responsive glass-morphism design
-- No API key required (uses Open-Meteo API)
-
-### 9. Physics Engine
-
-A modular 2D physics engine with interactive demos showcasing real-world physics concepts.
-
-- **Bouncing Balls Demo**: Multi-ball physics sandbox with extreme physics and interactive controls
-- **Breakout Game**: Classic brick-breaking game with advanced collision detection
-- Shared physics core with vector mathematics and collision detection
-- Real-time physics simulation with 60 FPS performance
-- Educational value for physics and programming concepts
-
-## Usage
-
-Open `index.html` or `main.html` in any project folder to run it.
-For WeatherApp, serve using a local server due to API requirements.
+### [Music Player](./Music%20Player/)
+A modern audio player interface with playlist support.
+- **Key Features:** Play/Pause/Seek controls, volume management, playlist navigation, and keyboard shortcuts.
+- **Tech Stack:** HTML5 Audio API, Range Inputs, Event Handling.
 
 ---
 
-_More projects coming soon..._
+## 🎮 Games
 
-## Technologies
+### [Memory Game](./Memory%20Game/)
+A card matching game to test your memory.
+- **Features:** Move counter, timer, responsive grid layout, and celebratory animations.
 
-- HTML5
-- CSS3
-- Vanilla JavaScript
-- Local Storage (for TODO list, Digital Notebook, and Weather app city preferences)
-- Service Workers (for WeatherApp offline functionality)
-- Canvas API (for Physics Engine)
-- ES6 Modules (for Physics Engine modular architecture)
-- CSS Custom Properties (for theming)
-- QR Server API (for QR code generation)
-- Open-Meteo Weather API (for WeatherApp)
-- Google Fonts (Crimson Text, Inter, Kalam for Digital Notebook)
+### [Tic-Tac-Toe](./Tic-Tac-Toe/)
+The classic paper-and-pencil game for two players.
+- **Features:** Score tracking, win/draw detection, and turn indicators.
 
-## Project Structure
+### [Breakout](./Physics-engine/demos/breakout/)
+A brick-breaking arcade game powered by the custom physics engine.
+- **Features:** Collision physics, paddle control, and scoring system.
 
-```
-Mini-JavaScript-Projects/
-├── Color Flipper/
-├── Notebook (Simple)/
-├── Palindrome Checker/
-├── Persistent TODO List/
-├── Random Quote Generator/
-├── Stop Watch/
-├── QR Code generator/
-├── WeatherApp/
-│   ├── index.html
-│   ├── app.js
-│   ├── styles.css
-│   ├── sw.js
-│   ├── manifest.json
-│   └── icons/
-├── Physics-engine/
-│   ├── core/              # Shared physics components
-│   ├── systems/           # Shared systems
-│   └── demos/             # Interactive demonstrations
-│       ├── bouncing-balls/
-│       └── breakout/
-└── README.md
-```
+---
 
-Most projects contain `main.html` and `index.js` files.
-WeatherApp uses `index.html` and `app.js`.
-Physics-engine has a modular structure with shared components.
+## 🛠️ Utilities & Tools
+
+- **[Calculator](./Calculator/):** A fully functional calculator with history tracking, keyboard support, and order-of-operations logic.
+- **[QR Code Generator](./QR%20Code%20generator/):** Instantly generate and download QR codes for text or URLs using the QR Server API.
+- **[Persistent TODO List](./Persistent%20TODO%20List/):** Manage tasks with add/delete functionality and LocalStorage persistence.
+- **[Stop Watch](./Stop%20Watch/):** specific timer with start, stop, and reset controls.
+- **[Color Flipper](./Color%20Flipper/):** background color generator to test DOM manipulation.
+- **[Random Quote Generator](./Random%20Quote%20Generator/):** Display inspirational quotes.
+- **[Palindrome Checker](./Palindrome%20Checker/):** Algorithm to check if text reads the same forwards and backwards.
+
+---
+
+## 💻 Getting Started
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/your-username/Mini-JavaScript-Projects.git
+    ```
+
+2.  **Run a Project:**
+    -   For most projects (Calculator, Games, Utilities), simply open the `index.html` or `main.html` file in your browser.
+
+    -   **For WeatherApp & Physics Engine:**
+        These projects use ES Modules or Service Workers which require a local server due to browser security restrictions (CORS).
+        
+        **Using Python:**
+        ```bash
+        cd WeatherApp  # or cd Physics-engine
+        python -m http.server 8000
+        ```
+        
+        **Using Node.js (http-server):**
+        ```bash
+        npx http-server WeatherApp
+        ```
+        Then open `http://localhost:8000` in your browser.
+
+## 🧰 Technologies Used
+
+-   **Core:** HTML5, CSS3, Vanilla JavaScript (ES6+)
+-   **APIs:** Canvas API, Audio API, LocalStorage, Fetch API
+-   **Advanced:** Service Workers (PWA), ES Modules, Custom Vector Math
+-   **External Services:** Open-Meteo API, QR Server API
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
