@@ -286,7 +286,7 @@ if (savedName) {
   nameInput.value = savedName;
 }
 
-restartBtn.addEventListener("click", initGame);
+restartBtn.onclick = initGame;
 
 // Initialize on load
 initGame();
