@@ -32,3 +32,30 @@
 .flipped {
   transform: rotateY(180deg);
 }
+
+/* Dropdown animation */
+#profile-dropdown {
+  transform-origin: top right;
+  transition: all 0.2s ease-out;
+}
+#profile-dropdown.hidden {
+  opacity: 0;
+  transform: scale(0.95);
+  pointer-events: none;
+  display: none; /* Keep display none for accessibility/layout, but can use class toggling for transition */
+}
+#profile-dropdown:not(.hidden) {
+  display: block;
+  animation: dropdownEnter 0.2s ease-out forwards;
+}
+
+@keyframes dropdownEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

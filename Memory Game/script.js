@@ -3,6 +3,12 @@ const movesDisplay = document.getElementById("moves");
 const timeDisplay = document.getElementById("timer");
 const restartBtn = document.getElementById("restart-btn");
 const statusText = document.getElementById("status-text");
+const levelDisplay = document.getElementById("level-display");
+const profileBtn = document.getElementById("profile-btn");
+const profileDropdown = document.getElementById("profile-dropdown");
+const nameInput = document.getElementById("name-input");
+const saveNameBtn = document.getElementById("save-name-btn");
+const playerNameDisplay = document.getElementById("player-name");
 
 const icons = [
   "pets",
@@ -39,9 +45,19 @@ const icons = [
   "palette",
   "shopping_cart",
   "info",
+  "wb_sunny",
+  "local_fire_department", // Added 2 more for level 5 (36 cards)
 ];
 
-let cards = []; // Array of card objects
+const levels = [
+  { level: 1, rows: 4, cols: 3, pairs: 6 },
+  { level: 2, rows: 4, cols: 4, pairs: 8 },
+  { level: 3, rows: 5, cols: 4, pairs: 10 },
+  { level: 4, rows: 6, cols: 5, pairs: 15 },
+  { level: 5, rows: 6, cols: 6, pairs: 18 },
+];
+
+let cards = [];
 let hasFlippedCard = false;
 let lockBoard = false;
 let firstCard, secondCard;
@@ -50,7 +66,7 @@ let timerInterval;
 let seconds = 0;
 let gameStarted = false;
 let matchedPairs = 0;
-const totalPairs = 18;
+let currentLevelIndex = 0;
 
 function shuffle(array) {
   let currentIndex = array.length,
@@ -77,11 +93,24 @@ function initGame() {
   gameStarted = false;
   matchedPairs = 0;
 
+  const currentLevelConfig = levels[currentLevelIndex];
+  const totalPairs = currentLevelConfig.pairs;
+
   // Update UI
   movesDisplay.textContent = moves;
   timeDisplay.textContent = "00:00";
   statusText.textContent = "Select a card";
+  levelDisplay.textContent = `${currentLevelConfig.level}/${levels.length}`;
+  restartBtn.innerHTML = `
+      <span class="material-symbols-outlined mr-2 text-[20px] group-hover:-rotate-180 transition-transform duration-500">refresh</span>
+      <span>Restart Level</span>
+  `;
   clearInterval(timerInterval);
+
+  // Configure Board Grid
+  gameBoard.className = `grid gap-3 w-full h-full p-5 bg-surface-light dark:bg-surface-dark rounded-4xl shadow-soft-xl border border-black/[0.04] dark:border-white/[0.08] ring-1 ring-black/[0.02] dark:ring-white/[0.02] transform transition-transform duration-500`;
+  gameBoard.style.gridTemplateColumns = `repeat(${currentLevelConfig.cols}, minmax(0, 1fr))`;
+  gameBoard.style.gridTemplateRows = `repeat(${currentLevelConfig.rows}, minmax(0, 1fr))`;
 
   // Create cards
   const selectedIcons = icons.slice(0, totalPairs);
@@ -160,11 +189,10 @@ function disableCards() {
   firstCard.removeEventListener("click", flipCard);
   secondCard.removeEventListener("click", flipCard);
 
-  // Optional: Visual style for matched cards (e.g., keep them slightly elevated or add a glow)
-  // The design handles it by keeping them flipped.
-
   matchedPairs++;
-  if (matchedPairs === totalPairs) {
+  const currentLevelConfig = levels[currentLevelIndex];
+
+  if (matchedPairs === currentLevelConfig.pairs) {
     endGame();
   } else {
     statusText.textContent = "Match found!";
@@ -201,8 +229,61 @@ function incrementMoves() {
 
 function endGame() {
   clearInterval(timerInterval);
-  statusText.textContent = `You won in ${moves} moves!`;
-  // Add simple celebration effect if desired
+  const isLastLevel = currentLevelIndex === levels.length - 1;
+
+  if (isLastLevel) {
+    statusText.textContent = `You completed all levels!`;
+    restartBtn.innerHTML = `
+          <span class="material-symbols-outlined mr-2 text-[20px] group-hover:-rotate-180 transition-transform duration-500">replay</span>
+          <span>Play Again</span>
+      `;
+    restartBtn.onclick = () => {
+      currentLevelIndex = 0;
+      restartBtn.onclick = initGame; // Reset handler
+      initGame();
+    };
+  } else {
+    statusText.textContent = `Level ${levels[currentLevelIndex].level} Complete!`;
+    restartBtn.innerHTML = `
+          <span class="material-symbols-outlined mr-2 text-[20px] transition-transform duration-500">arrow_forward</span>
+          <span>Next Level</span>
+      `;
+
+    // Temporarily override click handler for next level
+    restartBtn.onclick = () => {
+      currentLevelIndex++;
+      restartBtn.onclick = initGame; // Reset handler
+      initGame();
+    };
+  }
+}
+
+// Profile Dropdown Logic
+profileBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  profileDropdown.classList.toggle("hidden");
+});
+
+document.addEventListener("click", (e) => {
+  if (!profileBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+    profileDropdown.classList.add("hidden");
+  }
+});
+
+saveNameBtn.addEventListener("click", () => {
+  const newName = nameInput.value.trim();
+  if (newName) {
+    playerNameDisplay.textContent = newName;
+    localStorage.setItem("memoryGamePlayerName", newName);
+    profileDropdown.classList.add("hidden");
+  }
+});
+
+// Load saved name
+const savedName = localStorage.getItem("memoryGamePlayerName");
+if (savedName) {
+  playerNameDisplay.textContent = savedName;
+  nameInput.value = savedName;
 }
 
 restartBtn.addEventListener("click", initGame);
