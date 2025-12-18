@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Recipe Finder</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Noto+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#11d442",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102215",
+                        "card-dark": "#1a2e20",
+                        "surface": "#162b1b",
+                        "border-green": "#23482c",
+                    },
+                    fontFamily: {
+                        "display": ["Newsreader", "serif"],
+                        "sans": ["Noto Sans", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "2xl": "2rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+    <style>
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .glass-panel {
+            background: rgba(16, 34, 21, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex flex-col font-display text-[#112215] dark:text-white transition-colors duration-200 overflow-x-hidden">
+
+    <!-- SEARCH VIEW -->
+    <div id="search-view" class="w-full flex flex-col min-h-screen">
+        <!-- Top Navigation -->
+        <header class="sticky top-0 z-50 w-full border-b border-[#23482c] bg-[#112215]/90 backdrop-blur-md">
+            <div class="px-4 md:px-10 py-3 flex items-center justify-between max-w-7xl mx-auto w-full">
+                <div class="flex items-center gap-4 text-white">
+                    <div class="size-8 text-primary">
+                        <svg class="w-full h-full" fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                            <g clip-path="url(#clip0_6_319)">
+                                <path d="M8.57829 8.57829C5.52816 11.6284 3.451 15.5145 2.60947 19.7452C1.76794 23.9758 2.19984 28.361 3.85056 32.3462C5.50128 36.3314 8.29667 39.7376 11.8832 42.134C15.4698 44.5305 19.6865 45.8096 24 45.8096C28.3135 45.8096 32.5302 44.5305 36.1168 42.134C39.7033 39.7375 42.4987 36.3314 44.1494 32.3462C45.8002 28.361 46.2321 23.9758 45.3905 19.7452C44.549 15.5145 42.4718 11.6284 39.4217 8.57829L24 24L8.57829 8.57829Z" fill="currentColor"></path>
+                            </g>
+                            <defs>
+                                <clippath id="clip0_6_319"><rect fill="white" height="48" width="48"></rect></clippath>
+                            </defs>
+                        </svg>
+                    </div>
+                    <h2 class="text-white text-xl font-bold leading-tight tracking-tight">RecipeFinder</h2>
+                </div>
+                <nav class="hidden md:flex items-center gap-8">
+                    <a class="text-white/90 hover:text-primary transition-colors text-sm font-medium" href="#">Home</a>
+                    <a class="text-white/90 hover:text-primary transition-colors text-sm font-medium" href="#">Categories</a>
+                    <a class="text-white/90 hover:text-primary transition-colors text-sm font-medium" href="#">Saved</a>
+                    <a class="text-white/90 hover:text-primary transition-colors text-sm font-medium" href="#">Meal Plans</a>
+                </nav>
+                <div class="flex gap-3">
+                    <button class="hidden sm:flex items-center justify-center rounded-xl h-10 px-4 bg-[#23482c] hover:bg-[#2f5c3a] text-white text-sm font-bold tracking-wide transition-colors">
+                        Log In
+                    </button>
+                    <button class="flex items-center justify-center rounded-xl h-10 px-4 bg-primary hover:bg-[#15e04b] text-[#112215] text-sm font-bold tracking-wide transition-colors shadow-[0_0_15px_rgba(17,212,66,0.4)]">
+                        Sign Up
+                    </button>
+                </div>
+            </div>
+        </header>
+        <!-- Main Content Area -->
+        <main class="flex-grow flex flex-col items-center px-4 md:px-8 py-8 w-full max-w-7xl mx-auto">
+            <!-- Search & Filter Section -->
+            <div class="w-full max-w-4xl flex flex-col gap-6 mb-10">
+                <!-- Headline -->
+                <div class="text-center">
+                    <h1 class="text-white text-4xl md:text-5xl font-bold leading-tight tracking-tight mb-2">Find your next craving</h1>
+                    <p class="text-[#92c9a0] text-lg font-sans font-light">Explore thousands of recipes crafted for you.</p>
+                </div>
+                <!-- Search Bar -->
+                <div class="relative group z-10">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-primary/20 to-[#23482c] rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                    <div class="relative flex w-full items-center rounded-xl h-14 bg-[#23482c] border border-[#2f5c3a] focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/10 transition-all shadow-xl">
+                        <div class="pl-5 text-[#92c9a0]">
+                            <span class="material-symbols-outlined text-[24px]">search</span>
+                        </div>
+                        <input class="w-full h-full bg-transparent border-none text-white placeholder-[#92c9a0] px-4 text-lg font-sans focus:ring-0" placeholder="Search recipes, ingredients, or tags..." value="Pasta"/>
+                        <button class="mr-2 h-10 px-6 rounded-lg bg-primary text-[#112215] font-bold text-sm hover:brightness-110 transition-all">
+                            Search
+                        </button>
+                    </div>
+                </div>
+                <!-- Chips / Filters -->
+                <div class="flex flex-wrap justify-center gap-3">
+                    <button class="group flex items-center gap-2 h-9 px-4 rounded-full bg-primary text-[#112215] font-bold text-sm transition-all shadow-[0_0_10px_rgba(17,212,66,0.3)]">
+                        <span>Pasta</span>
+                        <span class="material-symbols-outlined text-[18px]">close</span>
+                    </button>
+                    <button class="group flex items-center gap-2 h-9 px-4 rounded-full bg-[#23482c] hover:bg-[#2f5c3a] border border-[#2f5c3a] text-white text-sm font-medium transition-all">
+                        <span>Vegetarian</span>
+                        <span class="material-symbols-outlined text-[18px] text-[#92c9a0] group-hover:text-white">expand_more</span>
+                    </button>
+                    <button class="group flex items-center gap-2 h-9 px-4 rounded-full bg-[#23482c] hover:bg-[#2f5c3a] border border-[#2f5c3a] text-white text-sm font-medium transition-all">
+                        <span>Under 30 min</span>
+                        <span class="material-symbols-outlined text-[18px] text-[#92c9a0] group-hover:text-white">expand_more</span>
+                    </button>
+                    <button class="group flex items-center gap-2 h-9 px-4 rounded-full bg-[#23482c] hover:bg-[#2f5c3a] border border-[#2f5c3a] text-white text-sm font-medium transition-all">
+                        <span>Healthy</span>
+                        <span class="material-symbols-outlined text-[18px] text-[#92c9a0] group-hover:text-white">expand_more</span>
+                    </button>
+                    <button class="group flex items-center gap-2 h-9 px-4 rounded-full bg-[#23482c] hover:bg-[#2f5c3a] border border-[#2f5c3a] text-white text-sm font-medium transition-all">
+                        <span>Rating 4.0+</span>
+                        <span class="material-symbols-outlined text-[18px] text-[#92c9a0] group-hover:text-white">expand_more</span>
+                    </button>
+                </div>
+            </div>
+            <!-- Results Header -->
+            <div class="w-full flex items-center justify-between mb-6 pb-2 border-b border-[#23482c]">
+                <h3 class="text-white text-2xl font-bold tracking-tight">Found 124 recipes for <span class="italic text-primary">'Pasta'</span></h3>
+                <div class="flex items-center gap-2 text-[#92c9a0] text-sm font-sans cursor-pointer hover:text-white transition-colors">
+                    <span>Sort by: Relevance</span>
+                    <span class="material-symbols-outlined text-[20px]">sort</span>
+                </div>
+            </div>
+            <!-- Recipe Grid (Masonry-ish 2 Columns) -->
+            <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-8 mb-12" id="recipe-grid">
+                <!-- Card 1 -->
+                <div class="recipe-card group relative w-full h-[400px] md:h-[480px] rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 transform hover:-translate-y-1">
+                    <!-- Image -->
+                    <img alt="Overhead shot of creamy pesto pasta with fresh basil leaves" class="recipe-image absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Overhead shot of creamy pesto pasta with fresh basil leaves" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxMERw5CwGUIEViBBFhMce97s5F_4q9SB2dpODMTF4mT9wHec2tAihj7qO5XRftAy8mO1pok2AxX57zvh4ORHgG_zMl26J7i1yKr5Ha0DUd5JKP_QSU9FVPb4wBYAf2N3UchiqkwiBOgDbDWng9CmBfBcWijr4bhVFQQFfFU0GaKSjAh2zo2JlDCXrL3eRksNxzSWrBPJv6KS_K7Uvv1_Tc0v1oHyoI9KlBz5QCadFcxn12QLn3psCTJ4EpD2cYBZ6GCIcqB6apRa7"/>
+                    <!-- Gradient overlay for text readability -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#102215] via-transparent to-transparent opacity-80"></div>
+                    <!-- Like Button -->
+                    <button class="absolute top-4 right-4 h-10 w-10 rounded-full bg-black/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-primary hover:text-[#112215] transition-all z-20">
+                        <span class="material-symbols-outlined">favorite</span>
+                    </button>
+                    <!-- Glassmorphism Content Bar -->
+                    <div class="absolute bottom-4 left-4 right-4 rounded-xl glass-panel p-4 flex flex-col gap-2 transition-transform duration-300 group-hover:translate-y-[-4px]">
+                        <div class="flex justify-between items-start">
+                            <h3 class="recipe-title text-white text-2xl font-bold leading-tight line-clamp-2 pr-4">Creamy Basil Pesto Pasta with Pine Nuts</h3>
+                        </div>
+                        <div class="flex items-center gap-4 text-[#d1e7d7] text-sm font-sans font-medium">
+                            <div class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[18px] text-primary">schedule</span>
+                                <span class="recipe-time">20 min</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[18px] text-primary">local_fire_department</span>
+                                <span class="recipe-cals">450 kcal</span>
+                            </div>
+                            <div class="flex items-center gap-1 ml-auto bg-primary/20 px-2 py-0.5 rounded-md text-primary">
+                                <span class="material-symbols-outlined text-[16px] fill-current">star</span>
+                                <span>4.8</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card 2 -->
+                <div class="recipe-card group relative w-full h-[400px] md:h-[480px] rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 transform hover:-translate-y-1">
+                    <img alt="Close up of tomato pasta with parmesan cheese" class="recipe-image absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Close up of tomato pasta with parmesan cheese" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcE6iodbuIag9rRu2b5-vAES9aSP5v_LSDgGQLnUD2_rYBGhN6uVgBcL7UWim6We-PON3yF2kBYDHsCNlcvnWQnw09VDhU9H6HVC3j4VqZEyJPUwkl6GUnPrAC5-IPkCzMZ-Thoz2QjlUzGNIgJRUWNq-Tfyh_S6mgrpah0ZLuX-NxbwcerFVMzDSaXfuqN_CzM10IKMg1wsJsSRCSaUGtP6ZO8szsSC-n7hbzjSaRjwuXWqAUB0jNCbbX_ymHXW8DT-UrXDi-26w1"/>
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#102215] via-transparent to-transparent opacity-80"></div>
+                    <button class="absolute top-4 right-4 h-10 w-10 rounded-full bg-black/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-primary hover:text-[#112215] transition-all z-20">
+                        <span class="material-symbols-outlined">favorite_border</span>
+                    </button>
+                    <div class="absolute bottom-4 left-4 right-4 rounded-xl glass-panel p-4 flex flex-col gap-2 transition-transform duration-300 group-hover:translate-y-[-4px]">
+                        <div class="flex justify-between items-start">
+                            <h3 class="recipe-title text-white text-2xl font-bold leading-tight line-clamp-2 pr-4">Spicy Tomato &amp; Garlic Spaghetti</h3>
+                        </div>
+                        <div class="flex items-center gap-4 text-[#d1e7d7] text-sm font-sans font-medium">
+                            <div class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[18px] text-primary">schedule</span>
+                                <span class="recipe-time">35 min</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[18px] text-primary">local_fire_department</span>
+                                <span class="recipe-cals">320 kcal</span>
+                            </div>
+                            <div class="flex items-center gap-1 ml-auto bg-primary/20 px-2 py-0.5 rounded-md text-primary">
+                                <span class="material-symbols-outlined text-[16px] fill-current">star</span>
+                                <span>4.5</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card 3 -->
+                <div class="recipe-card group relative w-full h-[400px] md:h-[480px] rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 transform hover:-translate-y-1">
+                    <img alt="Plate of tagliatelle with mushrooms and cream sauce" class="recipe-image absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Plate of tagliatelle with mushrooms and cream sauce" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDViIATiYANkT-ytx-bMmyNn4_u38Z1EQx64J6hEbaBmwU1hCKFKmmmb5UFh-1Py-JvyP3yzUhxfybzHUUYprUJ9TKt28n673kH6sNa176Oa35Bj5NfhTuaEkFc_1It4tWU66aiVILSQL1krrCYx1RGhSB547g1CeN1X8VBM_ZENEcnu2yWAfMayrYPKcZPw3dy6hN4Mns0uOSUW71ORUNoBAjwgsgFwJmZLyE88LC66TsiFwtVtXRDuc3_BUVxJpPpFSZJxN9bLNXv"/>
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#102215] via-transparent to-transparent opacity-80"></div>
+                    <button class="absolute top-4 right-4 h-10 w-10 rounded-full bg-black/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-primary hover:text-[#112215] transition-all z-20">
+                        <span class="material-symbols-outlined">favorite_border</span>
+                    </button>
+                    <div class="absolute bottom-4 left-4 right-4 rounded-xl glass-panel p-4 flex flex-col gap-2 transition-transform duration-300 group-hover:translate-y-[-4px]">
+                        <div class="flex justify-between items-start">
+                            <h3 class="recipe-title text-white text-2xl font-bold leading-tight line-clamp-2 pr-4">Wild Mushroom &amp; Truffle Tagliatelle</h3>
+                        </div>
+                        <div class="flex items-center gap-4 text-[#d1e7d7] text-sm font-sans font-medium">
+                            <div class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[18px] text-primary">schedule</span>
+                                <span class="recipe-time">45 min</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[18px] text-primary">local_fire_department</span>
+                                <span class="recipe-cals">580 kcal</span>
+                            </div>
+                            <div class="flex items-center gap-1 ml-auto bg-primary/20 px-2 py-0.5 rounded-md text-primary">
+                                <span class="material-symbols-outlined text-[16px] fill-current">star</span>
+                                <span>4.9</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card 4 -->
+                <div class="recipe-card group relative w-full h-[400px] md:h-[480px] rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 transform hover:-translate-y-1">
+                    <img alt="Seafood pasta with clams and mussels" class="recipe-image absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Seafood pasta with clams and mussels" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA85blMzjSpJbsguPddqe0eTzlvC_53RG0Kl68cyQY8-MTTPmwyfOJCGQusl_ifyB_tlOYFrWDggMXAIF1IR5JB-tzRBZx6JkACe2hsKo5dO-q6a0MaWf6u1GEIi9_8Xl5RoPX4PoMUAl-HYKG1PP_KklbYJznaVYjOLRW3_VyqdivEeY3ScIMQqrBGPZ89gRGDUbYBkQNbVMNdT3sy5kIpIvWFmS88gYim9Gcn3PF9Geki4m0I2T-N2qdKgCw4sIpLIy6o8oxqk5hX"/>
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#102215] via-transparent to-transparent opacity-80"></div>
+                    <button class="absolute top-4 right-4 h-10 w-10 rounded-full bg-black/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-primary hover:text-[#112215] transition-all z-20">
+                        <span class="material-symbols-outlined">favorite_border</span>
+                    </button>
+                    <div class="absolute bottom-4 left-4 right-4 rounded-xl glass-panel p-4 flex flex-col gap-2 transition-transform duration-300 group-hover:translate-y-[-4px]">
+                        <div class="flex justify-between items-start">
+                            <h3 class="recipe-title text-white text-2xl font-bold leading-tight line-clamp-2 pr-4">Seafood Linguine with White Wine</h3>
+                        </div>
+                        <div class="flex items-center gap-4 text-[#d1e7d7] text-sm font-sans font-medium">
+                            <div class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[18px] text-primary">schedule</span>
+                                <span class="recipe-time">55 min</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[18px] text-primary">local_fire_department</span>
+                                <span class="recipe-cals">410 kcal</span>
+                            </div>
+                            <div class="flex items-center gap-1 ml-auto bg-primary/20 px-2 py-0.5 rounded-md text-primary">
+                                <span class="material-symbols-outlined text-[16px] fill-current">star</span>
+                                <span>4.7</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Skeleton Loader Section -->
+            <div class="w-full">
+                <h4 class="text-[#92c9a0] text-sm font-sans font-bold uppercase tracking-wider mb-4 opacity-70">Loading more recipes...</h4>
+                <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Skeleton Card 1 -->
+                    <div class="relative w-full h-[400px] md:h-[480px] rounded-2xl overflow-hidden bg-[#1a2e20] animate-pulse">
+                        <div class="absolute inset-0 bg-[#23482c]"></div>
+                        <div class="absolute bottom-4 left-4 right-4 h-32 rounded-xl bg-[#2f5c3a]/50 border-t border-white/5 p-4 flex flex-col justify-end gap-3">
+                            <div class="h-8 bg-[#3d6e4b] rounded w-3/4"></div>
+                            <div class="flex gap-4 mt-2">
+                                <div class="h-5 bg-[#3d6e4b] rounded w-16"></div>
+                                <div class="h-5 bg-[#3d6e4b] rounded w-16"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Skeleton Card 2 -->
+                    <div class="relative w-full h-[400px] md:h-[480px] rounded-2xl overflow-hidden bg-[#1a2e20] animate-pulse delay-100">
+                        <div class="absolute inset-0 bg-[#23482c]"></div>
+                        <div class="absolute bottom-4 left-4 right-4 h-32 rounded-xl bg-[#2f5c3a]/50 border-t border-white/5 p-4 flex flex-col justify-end gap-3">
+                            <div class="h-8 bg-[#3d6e4b] rounded w-2/3"></div>
+                            <div class="flex gap-4 mt-2">
+                                <div class="h-5 bg-[#3d6e4b] rounded w-16"></div>
+                                <div class="h-5 bg-[#3d6e4b] rounded w-16"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- DETAIL VIEW -->
+    <div id="detail-view" class="hidden w-full flex flex-col min-h-screen">
+        <!-- Top Navigation -->
+        <header class="sticky top-0 z-50 w-full border-b border-border-green bg-background-dark/95 backdrop-blur-sm px-6 lg:px-10 py-3">
+            <div class="max-w-[1280px] mx-auto flex items-center justify-between whitespace-nowrap">
+                <div class="flex items-center gap-4 text-white">
+                    <div class="size-8 text-primary">
+                        <svg class="size-full" fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z" fill="currentColor"></path>
+                        </svg>
+                    </div>
+                    <h2 class="hidden sm:block text-white text-xl font-bold tracking-tight">Recipe Finder</h2>
+                </div>
+                <div class="flex items-center gap-6">
+                    <button id="back-button" class="text-white/80 hover:text-primary transition-colors text-sm font-medium font-sans flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+                        <span class="hidden sm:inline">Back to recipes</span>
+                    </button>
+                    <div class="h-6 w-px bg-border-green hidden sm:block"></div>
+                    <div class="flex items-center gap-4">
+                        <button class="flex items-center gap-2 h-10 px-5 bg-primary hover:bg-primary/90 transition-colors text-background-dark rounded-full font-bold text-sm tracking-wide font-sans">
+                            <span class="material-symbols-outlined text-[20px]">person</span>
+                            <span>Profile</span>
+                        </button>
+                        <div class="bg-center bg-no-repeat bg-cover rounded-full size-10 ring-2 ring-border-green" data-alt="User profile picture showing a smiling person" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCNS5qH_kolpCKho9Rd-2oba3xVg4CdC0dbJhe_H5ImYVOq0FpabjKCLxdpZbHRs4HcqLxTgj3OFnk-V5yLXQRUXjTgcT0xSMwzX-sbwBNA_IZBj8jNAUoFkVUYOGdn_3O-MIHEUW1DIUguskyuxFXC36tVzgbleYfYVOnqxIg7CGPHIybdYgll2iqBQH82cvktbHFDNS00f96qnX4Z-xDGlbt8kRVk11RaDE6ijTQUIFl9OIgJuNbOqzgJmY7cHMYxUXYXoo4pKc6D");'></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <main class="flex-1 w-full flex flex-col items-center">
+            <!-- Hero Section -->
+            <div class="w-full relative h-[45vh] lg:h-[55vh] group overflow-hidden">
+                <div id="detail-image" class="absolute inset-0 bg-cover bg-center transition-transform duration-1000 ease-out group-hover:scale-105" data-alt="Close up overhead shot of rustic tomato basil soup in a ceramic bowl with crusty bread" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCVlAP4XzncpadlbsqccppqToTm2e-MkT_Cbxblak3WhgZR3-4Tm_dPbTBGhpcLD6vGClSLiEOLGDNLFrZDOsh1iX2PffyHEtLZAkJ1nAH4mjqGKPDpWV3vfvv6sdtqtmnr4SMT3MWsjzTFuPdWllnpnxJyNMe9nPAjMAcGXcYSpRom9t33OsCrbddJmewV5vhcfQ1fKyGL-v8WarCwpo3OaEaLlwOvF-Jx0nGgJr9XlOu9mazSFiXa7efJ284nux6TMqukyV7nDxgF");'>
+                </div>
+                <!-- Gradient Overlay for smooth transition to content -->
+                <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-background-dark"></div>
+            </div>
+            <!-- Main Layout Container -->
+            <div class="w-full max-w-5xl px-4 sm:px-6 lg:px-8 relative z-10 -mt-24 pb-20">
+                <!-- Title & Quick Actions Block -->
+                <div class="flex flex-col gap-6 mb-10">
+                    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-3">
+                                <span class="px-3 py-1 rounded-full bg-primary/20 text-primary border border-primary/30 text-xs font-bold uppercase tracking-wider font-sans">Soup</span>
+                                <span class="px-3 py-1 rounded-full bg-surface text-white/70 border border-border-green text-xs font-bold uppercase tracking-wider font-sans">Vegetarian</span>
+                            </div>
+                            <h1 id="detail-title" class="text-4xl md:text-5xl lg:text-6xl font-medium text-white leading-[1.1] drop-shadow-lg">
+                                Rustic Roasted Tomato <br class="hidden md:block"/> &amp; Basil Soup
+                            </h1>
+                        </div>
+                        <div class="flex gap-3">
+                            <button class="size-12 rounded-full bg-surface hover:bg-primary border border-primary/30 text-primary hover:text-background-dark transition-all flex items-center justify-center shadow-lg group/btn">
+                                <span class="material-symbols-outlined group-hover/btn:scale-110 transition-transform">bookmark_border</span>
+                            </button>
+                            <button class="size-12 rounded-full bg-surface hover:bg-primary border border-primary/30 text-primary hover:text-background-dark transition-all flex items-center justify-center shadow-lg group/btn">
+                                <span class="material-symbols-outlined group-hover/btn:scale-110 transition-transform">share</span>
+                            </button>
+                            <button class="size-12 rounded-full bg-surface hover:bg-primary border border-primary/30 text-primary hover:text-background-dark transition-all flex items-center justify-center shadow-lg group/btn">
+                                <span class="material-symbols-outlined group-hover/btn:scale-110 transition-transform">print</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Rating & Author Line -->
+                    <div class="flex flex-wrap items-center gap-6 text-white/90">
+                        <div class="flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-primary text-[22px] fill-1" style="font-variation-settings: 'FILL' 1;">star</span>
+                            <span class="text-xl font-bold">4.8</span>
+                            <span class="text-sm text-white/60 font-sans underline decoration-white/30 underline-offset-4 decoration-dotted cursor-pointer hover:text-white transition-colors">See 124 reviews</span>
+                        </div>
+                        <div class="w-px h-5 bg-white/20 hidden sm:block"></div>
+                        <div class="flex items-center gap-3">
+                            <div class="size-8 rounded-full bg-cover ring-2 ring-primary/50" data-alt="Small portrait of the chef Elena R." style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDDsjvVoVyF5tX_iDPkj-jAyd9PQ927ifRHXfQ10ZvHXiz6lJDhWK07B_eBfN9By4R9jtTX7zJRiYevls22hqTiNezus9XWBo_py_U699CXtdU2Jg-bihY-nxNQBUzCNAwq6Fu17GBHCm_J2LRiclfYgihrZCfiZh1N7rmxFQ4-tifOuWPPc4-L1JUuCROyFu5eRvnPM_mGsFh8imwH8sMAZS1e7utzwcTW7kHq6Hxm7gYTf0SSq1gUQUVzzP8K9UiJWI4Ar1J8Zzgp");'></div>
+                            <span class="text-base font-medium">Recipe by <span class="text-primary hover:underline cursor-pointer">Elena R.</span></span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-14">
+                    <div class="flex flex-col items-center justify-center p-4 rounded-xl border border-border-green bg-surface hover:border-primary/50 transition-colors group">
+                        <span class="material-symbols-outlined text-primary mb-2 text-3xl group-hover:scale-110 transition-transform">schedule</span>
+                        <p id="detail-time" class="text-white text-xl font-bold leading-none mb-1">45m</p>
+                        <p class="text-[#92c9a0] text-xs font-sans uppercase tracking-wider">Total Time</p>
+                    </div>
+                    <div class="flex flex-col items-center justify-center p-4 rounded-xl border border-border-green bg-surface hover:border-primary/50 transition-colors group">
+                        <span class="material-symbols-outlined text-primary mb-2 text-3xl group-hover:scale-110 transition-transform">restaurant</span>
+                        <p class="text-white text-xl font-bold leading-none mb-1">4</p>
+                        <p class="text-[#92c9a0] text-xs font-sans uppercase tracking-wider">Servings</p>
+                    </div>
+                    <div class="flex flex-col items-center justify-center p-4 rounded-xl border border-border-green bg-surface hover:border-primary/50 transition-colors group">
+                        <span class="material-symbols-outlined text-primary mb-2 text-3xl group-hover:scale-110 transition-transform">local_fire_department</span>
+                        <p id="detail-cals" class="text-white text-xl font-bold leading-none mb-1">320</p>
+                        <p class="text-[#92c9a0] text-xs font-sans uppercase tracking-wider">Calories</p>
+                    </div>
+                    <div class="flex flex-col items-center justify-center p-4 rounded-xl border border-border-green bg-surface hover:border-primary/50 transition-colors group">
+                        <span class="material-symbols-outlined text-primary mb-2 text-3xl group-hover:scale-110 transition-transform">signal_cellular_alt</span>
+                        <p class="text-white text-xl font-bold leading-none mb-1">Easy</p>
+                        <p class="text-[#92c9a0] text-xs font-sans uppercase tracking-wider">Difficulty</p>
+                    </div>
+                </div>
+                <!-- Content Split: Ingredients & Instructions -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+                    <!-- Left Column: Ingredients (4 cols) -->
+                    <div class="lg:col-span-4">
+                        <div class="sticky top-24">
+                            <div class="flex items-center justify-between mb-6 pb-4 border-b border-border-green">
+                                <h2 class="text-2xl font-bold text-white">Ingredients</h2>
+                                <div class="flex items-center bg-surface p-1 rounded-lg border border-border-green font-sans">
+                                    <button class="px-2.5 py-1 rounded text-[10px] font-bold bg-primary text-background-dark shadow-sm">US</button>
+                                    <button class="px-2.5 py-1 rounded text-[10px] font-bold text-white/50 hover:text-white transition-colors">M</button>
+                                </div>
+                            </div>
+                            <ul class="space-y-4">
+                                <!-- Checked Item Example -->
+                                <li class="flex items-start gap-4 group cursor-pointer">
+                                    <div class="mt-1 flex-shrink-0 size-6 rounded-full border-2 border-primary bg-primary text-background-dark flex items-center justify-center transition-all">
+                                        <span class="material-symbols-outlined text-[16px] font-bold">check</span>
+                                    </div>
+                                    <span class="text-lg text-white/40 line-through decoration-white/30 transition-colors">2 lbs Roma tomatoes, halved</span>
+                                </li>
+                                <!-- Unchecked Item -->
+                                <li class="flex items-start gap-4 group cursor-pointer">
+                                    <div class="mt-1 flex-shrink-0 size-6 rounded-full border-2 border-white/30 group-hover:border-primary transition-all flex items-center justify-center"></div>
+                                    <span class="text-lg text-white group-hover:text-primary/90 transition-colors">4 cloves garlic, peeled</span>
+                                </li>
+                                <li class="flex items-start gap-4 group cursor-pointer">
+                                    <div class="mt-1 flex-shrink-0 size-6 rounded-full border-2 border-white/30 group-hover:border-primary transition-all flex items-center justify-center"></div>
+                                    <span class="text-lg text-white group-hover:text-primary/90 transition-colors">3 tbsp olive oil, divided</span>
+                                </li>
+                                <li class="flex items-start gap-4 group cursor-pointer">
+                                    <div class="mt-1 flex-shrink-0 size-6 rounded-full border-2 border-white/30 group-hover:border-primary transition-all flex items-center justify-center"></div>
+                                    <span class="text-lg text-white group-hover:text-primary/90 transition-colors">1 large yellow onion, chopped</span>
+                                </li>
+                                <li class="flex items-start gap-4 group cursor-pointer">
+                                    <div class="mt-1 flex-shrink-0 size-6 rounded-full border-2 border-white/30 group-hover:border-primary transition-all flex items-center justify-center"></div>
+                                    <span class="text-lg text-white group-hover:text-primary/90 transition-colors">1/2 cup fresh basil leaves</span>
+                                </li>
+                                <li class="flex items-start gap-4 group cursor-pointer">
+                                    <div class="mt-1 flex-shrink-0 size-6 rounded-full border-2 border-white/30 group-hover:border-primary transition-all flex items-center justify-center"></div>
+                                    <span class="text-lg text-white group-hover:text-primary/90 transition-colors">1 quart vegetable broth</span>
+                                </li>
+                            </ul>
+                            <!-- CTA Box -->
+                            <div class="mt-10 p-5 rounded-xl bg-surface border border-primary/20 flex flex-col gap-3 relative overflow-hidden">
+                                <div class="absolute -right-4 -top-4 text-primary/5">
+                                    <span class="material-symbols-outlined text-[120px]">shopping_cart</span>
+                                </div>
+                                <h3 class="text-lg font-bold text-white relative z-10">Shop this recipe</h3>
+                                <p class="text-sm text-white/70 font-sans relative z-10">Get all ingredients delivered in as fast as 1 hour.</p>
+                                <button class="mt-2 w-full py-2.5 rounded-lg bg-primary text-background-dark font-sans font-bold text-sm hover:bg-white hover:text-background-dark transition-colors relative z-10">Add to Cart</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Right Column: Instructions (8 cols) -->
+                    <div class="lg:col-span-8">
+                        <div class="flex items-center justify-between mb-8 pb-4 border-b border-border-green">
+                            <h2 class="text-2xl font-bold text-white">Instructions</h2>
+                            <button class="text-primary hover:text-white transition-colors text-sm font-bold font-sans flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[18px]">play_circle</span>
+                                <span>Cook Mode</span>
+                            </button>
+                        </div>
+                        <div class="flex flex-col space-y-10">
+                            <!-- Step 1 -->
+                            <div class="flex gap-5 md:gap-8 group">
+                                <div class="flex flex-col items-center">
+                                    <div class="size-10 md:size-12 rounded-full bg-primary text-background-dark font-bold text-xl md:text-2xl flex items-center justify-center shadow-[0_0_20px_rgba(17,212,66,0.2)] group-hover:scale-110 transition-transform duration-300 z-10 relative">
+                                        1
+                                    </div>
+                                    <div class="w-0.5 h-full bg-border-green -mt-2 -mb-10 group-last:hidden"></div>
+                                </div>
+                                <div class="flex-1 pb-4">
+                                    <h3 class="text-xl md:text-2xl font-bold text-white mb-3">Preheat and Prep</h3>
+                                    <p class="text-lg md:text-xl text-white/80 font-light leading-relaxed">
+                                        Preheat the oven to 400°F (200°C). Line a large baking sheet with parchment paper. Arrange the halved tomatoes and peeled garlic cloves on the baking sheet.
+                                    </p>
+                                </div>
+                            </div>
+                            <!-- Step 2 -->
+                            <div class="flex gap-5 md:gap-8 group">
+                                <div class="flex flex-col items-center">
+                                    <div class="size-10 md:size-12 rounded-full bg-surface border-2 border-primary text-primary font-bold text-xl md:text-2xl flex items-center justify-center group-hover:bg-primary group-hover:text-background-dark transition-colors duration-300 z-10 relative">
+                                        2
+                                    </div>
+                                    <div class="w-0.5 h-full bg-border-green -mt-2 -mb-10 group-last:hidden"></div>
+                                </div>
+                                <div class="flex-1 pb-4">
+                                    <h3 class="text-xl md:text-2xl font-bold text-white mb-3">Roast the Vegetables</h3>
+                                    <p class="text-lg md:text-xl text-white/80 font-light leading-relaxed">
+                                        Drizzle with 2 tablespoons of olive oil and season generously with salt and pepper. Roast for 40-45 minutes, until the tomatoes are soft and slightly charred.
+                                    </p>
+                                    <div class="mt-4 rounded-xl overflow-hidden max-w-md border border-border-green">
+                                        <img class="w-full h-auto object-cover opacity-80 hover:opacity-100 transition-opacity" data-alt="Roasted tomatoes on a baking sheet" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCIdmcUnUP6-3_wYsobK3l6Hf9ekf1fpjINk5bTyV4tG0AG2rfu4wYstITmZe4qE4A54rkpkdDdLdUkJk9mOJWLNaVhswN-NiUFQFxyZSYIOOEEs8GTXfG60AUnov7LJsVKohPy69MpfFhsiGDINrtMtrqMWC85PdvmMnfJgvRH-wdhVE5Zbf0H5gKpVcdavqkja2GX6heg2Qslu4JucSW8GZ9cKOV2OPduXIt87NhTSTPGrYGftfwPXtIr17KsE1jh7vYhr5WFpYiv"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Step 3 -->
+                            <div class="flex gap-5 md:gap-8 group">
+                                <div class="flex flex-col items-center">
+                                    <div class="size-10 md:size-12 rounded-full bg-surface border-2 border-primary text-primary font-bold text-xl md:text-2xl flex items-center justify-center group-hover:bg-primary group-hover:text-background-dark transition-colors duration-300 z-10 relative">
+                                        3
+                                    </div>
+                                    <div class="w-0.5 h-full bg-border-green -mt-2 -mb-10 group-last:hidden"></div>
+                                </div>
+                                <div class="flex-1 pb-4">
+                                    <h3 class="text-xl md:text-2xl font-bold text-white mb-3">Sauté Aromatics</h3>
+                                    <p class="text-lg md:text-xl text-white/80 font-light leading-relaxed">
+                                        While the tomatoes are roasting, heat the remaining tablespoon of olive oil in a large pot over medium heat. Add the chopped onion and cook until translucent, about 5 minutes.
+                                    </p>
+                                </div>
+                            </div>
+                            <!-- Step 4 -->
+                            <div class="flex gap-5 md:gap-8 group">
+                                <div class="flex flex-col items-center">
+                                    <div class="size-10 md:size-12 rounded-full bg-surface border-2 border-primary text-primary font-bold text-xl md:text-2xl flex items-center justify-center group-hover:bg-primary group-hover:text-background-dark transition-colors duration-300 z-10 relative">
+                                        4
+                                    </div>
+                                </div>
+                                <div class="flex-1 pb-4">
+                                    <h3 class="text-xl md:text-2xl font-bold text-white mb-3">Simmer and Blend</h3>
+                                    <p class="text-lg md:text-xl text-white/80 font-light leading-relaxed">
+                                        Add the roasted tomatoes, garlic, and any juices from the pan into the pot. Pour in the vegetable broth, bring to a simmer, and cook for 10 minutes. Stir in the fresh basil. Use an immersion blender to blend until smooth.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Related Recipes Footer -->
+            <section class="w-full bg-surface border-t border-border-green py-16">
+                <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-center justify-between mb-8">
+                        <h3 class="text-3xl font-medium text-white">You might also like</h3>
+                        <a class="text-primary hover:text-white transition-colors font-sans text-sm font-bold flex items-center gap-1" href="#">
+                            View all <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                        </a>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Card 1 -->
+                        <div class="group flex flex-col gap-3 cursor-pointer">
+                            <div class="aspect-[4/3] rounded-xl overflow-hidden relative">
+                                <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="Bowl of creamy mushroom soup" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCBjHxfWCskmrAimc60fZx-igjf-trxAumK2wYcUieo_IPE8HAjae3iYdWBD0JYP8aBdcU769qsrleXW1y465yiRLTyERVyjM35gnbO42zOXwOWpPV1KNc78HkH-QDsb7sYly9GpcViCHYU72S2Fw59fU3qAmPR1e99eXxiUd8H1987p8L1wuD7kg_O9E_aBtZWDp_AARid5Z_nk2JMGPjsNUlOIhNeDKBPd1Y0Btu0CxGgD3w3ZoM-3kjJwvuGeYycfcXnkL3TFXhg");'></div>
+                                <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+                                <div class="absolute top-3 right-3 bg-black/50 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-lg flex items-center gap-1 font-sans">
+                                    <span class="material-symbols-outlined text-[14px] text-primary">schedule</span> 35m
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-bold text-white group-hover:text-primary transition-colors">Creamy Wild Mushroom Soup</h4>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-white/60 text-sm font-sans">450 cals</span>
+                                    <span class="size-1 bg-white/30 rounded-full"></span>
+                                    <span class="text-white/60 text-sm font-sans">Easy</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Card 2 -->
+                        <div class="group flex flex-col gap-3 cursor-pointer">
+                            <div class="aspect-[4/3] rounded-xl overflow-hidden relative">
+                                <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="Grilled cheese sandwich sliced in half" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD8UIaMDrEyYU_xO3xZN5LsCq9gO2XRaGQdE5-wIxv7jjwE2dxbBT2yKACLMwlrsPZLUc4rXh_W73m7O4aFrhKt4mv2dOZrpmoYOjfRRn6juQ7A1afKSqfOaDbqAcpHSkSM7BzTMpAyiURV3S-BsastDll1AfiGc5yJvYMEulFI_3QgOBbi1xJWUhTANPL8MHTj76tYwn5HfGPzBCt918UlwU3izZmdFZ_ls6uCuZWchjL2FxeZYlDqaPPHiQ9xYK24m5PSfQrjZjyT");'></div>
+                                <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+                                <div class="absolute top-3 right-3 bg-black/50 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-lg flex items-center gap-1 font-sans">
+                                    <span class="material-symbols-outlined text-[14px] text-primary">schedule</span> 15m
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-bold text-white group-hover:text-primary transition-colors">Classic Sourdough Grilled Cheese</h4>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-white/60 text-sm font-sans">320 cals</span>
+                                    <span class="size-1 bg-white/30 rounded-full"></span>
+                                    <span class="text-white/60 text-sm font-sans">Very Easy</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Card 3 -->
+                        <div class="group flex flex-col gap-3 cursor-pointer">
+                            <div class="aspect-[4/3] rounded-xl overflow-hidden relative">
+                                <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="Fresh bruschetta on toast" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDSp25vEwVOQedVBTjDMUV3SGfmoveRrkPjMLkPYSH-13nwMQhQWKtA5G4s-lkZ-MDM-37V1Dgfkgk_IBN5q6WHfS-9NzEIMeZhPKDikxVwRWAK90e8OEL-g7XmiSqa29qWoxeoxQB1CieKvGwK6CBGSGTju2Ps6t1rrkq_F6sUMx1KE8q5gyrEJ2ef0sgl3oiDg5ode0noIbDrSsVlPduNhVzjyk7vfULQXywLdPQT0Jjojrq1t8H1F-pBAXFjSKKQw-E5VKS_-BpR");'></div>
+                                <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+                                <div class="absolute top-3 right-3 bg-black/50 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-lg flex items-center gap-1 font-sans">
+                                    <span class="material-symbols-outlined text-[14px] text-primary">schedule</span> 20m
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-bold text-white group-hover:text-primary transition-colors">Tomato &amp; Basil Bruschetta</h4>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-white/60 text-sm font-sans">180 cals</span>
+                                    <span class="size-1 bg-white/30 rounded-full"></span>
+                                    <span class="text-white/60 text-sm font-sans">Easy</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
