@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Typing Test: Pre-Test</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap"
+      rel="stylesheet"
+    />
+    <!-- Material Symbols -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Tailwind Config -->
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#135bec",
+              "background-light": "#f6f6f8",
+              "background-dark": "#101622",
+              "surface-dark": "#18202F",
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+              mono: ["JetBrains Mono", "monospace"],
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            animation: {
+              "caret-blink": "blink 1.2s infinite",
+            },
+            keyframes: {
+              blink: {
+                "0%, 100%": { opacity: "1" },
+                "50%": { opacity: "0" },
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body
+    class="bg-background-light dark:bg-background-dark min-h-screen flex flex-col font-display overflow-hidden text-slate-900 dark:text-white transition-colors duration-300"
+  >
+    <!-- Header / Metrics -->
+    <header
+      class="w-full px-8 py-6 flex justify-between items-start z-50 transition-opacity duration-500"
+      id="header-chrome"
+    >
+      <!-- WPM Counter -->
+      <div
+        class="flex flex-col items-start gap-1 opacity-60 hover:opacity-100 transition-opacity"
+      >
+        <span
+          class="text-xs uppercase tracking-wider font-bold text-gray-500 dark:text-gray-400"
+          >WPM</span
+        >
+        <span
+          class="text-2xl font-mono font-medium text-gray-800 dark:text-gray-200"
+          id="wpm-display"
+          >0</span
+        >
+      </div>
+
+      <!-- Logo / Brand -->
+      <div class="hidden md:flex items-center gap-2 opacity-20">
+        <span class="material-symbols-outlined text-3xl">keyboard</span>
+      </div>
+
+      <!-- Timer -->
+      <div
+        class="flex flex-col items-end gap-1 opacity-60 hover:opacity-100 transition-opacity"
+      >
+        <span
+          class="text-xs uppercase tracking-wider font-bold text-gray-500 dark:text-gray-400"
+          >Time</span
+        >
+        <span
+          class="text-2xl font-mono font-medium text-primary"
+          id="time-display"
+          >60s</span
+        >
+      </div>
+    </header>
+
+    <!-- Main Typing Area -->
+    <main
+      class="flex-grow flex flex-col items-center justify-center w-full max-w-[1200px] mx-auto px-6 relative"
+    >
+      <!-- Focus Indicator Overlay -->
+      <div
+        class="absolute inset-0 pointer-events-none z-0 bg-gradient-to-b from-transparent via-background-light/50 dark:via-background-dark/50 to-background-light dark:to-background-dark opacity-0 transition-opacity duration-300"
+        id="focus-overlay"
+      ></div>
+
+      <div
+        class="layout-content-container flex flex-col w-full max-w-[900px] z-10"
+      >
+        <!-- Text Passage Container -->
+        <!-- Using tabindex="0" to capture keyboard events when focused -->
+        <div
+          class="relative no-select cursor-text outline-none"
+          id="typing-area"
+          tabindex="0"
+        >
+          <p
+            class="font-mono text-2xl md:text-3xl lg:text-[2rem] leading-relaxed tracking-wide text-gray-400 dark:text-gray-600 text-left transition-colors"
+            id="text-display"
+          >
+            <!-- Text will be injected here by JS -->
+          </p>
+          <input
+            type="text"
+            id="input-field"
+            class="absolute opacity-0 -z-10"
+            autocomplete="off"
+            autocapitalize="off"
+            autocorrect="off"
+            spellcheck="false"
+          />
+        </div>
+
+        <!-- Instruction Hint -->
+        <div class="mt-12 flex justify-center" id="instruction-hint">
+          <p
+            class="text-gray-400 dark:text-gray-500 text-sm font-medium tracking-wide animate-pulse"
+          >
+            Start typing to begin
+          </p>
+        </div>
+
+        <!-- Results Overlay (Hidden by default) -->
+        <div
+          id="results-overlay"
+          class="hidden absolute inset-0 z-20 flex flex-col items-center justify-center bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md opacity-0 transition-opacity duration-500"
+        >
+          <div
+            class="text-center transform transition-all duration-500 scale-95"
+            id="results-content"
+          >
+            <h2 class="text-xl text-gray-500 font-medium mb-2">
+              Test Completed
+            </h2>
+            <div
+              class="text-8xl font-black text-primary mb-4 font-display tracking-tight"
+              id="final-wpm"
+            >
+              0
+            </div>
+            <div class="flex gap-8 justify-center">
+              <div class="flex flex-col items-center">
+                <span class="text-sm text-gray-400 uppercase tracking-wider"
+                  >Accuracy</span
+                >
+                <span
+                  class="text-2xl font-mono text-green-500"
+                  id="final-accuracy"
+                  >100%</span
+                >
+              </div>
+              <div class="flex flex-col items-center">
+                <span class="text-sm text-gray-400 uppercase tracking-wider"
+                  >Errors</span
+                >
+                <span class="text-2xl font-mono text-red-500" id="final-errors"
+                  >0</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer / Toolbar -->
+    <footer class="w-full px-8 py-8 flex justify-center items-center z-50">
+      <div
+        class="flex items-center gap-8 bg-white/5 dark:bg-white/5 backdrop-blur-sm px-6 py-3 rounded-full border border-gray-200/10 dark:border-gray-700/30 shadow-lg"
+      >
+        <!-- Restart Button -->
+        <button
+          aria-label="Restart Test"
+          id="restart-btn"
+          class="group flex items-center justify-center p-2 rounded-lg text-gray-400 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-200"
+        >
+          <span
+            class="material-symbols-outlined text-[24px] group-hover:rotate-180 transition-transform duration-500"
+            >refresh</span
+          >
+        </button>
+        <!-- Separator -->
+        <div class="w-px h-6 bg-gray-300 dark:bg-gray-700"></div>
+        <!-- History Button -->
+        <button
+          aria-label="History"
+          id="history-btn"
+          class="group flex items-center justify-center p-2 rounded-lg text-gray-400 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-200"
+        >
+          <span class="material-symbols-outlined text-[24px]">history</span>
+        </button>
+        <!-- Settings Button (Visual only for now) -->
+        <button
+          aria-label="Settings"
+          class="group flex items-center justify-center p-2 rounded-lg text-gray-400 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-200"
+        >
+          <span
+            class="material-symbols-outlined text-[24px] group-hover:rotate-90 transition-transform duration-300"
+            >tune</span
+          >
+        </button>
+        <!-- Language/Mode Button (Visual only) -->
+        <button
+          class="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+        >
+          <span class="material-symbols-outlined text-[18px]">language</span>
+          <span>English</span>
+        </button>
+      </div>
+    </footer>
+
+    <!-- History Overlay -->
+    <div
+      id="history-overlay"
+      class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 transition-opacity duration-300"
+    >
+      <div
+        class="bg-white dark:bg-surface-dark w-full max-w-lg rounded-2xl shadow-2xl p-6 transform scale-95 transition-transform duration-300 border border-gray-200 dark:border-gray-700"
+        id="history-modal-content"
+      >
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-xl font-bold text-gray-800 dark:text-white">
+            Recent Attempts
+          </h2>
+          <button
+            id="close-history-btn"
+            class="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white transition-colors"
+          >
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <div
+          class="overflow-y-auto max-h-[60vh] space-y-3 pr-2"
+          id="history-list"
+        >
+          <!-- History Items injected here -->
+          <div class="text-center text-gray-500 py-8">No attempts yet</div>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>

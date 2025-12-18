@@ -1,0 +1,68 @@
+/* Custom scrollbar to keep it clean */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #2d3748;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #4a5568;
+}
+
+/* Disable selection for better typing feel */
+.no-select {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Character States handled via CSS for cleaner JS */
+
+/* Correct Character: Faded/Deference */
+.char-correct {
+    color: #9CA3AF; /* gray-400 */
+    transition: color 0.2s ease;
+}
+.dark .char-correct {
+    color: #4B5563; /* gray-600 */
+}
+
+/* Incorrect Character: Highlighted */
+.char-incorrect {
+    color: #EF4444 !important; /* red-500 */
+    background-color: rgba(239, 68, 68, 0.1);
+    border-radius: 2px;
+}
+
+/* Active Character: High Contrast + Caret */
+.char-active {
+    color: #111827; /* gray-900 */
+    position: relative;
+}
+.dark .char-active {
+    color: #F3F4F6; /* gray-100 */
+}
+
+/* The Cursor/Caret */
+.char-active::before {
+    content: "";
+    position: absolute;
+    left: -2px;
+    top: 10%;
+    bottom: 10%;
+    width: 3px;
+    background-color: #135bec; /* primary color matching tailwind config */
+    border-radius: 9999px;
+    animation: blink 1.2s infinite;
+    box-shadow: 0 0 8px rgba(19,91,236,0.5);
+    z-index: 10;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
