@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Drawing Canvas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#36e27b",
+                        "background-light": "#f6f8f7",
+                        "background-dark": "#112117",
+                        "toolbar-bg": "#1e2923",
+                    },
+                    fontFamily: {
+                        "display": ["Spline Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                    boxShadow: {
+                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+                        'tool-lift': '0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3)',
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        /* Custom pattern for the canvas paper texture */
+        .bg-pattern-dot {
+            background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        
+        /* Hide scrollbar for clean look */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+
+        /* Tool active state animation */
+        .tool-active {
+            transform: translateY(-12px) scale(1.1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            z-index: 20;
+            background-color: #2a3830;
+            border: 1px solid rgba(54, 226, 123, 0.2);
+        }
+
+        .tool-btn {
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+    </style>
+</head>
+<body class="bg-white dark:bg-[#e8e8e8] font-display overflow-hidden relative h-screen w-screen selection:bg-primary selection:text-background-dark">
+    <!-- Canvas Area -->
+    <div aria-label="Drawing Canvas" class="absolute inset-0 z-0 bg-white bg-pattern-dot opacity-80 cursor-crosshair">
+        <canvas id="main-canvas" class="w-full h-full touch-none"></canvas>
+    </div>
+    
+    <!-- UI Overlay Container -->
+    <div class="relative z-10 flex h-full w-full flex-col justify-between pointer-events-none">
+        <!-- Top Bar (Minimal) -->
+        <div class="flex justify-between items-center p-6 w-full pointer-events-auto">
+            <div class="flex items-center gap-3">
+                <button class="flex items-center justify-center size-10 rounded-full bg-white/80 dark:bg-background-dark/80 backdrop-blur-md shadow-sm hover:bg-gray-100 transition-colors">
+                    <span class="material-symbols-outlined text-gray-800 dark:text-white text-[20px]">menu</span>
+                </button>
+                <h1 class="text-sm font-medium text-gray-500 dark:text-gray-800 hidden sm:block">Untitled Artwork</h1>
+            </div>
+            <div class="flex gap-3">
+                <button id="btn-export" class="flex items-center justify-center h-10 px-4 rounded-full bg-white/80 dark:bg-background-dark/80 backdrop-blur-md shadow-sm text-sm font-medium text-gray-800 dark:text-white hover:bg-gray-100 transition-colors">
+                    <span class="material-symbols-outlined text-[18px] mr-2">ios_share</span>
+                    Export
+                </button>
+            </div>
+        </div>
+
+        <!-- Center Bottom Toolbar Area -->
+        <div class="flex flex-col items-center justify-end pb-8 gap-4 pointer-events-auto w-full">
+            <!-- Tool Settings Popover (Shown for active tool context) -->
+            <div id="tool-settings" class="mb-2 bg-background-dark/95 backdrop-blur-xl border border-white/10 rounded-2xl p-4 w-[280px] shadow-glass transform transition-all animate-in fade-in slide-in-from-bottom-4 duration-300">
+                <div class="flex flex-col gap-4">
+                    <!-- Thickness Slider -->
+                    <div class="flex flex-col gap-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Thickness</span>
+                            <span id="thickness-value" class="text-xs text-primary font-bold">12px</span>
+                        </div>
+                        <div id="thickness-slider" class="relative flex items-center h-6 w-full group cursor-pointer">
+                            <div class="absolute w-full h-1 bg-gray-700 rounded-full overflow-hidden">
+                                <div id="thickness-fill" class="h-full bg-primary w-[35%]"></div>
+                            </div>
+                            <div id="thickness-knob" class="absolute left-[35%] w-4 h-4 bg-white rounded-full shadow-lg border-2 border-primary transform -translate-x-1/2 hover:scale-125 transition-transform"></div>
+                        </div>
+                    </div>
+                    <!-- Opacity Slider -->
+                    <div class="flex flex-col gap-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Opacity</span>
+                            <span id="opacity-value" class="text-xs text-primary font-bold">100%</span>
+                        </div>
+                        <div id="opacity-slider" class="relative flex items-center h-6 w-full group cursor-pointer">
+                            <div class="absolute w-full h-1 bg-gray-700 rounded-full overflow-hidden">
+                                <div id="opacity-fill" class="h-full bg-primary w-full"></div>
+                            </div>
+                            <div id="opacity-knob" class="absolute right-0 w-4 h-4 bg-white rounded-full shadow-lg border-2 border-primary transform translate-x-1/4 hover:scale-125 transition-transform"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Triangle indicator -->
+                <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-background-dark/95 border-b border-r border-white/10 rotate-45"></div>
+            </div>
+
+            <!-- Main Toolbar Pill -->
+            <div class="flex items-center bg-[#1e2923]/90 dark:bg-background-dark/90 backdrop-blur-2xl px-2 py-2 rounded-full shadow-2xl border border-white/5 gap-1">
+                <!-- Tools Group -->
+                <div class="flex items-end gap-1 px-2 h-[60px]">
+                    <!-- Pencil Tool -->
+                    <button id="tool-pencil" class="group/tool tool-btn relative flex flex-col items-center justify-center w-12 h-14 rounded-xl hover:bg-white/5" data-tool="pencil">
+                        <span class="material-symbols-outlined text-gray-400 group-hover/tool:text-white transition-colors" style="font-size: 28px; font-variation-settings: 'FILL' 0;">edit</span>
+                    </button>
+                    <!-- Brush Tool (Active) -->
+                    <button id="tool-brush" class="group/tool tool-btn tool-active relative flex flex-col items-center justify-center w-12 h-14 rounded-xl bg-gradient-to-b from-[#2a3830] to-[#1e2923]" data-tool="brush">
+                        <span class="material-symbols-outlined text-primary" style="font-size: 32px; font-variation-settings: 'FILL' 1;">brush</span>
+                        <div class="absolute -bottom-3 w-1 h-1 bg-primary rounded-full"></div>
+                    </button>
+                    <!-- Eraser Tool -->
+                    <button id="tool-eraser" class="group/tool tool-btn relative flex flex-col items-center justify-center w-12 h-14 rounded-xl hover:bg-white/5" data-tool="eraser">
+                        <span class="material-symbols-outlined text-gray-400 group-hover/tool:text-white transition-colors" style="font-size: 28px; font-variation-settings: 'FILL' 1;">ink_eraser</span>
+                    </button>
+                    <!-- Marker Tool -->
+                    <button id="tool-marker" class="group/tool tool-btn relative flex flex-col items-center justify-center w-12 h-14 rounded-xl hover:bg-white/5" data-tool="marker">
+                        <span class="material-symbols-outlined text-gray-400 group-hover/tool:text-white transition-colors" style="font-size: 28px; font-variation-settings: 'FILL' 0;">ink_highlighter</span>
+                    </button>
+                </div>
+                <!-- Separator -->
+                <div class="h-8 w-px bg-white/10 mx-1"></div>
+                <!-- Color Picker -->
+                <div class="flex items-center gap-3 px-2">
+                    <button id="btn-color-picker" class="relative group size-10 rounded-full ring-2 ring-white/20 hover:ring-white/50 transition-all overflow-hidden">
+                        <div id="current-color-gradient" class="absolute inset-0 bg-gradient-to-br from-red-500 via-yellow-500 to-blue-500 opacity-20"></div>
+                        <div id="current-color-display" class="absolute inset-1 rounded-full bg-primary shadow-inner"></div>
+                    </button>
+                </div>
+                <!-- Separator -->
+                <div class="h-8 w-px bg-white/10 mx-1"></div>
+                <!-- Actions -->
+                <div class="flex items-center gap-1 px-2">
+                    <button id="btn-clear" class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-red-500/20 hover:text-red-400 text-gray-400 transition-colors">
+                        <span class="material-symbols-outlined" style="font-size: 24px;">delete</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="hidden absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+        <div class="bg-[#1e2923] dark:bg-background-dark border border-white/10 p-6 rounded-3xl shadow-2xl max-w-sm w-full mx-4 transform transition-all scale-100">
+            <div class="flex flex-col items-center text-center gap-4">
+                <div class="size-12 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-2">
+                    <span class="material-symbols-outlined" style="font-size: 28px;">warning</span>
+                </div>
+                <h3 class="text-white text-xl font-bold font-display">Delete Artwork?</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">Are you sure you want to clear the canvas? This action cannot be undone.</p>
+                <div class="flex w-full gap-3 mt-4">
+                    <button id="btn-delete-cancel" class="flex-1 py-3 px-4 rounded-full bg-white/5 text-white font-medium hover:bg-white/10 transition-colors">
+                        Cancel
+                    </button>
+                    <button id="btn-delete-confirm" class="flex-1 py-3 px-4 rounded-full bg-red-500 text-white font-medium hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Color Picker Popover -->
+    <div id="color-popover" class="hidden absolute bottom-32 left-1/2 -translate-x-1/2 ml-16 bg-[#1e2923] border border-white/10 p-4 rounded-3xl shadow-glass z-40 w-[260px]">
+        <div class="grid grid-cols-5 gap-3 mb-4">
+            <button class="color-swatch size-8 rounded-full bg-black border border-white/20" data-color="#000000"></button>
+            <button class="color-swatch size-8 rounded-full bg-white border border-white/20" data-color="#ffffff"></button>
+            <button class="color-swatch size-8 rounded-full bg-red-500" data-color="#ef4444"></button>
+            <button class="color-swatch size-8 rounded-full bg-orange-500" data-color="#f97316"></button>
+            <button class="color-swatch size-8 rounded-full bg-yellow-400" data-color="#facc15"></button>
+            <button class="color-swatch size-8 rounded-full bg-green-500" data-color="#22c55e"></button>
+            <button class="color-swatch size-8 rounded-full bg-teal-400" data-color="#2dd4bf"></button>
+            <button class="color-swatch size-8 rounded-full bg-blue-500" data-color="#3b82f6"></button>
+            <button class="color-swatch size-8 rounded-full bg-indigo-500" data-color="#6366f1"></button>
+            <button class="color-swatch size-8 rounded-full bg-purple-500" data-color="#a855f7"></button>
+        </div>
+        <div class="h-px bg-white/10 w-full mb-4"></div>
+        <div class="flex items-center justify-between">
+            <span class="text-xs text-gray-400 font-medium">Spectrum</span>
+            <div class="relative size-6">
+                 <input type="color" id="system-color-picker" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" value="#36e27b">
+                 <div id="spectrum-indicator" class="size-6 rounded-full bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 pointer-events-none"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
