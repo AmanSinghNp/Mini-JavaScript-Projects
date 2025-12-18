@@ -53,6 +53,13 @@ A direct manipulation digital canvas with realistic tools.
 - **Key Features:** HTML5 Canvas engine, pressure-simulated tools (Pencil, Marker), custom UI controls, and image export.
 - **Tech Stack:** HTML5 Canvas, Touch Events, Tailwind CSS.
 
+### [Typing Speed Test](./Typing%20Speed%20Test/)
+
+A sleek, distraction-free typing test to measure your WPM.
+
+- **Key Features:** Real-time WPM & accuracy tracking, character-by-character feedback, test history with localStorage, and animated caret.
+- **Tech Stack:** DOM Events, LocalStorage, Tailwind CSS, JetBrains Mono.
+
 ---
 
 ## 🎮 Games
