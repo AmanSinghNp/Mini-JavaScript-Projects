@@ -414,3 +414,4 @@ window.playPlaylist = (index) => {
 
 // Run init
 init();
+

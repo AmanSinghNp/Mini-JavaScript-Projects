@@ -150,3 +150,4 @@ function restartGame() {
 
 // Start the game
 initGame();
+
