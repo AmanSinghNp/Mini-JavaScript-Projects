@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Code Editor</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="editor-container">
+      <!-- Unified Title Bar (52px) -->
+      <div class="title-bar">
+        <div class="window-controls">
+          <button
+            class="window-control close"
+            aria-label="Close window"
+            title="Close"
+            role="button"
+          ></button>
+          <button
+            class="window-control minimize"
+            aria-label="Minimize window"
+            title="Minimize"
+            role="button"
+          ></button>
+          <button
+            class="window-control maximize"
+            aria-label="Maximize window"
+            title="Maximize"
+            role="button"
+          ></button>
+        </div>
+        <div class="title-content">
+          <div class="menu-bar">
+            <button class="menu-item" id="menu-file">File</button>
+            <button class="menu-item" id="menu-edit">Edit</button>
+            <button class="menu-item" id="menu-view">View</button>
+          </div>
+          <span class="file-name">Untitled</span>
+        </div>
+
+        <!-- Find/Replace Bar -->
+        <div
+          class="find-replace-bar"
+          id="find-replace-bar"
+          style="display: none"
+        >
+          <div class="find-replace-content">
+            <div class="find-section">
+              <input
+                type="text"
+                id="find-input"
+                class="find-input"
+                placeholder="Find"
+              />
+              <button class="find-btn prev" id="find-prev" title="Previous">
+                ↑
+              </button>
+              <button class="find-btn next" id="find-next" title="Next">
+                ↓
+              </button>
+              <span class="find-matches" id="find-matches"></span>
+            </div>
+            <div
+              class="replace-section"
+              id="replace-section"
+              style="display: none"
+            >
+              <input
+                type="text"
+                id="replace-input"
+                class="replace-input"
+                placeholder="Replace"
+              />
+              <button class="replace-btn" id="replace-btn">Replace</button>
+              <button class="replace-btn" id="replace-all-btn">
+                Replace All
+              </button>
+            </div>
+            <div class="find-options">
+              <label
+                ><input type="checkbox" id="find-case-sensitive" /> Case</label
+              >
+              <label><input type="checkbox" id="find-whole-word" /> Word</label>
+              <label><input type="checkbox" id="find-regex" /> Regex</label>
+            </div>
+            <button class="find-close" id="find-close" title="Close">×</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Editor Area -->
+      <div class="editor-wrapper">
+        <div class="editor-gutter" id="editor-gutter"></div>
+        <div class="editor-content-wrapper">
+          <div class="editor-content" id="editor-content" tabindex="0">
+          <div class="editor-lines" id="editor-lines"></div>
+          <div class="editor-cursors" id="editor-cursors"></div>
+          <div class="editor-selections" id="editor-selections"></div>
+          <div class="editor-bracket-matches" id="editor-bracket-matches"></div>
+        </div>
+      </div>
+
+      <!-- Error Panel -->
+      <div class="error-panel" id="error-panel" style="display: none;">
+        <div class="error-panel-header">
+          <span>Problems</span>
+          <button class="error-panel-toggle" id="error-panel-toggle">×</button>
+        </div>
+        <div class="error-panel-content" id="error-panel-content"></div>
+      </div>
+
+      <!-- Status Bar -->
+      <div class="status-bar" id="status-bar">
+        <div class="status-left">
+          <span class="status-item" id="status-line-col">Ln 1, Col 1</span>
+          <span class="status-item" id="status-selection"></span>
+          <span class="status-item" id="status-errors" style="cursor: pointer;"></span>
+        </div>
+        <div class="status-right">
+          <span class="status-item" id="status-language">JavaScript</span>
+          <span class="status-item" id="status-encoding">UTF-8</span>
+          <span class="status-item" id="status-line-ending">LF</span>
+          <span class="status-item" id="status-tab-size">Spaces: 2</span>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

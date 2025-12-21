@@ -1,0 +1,690 @@
+/**
+ * Code Editor - Apple/Xcode-inspired Design
+ * Minimalist interface with perfect typography and pastel syntax highlighting
+ */
+
+/* ============================================================================
+   Reset & Base Styles
+   ============================================================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  background: #1e1e2e;
+  color: #d4d4d4;
+  overflow: hidden;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+/* Fullscreen support */
+.editor-container:fullscreen,
+.editor-container:-webkit-full-screen,
+.editor-container:-moz-full-screen,
+.editor-container:-ms-fullscreen {
+  width: 100vw;
+  height: 100vh;
+}
+
+/* ============================================================================
+   Unified Title Bar (52px)
+   ============================================================================ */
+
+.title-bar {
+  height: 52px;
+  background: #1e1e2e;
+  border-bottom: 1px solid #2a2a3a;
+  display: flex;
+  align-items: center;
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+.window-controls {
+  display: flex;
+  gap: 8px;
+  padding: 0 12px;
+  -webkit-app-region: no-drag;
+}
+
+.window-control {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.window-control:hover {
+  opacity: 0.8;
+  transform: scale(1.1);
+}
+
+.window-control:active {
+  transform: scale(0.95);
+}
+
+.window-control.close {
+  background: #ff5f57;
+}
+
+.window-control.minimize {
+  background: #ffbd2e;
+}
+
+.window-control.maximize {
+  background: #28c840;
+}
+
+.title-content {
+  flex: 1;
+  text-align: center;
+  color: #8e8e93;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.file-name {
+  color: #d4d4d4;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  user-select: none;
+}
+
+.file-name:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* ============================================================================
+   Find/Replace Bar
+   ============================================================================ */
+
+.find-replace-bar {
+  position: absolute;
+  top: 52px;
+  left: 0;
+  right: 0;
+  background: #252538;
+  border-bottom: 1px solid #3a3a4a;
+  padding: 8px 12px;
+  z-index: 100;
+}
+
+.find-replace-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.find-section {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.find-input,
+.replace-input {
+  background: #1e1e2e;
+  border: 1px solid #3a3a4a;
+  color: #d4d4d4;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 13px;
+  width: 200px;
+  outline: none;
+}
+
+.find-input:focus,
+.replace-input:focus {
+  border-color: #89ddff;
+}
+
+.find-btn,
+.replace-btn {
+  background: #3a3a4a;
+  border: 1px solid #4a4a5a;
+  color: #d4d4d4;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.2s;
+}
+
+.find-btn:hover,
+.replace-btn:hover {
+  background: #4a4a5a;
+}
+
+.find-btn.prev,
+.find-btn.next {
+  padding: 4px 8px;
+  min-width: 32px;
+}
+
+.find-matches {
+  color: #6e6e80;
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+.replace-section {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.find-options {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: #8e8e93;
+}
+
+.find-options label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.find-options input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.find-close {
+  background: transparent;
+  border: none;
+  color: #8e8e93;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 8px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.find-close:hover {
+  color: #d4d4d4;
+}
+
+/* ============================================================================
+   File Explorer
+   ============================================================================ */
+
+.file-explorer {
+  width: 250px;
+  background: #252538;
+  border-right: 1px solid #3a3a4a;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.explorer-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid #3a3a4a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: #d4d4d4;
+}
+
+.explorer-toggle {
+  background: transparent;
+  border: none;
+  color: #d4d4d4;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  transition: background 0.2s;
+}
+
+.explorer-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.explorer-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.explorer-empty {
+  padding: 20px;
+  text-align: center;
+  color: #6e6e80;
+  font-size: 12px;
+}
+
+.explorer-item {
+  padding: 4px 8px;
+  cursor: pointer;
+  color: #d4d4d4;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 2px;
+  transition: background 0.2s;
+}
+
+.explorer-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.explorer-item-icon {
+  width: 16px;
+  text-align: center;
+}
+
+/* ============================================================================
+   Editor Container
+   ============================================================================ */
+
+.editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #1e1e2e;
+}
+
+.editor-wrapper {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+.editor-content-wrapper {
+  flex: 1;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ============================================================================
+   Gutter (Line Numbers)
+   ============================================================================ */
+
+.editor-gutter {
+  width: 60px;
+  background: #252538;
+  border-right: 1px solid #3a3a4a;
+  position: relative;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.gutter-line {
+  position: absolute;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 12px;
+  color: #6e6e80;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.gutter-line.gutter-wrap {
+  color: #4a4a5a;
+  font-size: 14px;
+  padding-right: 16px;
+}
+
+.fold-indicator {
+  margin-left: 4px;
+  cursor: pointer;
+  font-size: 10px;
+  color: #6e6e80;
+  transition: transform 0.2s;
+  display: inline-block;
+}
+
+.fold-indicator:hover {
+  color: #d4d4d4;
+}
+
+.fold-indicator.folded {
+  transform: rotate(0deg);
+}
+
+.editor-line.folded {
+  display: none;
+}
+
+/* ============================================================================
+   Editor Content Area
+   ============================================================================ */
+
+.editor-content {
+  flex: 1;
+  position: relative;
+  overflow: auto;
+  background: #1e1e2e;
+  outline: none;
+  font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.editor-content:focus {
+  outline: none;
+}
+
+.editor-lines {
+  position: relative;
+  min-height: 100%;
+}
+
+.editor-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  padding-left: 16px;
+  padding-right: 16px;
+  white-space: pre;
+  font-variant-ligatures: none;
+  font-feature-settings: normal;
+}
+
+.editor-line.wrapped-line {
+  padding-left: 24px; /* Extra indent for wrapped lines */
+}
+
+/* ============================================================================
+   Syntax Highlighting (Pastel Colors)
+   ============================================================================ */
+
+.token {
+  font-family: inherit;
+}
+
+.token-text {
+  color: #d4d4d4;
+}
+
+.token-keyword {
+  color: #c792ea;
+}
+
+.token-string {
+  color: #c3e88d;
+}
+
+.token-comment {
+  color: #676e95;
+  font-style: italic;
+}
+
+.token-number {
+  color: #f78c6c;
+}
+
+.token-operator {
+  color: #89ddff;
+}
+
+.token-function {
+  color: #82aaff;
+}
+
+.token-tag {
+  color: #f07178;
+}
+
+.token-attribute {
+  color: #c792ea;
+}
+
+.token-selector {
+  color: #82aaff;
+}
+
+.token-property {
+  color: #c792ea;
+}
+
+/* ============================================================================
+   Cursors
+   ============================================================================ */
+
+.editor-cursors {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.cursor {
+  position: absolute;
+  width: 2px;
+  height: 21px;
+  background: #ffcc02;
+  animation: blink 1.2s infinite;
+  pointer-events: none;
+}
+
+.cursor-secondary {
+  background: #89ddff;
+  opacity: 0.8;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ============================================================================
+   Selections
+   ============================================================================ */
+
+.editor-selections {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.editor-brackets {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.matched-bracket {
+  position: absolute;
+  background: rgba(255, 204, 2, 0.2);
+  border-bottom: 1px solid #ffcc02;
+  pointer-events: none;
+}
+
+.editor-bracket-matches {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 2; /* Below cursors, above selections */
+}
+
+.bracket-match {
+  position: absolute;
+  background: rgba(137, 221, 255, 0.2);
+  border: 1px solid #89ddff;
+  border-radius: 2px;
+}
+
+/* ============================================================================
+   Autocomplete
+   ============================================================================ */
+
+.autocomplete-suggestions {
+  position: absolute;
+  background: #252538;
+  border: 1px solid #3a3a4a;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  min-width: 200px;
+}
+
+.autocomplete-item {
+  padding: 6px 12px;
+  cursor: pointer;
+  color: #d4d4d4;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.selected {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.autocomplete-item-icon {
+  width: 16px;
+  text-align: center;
+  color: #6e6e80;
+}
+
+.autocomplete-item-label {
+  flex: 1;
+}
+
+.autocomplete-item-detail {
+  color: #6e6e80;
+  font-size: 11px;
+}
+
+.selection {
+  position: absolute;
+  background: rgba(100, 150, 255, 0.3);
+  border-radius: 2px;
+}
+
+/* ============================================================================
+   Scrollbar Styling
+   ============================================================================ */
+
+.editor-content::-webkit-scrollbar {
+  width: 14px;
+}
+
+.editor-content::-webkit-scrollbar-track {
+  background: #1e1e2e;
+}
+
+.editor-content::-webkit-scrollbar-thumb {
+  background: #3a3a4a;
+  border-radius: 7px;
+  border: 3px solid #1e1e2e;
+}
+
+.editor-content::-webkit-scrollbar-thumb:hover {
+  background: #4a4a5a;
+}
+
+/* ============================================================================
+   Focus States
+   ============================================================================ */
+
+.editor-content:focus .cursor {
+  animation: blink 1.2s infinite;
+}
+
+/* ============================================================================
+   Status Bar
+   ============================================================================ */
+
+.status-bar {
+  height: 22px;
+  background: #252538;
+  border-top: 1px solid #3a3a4a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 12px;
+  font-size: 12px;
+  color: #8e8e93;
+  user-select: none;
+}
+
+.status-left,
+.status-right {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.status-item {
+  color: #8e8e93;
+  font-variant-numeric: tabular-nums;
+}
+
+.status-item:hover {
+  color: #d4d4d4;
+}
+
+/* ============================================================================
+   Responsive Adjustments
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .editor-gutter {
+    width: 50px;
+  }
+  
+  .gutter-line {
+    padding-right: 8px;
+    font-size: 12px;
+  }
+  
+  .editor-line {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  
+  .cursor {
+    margin-left: 12px;
+  }
+}
+
