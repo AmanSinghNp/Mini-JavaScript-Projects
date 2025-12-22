@@ -99,3 +99,5 @@ Potential additions:
 - More language support
 - Custom themes
 
+
+
