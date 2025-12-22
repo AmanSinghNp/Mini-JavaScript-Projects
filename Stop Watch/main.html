@@ -7,10 +7,15 @@
   </head>
   <body>
     <h3>Stop Watch</h3>
-    <h1 id="time">00:00</h1>
-    <button onclick="startClock()">Start</button>
-    <button onclick="stopClock()">Stop</button>
-    <button onclick="resetClock()">Reset</button>
+    <h1 id="time">00:00:00</h1>
+    <div>
+      <button id="start-btn">Start</button>
+      <button id="stop-btn" disabled>Stop</button>
+      <button id="reset-btn" disabled>Reset</button>
+    </div>
+    <p>
+      <small>Tip: Press <strong>Space</strong> to start/stop and <strong>R</strong> to reset.</small>
+    </p>
     <script src="index.js"></script>
   </body>
 </html>
