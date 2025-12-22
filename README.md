@@ -1,6 +1,8 @@
 # Mini JavaScript Projects
 
-A curated collection of vanilla JavaScript applications demonstrating modern web development concepts, from DOM manipulation and API integration to complex physics simulations and game logic.
+A curated collection of vanilla JavaScript applications by **Aman Singh**, showcasing modern frontend skills with vanilla JavaScript — from DOM manipulation and API integration to physics simulations, games, and small productivity tools.
+
+Use this repo as a portfolio of real, self-contained mini-apps that you can run locally in a browser or deploy to any static host.
 
 ## 🚀 Featured Projects
 
@@ -143,7 +145,18 @@ A brick-breaking arcade game powered by the custom physics engine.
 - **Advanced:** Service Workers (PWA), ES Modules, Custom Vector Math
 - **External Services:** Open-Meteo API, QR Server API
 
+## 📜 Commit Message Style
+
+For future work in this repo, aim for clear, focused commit messages. A simple pattern that works well:
+
+- **Format:** `type: short imperative description`
+  - Examples: `feat: add stopwatch hours display`, `docs: improve WeatherApp README`, `chore: update gitignore`
+- **Guidelines:**
+  - Keep each commit focused on one logical change.
+  - Use present-tense, imperative language (\"add\", \"update\", \"fix\" rather than \"added\", \"updated\", \"fixed\").
+
 ## 📄 License
 
 This project is open source and available under the [MIT License](LICENSE).
+
 
