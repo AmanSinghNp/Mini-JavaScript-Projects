@@ -173,7 +173,7 @@ WeatherApp/
 
 ## License
 
-Open source under the MIT License.
+Open source under the MIT License. See the root `LICENSE` file in the repository for full details.
 
 ## Contributing
 

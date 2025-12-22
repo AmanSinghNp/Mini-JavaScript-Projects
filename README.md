@@ -18,7 +18,7 @@ A minimalistic, offline-capable weather application.
 - **Key Features:** Real-time data via Open-Meteo API, 12-hour forecast, city search, local persistence, and PWA support (installable).
 - **Tech Stack:** Service Workers, Fetch API, CSS Grid, Glassmorphism.
 
-### [Digital Notebook](<./Notebook%20(Simple)/>)
+### [Digital Notebook](./Notebook%20(Simple)/)
 
 A beautiful, distraction-free note-taking application.
 
@@ -82,11 +82,15 @@ The classic paper-and-pencil game for two players.
 
 - **Features:** Score tracking, win/draw detection, and turn indicators.
 
+<!-- Breakout demo planned but not yet included in the repository structure.
+Once added under `Physics-engine/demos/breakout/`, you can re-enable this section. -->
+<!--
 ### [Breakout](./Physics-engine/demos/breakout/)
 
 A brick-breaking arcade game powered by the custom physics engine.
 
 - **Features:** Collision physics, paddle control, and scoring system.
+-->
 
 ---
 
@@ -95,10 +99,10 @@ A brick-breaking arcade game powered by the custom physics engine.
 - **[Calculator](./Calculator/):** A fully functional calculator with history tracking, keyboard support, and order-of-operations logic.
 - **[QR Code Generator](./QR%20Code%20generator/):** Instantly generate and download QR codes for text or URLs using the QR Server API.
 - **[Persistent TODO List](./Persistent%20TODO%20List/):** Manage tasks with add/delete functionality and LocalStorage persistence.
-- **[Stop Watch](./Stop%20Watch/):** specific timer with start, stop, and reset controls.
-- **[Color Flipper](./Color%20Flipper/):** background color generator to test DOM manipulation.
-- **[Random Quote Generator](./Random%20Quote%20Generator/):** Display inspirational quotes.
-- **[Palindrome Checker](./Palindrome%20Checker/):** Algorithm to check if text reads the same forwards and backwards.
+- **[Stop Watch](./Stop%20Watch/):** Simple timer with start, stop, and reset controls.
+- **[Color Flipper](./Color%20Flipper/):** Background color generator demonstrating basic DOM manipulation.
+- **[Random Quote Generator](./Random%20Quote%20Generator/):** Displays random inspirational quotes.
+- **[Palindrome Checker](./Palindrome%20Checker/):** Checks whether input text reads the same forwards and backwards.
 
 ---
 
@@ -142,3 +146,4 @@ A brick-breaking arcade game powered by the custom physics engine.
 ## 📄 License
 
 This project is open source and available under the [MIT License](LICENSE).
+

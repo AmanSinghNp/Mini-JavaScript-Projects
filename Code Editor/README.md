@@ -89,6 +89,10 @@ Optimized for:
 - Smooth scrolling
 - Responsive UI
 
+## License
+
+Open source under the MIT License. See the root `LICENSE` file in the repository for full details.
+
 ## Future Enhancements
 
 Potential additions:

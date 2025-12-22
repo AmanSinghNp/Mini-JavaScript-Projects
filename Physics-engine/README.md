@@ -174,3 +174,7 @@ Each demo is **self-contained** with its own:
 Start with the [Bouncing Balls Demo](demos/bouncing-balls/) for dramatic physics, or jump into the [Breakout Game](demos/breakout/) for classic gameplay!
 
 _Built with modern JavaScript, HTML5 Canvas, and a passion for physics simulation._
+
+## License
+
+Open source under the MIT License. See the root `LICENSE` file in the repository for full details.
