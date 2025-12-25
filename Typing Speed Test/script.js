@@ -11,6 +11,8 @@ const resultsOverlay = document.getElementById("results-overlay");
 const finalWpm = document.getElementById("final-wpm");
 const finalAccuracy = document.getElementById("final-accuracy");
 const finalErrors = document.getElementById("final-errors");
+const closeResultsBtn = document.getElementById("close-results-btn");
+const tryAgainBtn = document.getElementById("try-again-btn");
 
 // History Elements
 const historyBtn = document.getElementById("history-btn");
@@ -271,6 +273,16 @@ function closeHistory() {
     }, 300);
 }
 
+function closeResults() {
+    resultsOverlay.classList.add("opacity-0");
+    resultsOverlay.querySelector("#results-content").classList.remove("scale-100");
+    resultsOverlay.querySelector("#results-content").classList.add("scale-95");
+    
+    setTimeout(() => {
+        resultsOverlay.classList.add("hidden");
+    }, 300);
+}
+
 // Handle paste events to limit length and process properly
 inputField.addEventListener("paste", (e) => {
     e.preventDefault();
@@ -299,6 +311,31 @@ historyBtn.addEventListener("click", openHistory);
 closeHistoryBtn.addEventListener("click", closeHistory);
 historyOverlay.addEventListener("click", (e) => {
     if (e.target === historyOverlay) closeHistory();
+});
+
+// Results Overlay Events
+if (closeResultsBtn) {
+    closeResultsBtn.addEventListener("click", closeResults);
+}
+if (tryAgainBtn) {
+    tryAgainBtn.addEventListener("click", resetGame);
+}
+resultsOverlay.addEventListener("click", (e) => {
+    if (e.target === resultsOverlay) closeResults();
+});
+
+// Escape key handler for closing modals
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+        // Close history modal if open
+        if (!historyOverlay.classList.contains("hidden")) {
+            closeHistory();
+        }
+        // Close results overlay if visible
+        else if (!resultsOverlay.classList.contains("hidden")) {
+            closeResults();
+        }
+    }
 });
 
 // Handle special keys to prevent interference
