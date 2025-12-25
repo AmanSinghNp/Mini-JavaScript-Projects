@@ -387,6 +387,26 @@
           </div>
         </div>
 
+        <!-- Difficulty Toggles -->
+        <div class="mt-4 grid md:grid-cols-2 gap-4">
+          <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
+            <input type="checkbox" id="toggle-case" class="rounded border-gray-300 dark:border-gray-700" />
+            Case sensitive
+          </label>
+          <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
+            <input type="checkbox" id="toggle-punctuation" class="rounded border-gray-300 dark:border-gray-700" checked />
+            Include punctuation
+          </label>
+          <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
+            <input type="checkbox" id="toggle-nobackspace" class="rounded border-gray-300 dark:border-gray-700" />
+            No backspace mode
+          </label>
+          <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
+            <input type="checkbox" id="toggle-strict" class="rounded border-gray-300 dark:border-gray-700" />
+            Strict mode (must type correctly to advance)
+          </label>
+        </div>
+
         <!-- Custom text area -->
         <div class="mt-4 flex flex-col gap-2 hidden" id="custom-text-group">
           <label class="text-sm font-semibold text-gray-700 dark:text-gray-200"

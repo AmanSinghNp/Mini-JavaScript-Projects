@@ -21,6 +21,10 @@ const customTextGroup = document.getElementById("custom-text-group");
 const customTextarea = document.getElementById("custom-textarea");
 const randomizeTextBtn = document.getElementById("randomize-text-btn");
 const applySettingsBtn = document.getElementById("apply-settings-btn");
+const toggleCase = document.getElementById("toggle-case");
+const togglePunctuation = document.getElementById("toggle-punctuation");
+const toggleNoBackspace = document.getElementById("toggle-nobackspace");
+const toggleStrict = document.getElementById("toggle-strict");
 const restartBtn = document.getElementById("restart-btn");
 const headerChrome = document.getElementById("header-chrome");
 const instructionHint = document.getElementById("instruction-hint");
@@ -65,7 +69,11 @@ const settings = {
     duration: 60,
     wordCount: 50,
     textSource: "random", // "random" or "custom"
-    customText: ""
+    customText: "",
+    caseSensitive: false,
+    includePunctuation: true,
+    noBackspace: false,
+    strictMode: false
 };
 
 function pickRandomText() {
@@ -78,12 +86,16 @@ function getActiveText() {
             ? settings.customText.trim()
             : pickRandomText();
 
+    const processedSource = settings.includePunctuation
+        ? source
+        : source.replace(/[.,!?;:]/g, "");
+
     if (settings.mode === "words") {
-        const words = source.replace(/\s+/g, " ").trim().split(" ");
+        const words = processedSource.replace(/\s+/g, " ").trim().split(" ");
         const limited = words.slice(0, settings.wordCount).join(" ");
         return limited.length > 0 ? limited : pickRandomText();
     }
-    return source;
+    return processedSource;
 }
 
 function updateModeVisibility() {
@@ -101,6 +113,18 @@ function updateModeVisibility() {
     } else {
         customTextGroup.classList.add("hidden");
     }
+}
+
+function syncSettingsUI() {
+    if (modeSelect) modeSelect.value = settings.mode;
+    if (timeSelect) timeSelect.value = String(settings.duration);
+    if (wordsSelect) wordsSelect.value = String(settings.wordCount);
+    if (textSourceSelect) textSourceSelect.value = settings.textSource;
+    if (customTextarea) customTextarea.value = settings.customText;
+    if (toggleCase) toggleCase.checked = settings.caseSensitive;
+    if (togglePunctuation) togglePunctuation.checked = settings.includePunctuation;
+    if (toggleNoBackspace) toggleNoBackspace.checked = settings.noBackspace;
+    if (toggleStrict) toggleStrict.checked = settings.strictMode;
 }
 
 function updateTimeDisplayLabel() {
@@ -220,8 +244,12 @@ function initTyping() {
             // Remove active from current
             chars[charIndex].classList.remove("char-active");
 
+            const targetChar = chars[charIndex].innerText;
+            const expected = settings.caseSensitive ? targetChar : targetChar.toLowerCase();
+            const actual = settings.caseSensitive ? typedChar : typedChar.toLowerCase();
+
             // Check correctness
-            if (chars[charIndex].innerText === typedChar) {
+            if (expected === actual) {
                 chars[charIndex].classList.add("char-correct");
                 // Remove from mistake indices if it was previously incorrect
                 if (mistakeIndices.has(charIndex)) {
@@ -229,12 +257,24 @@ function initTyping() {
                     mistakes--;
                 }
             } else {
-                // Only increment if this index wasn't already marked as a mistake
-                if (!mistakeIndices.has(charIndex)) {
-                    mistakes++;
-                    mistakeIndices.add(charIndex);
+                // Strict mode: do not advance until corrected
+                if (settings.strictMode) {
+                    if (!mistakeIndices.has(charIndex)) {
+                        mistakes++;
+                        mistakeIndices.add(charIndex);
+                    }
+                    chars[charIndex].classList.add("char-incorrect");
+                    // Revert latest character so input matches position
+                    inputField.value = typedVal.slice(0, -1);
+                    return;
+                } else {
+                    // Only increment if this index wasn't already marked as a mistake
+                    if (!mistakeIndices.has(charIndex)) {
+                        mistakes++;
+                        mistakeIndices.add(charIndex);
+                    }
+                    chars[charIndex].classList.add("char-incorrect");
                 }
-                chars[charIndex].classList.add("char-incorrect");
             }
 
             const wordIdx = parseInt(chars[charIndex].dataset.wordIndex, 10);
@@ -496,6 +536,8 @@ function closeHistory() {
 
 function openSettings() {
     if (!settingsOverlay) return;
+    syncSettingsUI();
+    updateModeVisibility();
     settingsOverlay.classList.remove("hidden");
     settingsOverlay.setAttribute("aria-hidden", "false");
     requestAnimationFrame(() => {
@@ -684,6 +726,10 @@ function applySettings() {
     if (wordsSelect) settings.wordCount = parseInt(wordsSelect.value, 10) || 50;
     if (textSourceSelect) settings.textSource = textSourceSelect.value;
     if (customTextarea) settings.customText = customTextarea.value || "";
+    if (toggleCase) settings.caseSensitive = toggleCase.checked;
+    if (togglePunctuation) settings.includePunctuation = togglePunctuation.checked;
+    if (toggleNoBackspace) settings.noBackspace = toggleNoBackspace.checked;
+    if (toggleStrict) settings.strictMode = toggleStrict.checked;
 
     updateModeVisibility();
     closeSettings();
@@ -741,6 +787,12 @@ document.addEventListener("keydown", (e) => {
 inputField.addEventListener("keydown", (e) => {
     // Prevent Tab from navigating away
     if (e.key === "Tab") {
+        e.preventDefault();
+        return;
+    }
+
+    // No backspace mode
+    if (settings.noBackspace && e.key === "Backspace") {
         e.preventDefault();
         return;
     }
