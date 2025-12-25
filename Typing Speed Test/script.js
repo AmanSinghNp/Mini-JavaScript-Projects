@@ -26,6 +26,8 @@ const toggleCase = document.getElementById("toggle-case");
 const togglePunctuation = document.getElementById("toggle-punctuation");
 const toggleNoBackspace = document.getElementById("toggle-nobackspace");
 const toggleStrict = document.getElementById("toggle-strict");
+const toggleContrast = document.getElementById("toggle-contrast");
+const toggleLargeText = document.getElementById("toggle-large-text");
 const restartBtn = document.getElementById("restart-btn");
 const headerChrome = document.getElementById("header-chrome");
 const instructionHint = document.getElementById("instruction-hint");
@@ -37,6 +39,9 @@ const finalAccuracy = document.getElementById("final-accuracy");
 const finalErrors = document.getElementById("final-errors");
 const closeResultsBtn = document.getElementById("close-results-btn");
 const tryAgainBtn = document.getElementById("try-again-btn");
+const capsLockWarning = document.getElementById("caps-lock-warning");
+const pauseIndicator = document.getElementById("pause-indicator");
+const srLive = document.getElementById("sr-live");
 
 // History Elements
 const historyBtn = document.getElementById("history-btn");
@@ -56,6 +61,7 @@ let charIndex = 0;
 let mistakes = 0;
 let isTyping = false;
 let gameEnded = false;
+let isPaused = false;
 // Track which character indices had mistakes
 let mistakeIndices = new Set();
 let keyElements = new Map();
@@ -80,7 +86,9 @@ const settings = {
     caseSensitive: false,
     includePunctuation: true,
     noBackspace: false,
-    strictMode: false
+    strictMode: false,
+    highContrast: false,
+    largeText: false
 };
 
 function pickRandomText() {
@@ -132,6 +140,29 @@ function syncSettingsUI() {
     if (togglePunctuation) togglePunctuation.checked = settings.includePunctuation;
     if (toggleNoBackspace) toggleNoBackspace.checked = settings.noBackspace;
     if (toggleStrict) toggleStrict.checked = settings.strictMode;
+    if (toggleContrast) toggleContrast.checked = settings.highContrast;
+    if (toggleLargeText) toggleLargeText.checked = settings.largeText;
+}
+
+function applyAppearanceSettings() {
+    if (settings.highContrast) {
+        document.body.classList.add("high-contrast");
+    } else {
+        document.body.classList.remove("high-contrast");
+    }
+    if (settings.largeText) {
+        document.body.classList.add("text-large");
+    } else {
+        document.body.classList.remove("text-large");
+    }
+}
+
+function announce(message) {
+    if (!srLive) return;
+    srLive.textContent = "";
+    setTimeout(() => {
+        srLive.textContent = message;
+    }, 10);
 }
 
 function updateTimeDisplayLabel() {
@@ -236,10 +267,12 @@ function initTyping() {
 
     if (!isTyping && typedVal.length > 0) {
         isTyping = true;
+        isPaused = false;
         if (timer) clearInterval(timer);
         timer = setInterval(initTimer, 1000);
         headerChrome.classList.add("opacity-20");
         instructionHint.style.opacity = "0";
+        announce("Typing test started");
     }
 
     // Handle typing (forward loop to catch up if fast or pasted)
@@ -388,6 +421,7 @@ function endGame() {
 
     // Save Result
     saveResult(wpm, rawWpm, cpm, accuracy, mistakes);
+    announce("Typing test completed");
 
     // Show results
     resultsOverlay.classList.remove("hidden");
@@ -414,6 +448,7 @@ function resetGame() {
     mistakes = 0;
     isTyping = false;
     gameEnded = false;
+    isPaused = false;
     mistakeIndices.clear();
     inputField.value = "";
     inputField.disabled = false;
@@ -432,6 +467,7 @@ function resetGame() {
     resultsOverlay.querySelector("#results-content").classList.add("scale-95");
     resultsOverlay.querySelector("#results-content").classList.remove("scale-100");
     
+    if (pauseIndicator) pauseIndicator.classList.add("hidden");
     // Focus input
     inputField.focus();
 }
@@ -689,6 +725,28 @@ function updateProgressBar() {
     setProgress(percent);
 }
 
+function pauseTest(reason = "") {
+    if (!isTyping || gameEnded || isPaused) return;
+    if (timer) {
+        clearInterval(timer);
+        timer = null;
+    }
+    isPaused = true;
+    if (pauseIndicator) {
+        pauseIndicator.textContent = reason || "Paused";
+        pauseIndicator.classList.remove("hidden");
+    }
+}
+
+function resumeTest() {
+    if (!isTyping || gameEnded || !isPaused) return;
+    if (!timer) {
+        timer = setInterval(initTimer, 1000);
+    }
+    isPaused = false;
+    if (pauseIndicator) pauseIndicator.classList.add("hidden");
+}
+
 // Virtual keyboard rendering + highlighting
 function normalizeKeyLabel(key) {
     if (key === " ") return "SPACE";
@@ -785,6 +843,10 @@ if (clearHistoryBtn) clearHistoryBtn.addEventListener("click", () => {
     loadHistory();
 });
 
+// Pause on window blur, resume on focus
+window.addEventListener("blur", () => pauseTest("Paused (window not focused)"));
+window.addEventListener("focus", () => resumeTest());
+
 // Results Overlay Events
 if (closeResultsBtn) {
     closeResultsBtn.addEventListener("click", closeResults);
@@ -824,8 +886,11 @@ function applySettings() {
     if (togglePunctuation) settings.includePunctuation = togglePunctuation.checked;
     if (toggleNoBackspace) settings.noBackspace = toggleNoBackspace.checked;
     if (toggleStrict) settings.strictMode = toggleStrict.checked;
+    if (toggleContrast) settings.highContrast = toggleContrast.checked;
+    if (toggleLargeText) settings.largeText = toggleLargeText.checked;
 
     updateModeVisibility();
+    applyAppearanceSettings();
     closeSettings();
     resetGame();
 }
@@ -877,6 +942,19 @@ document.addEventListener("keydown", (e) => {
     }
 });
 
+function updateCapsLockIndicator(e) {
+    if (!capsLockWarning) return;
+    const isOn = e.getModifierState && e.getModifierState("CapsLock");
+    if (isOn) {
+        capsLockWarning.classList.remove("hidden");
+    } else {
+        capsLockWarning.classList.add("hidden");
+    }
+}
+
+document.addEventListener("keydown", updateCapsLockIndicator);
+document.addEventListener("keyup", updateCapsLockIndicator);
+
 // Handle special keys to prevent interference
 inputField.addEventListener("keydown", (e) => {
     // Prevent Tab from navigating away
@@ -923,6 +1001,7 @@ textDisplay.addEventListener("click", () => inputField.focus());
 
 // Initialize
 updateModeVisibility();
+applyAppearanceSettings();
 loadParagraph();
 setProgress(100);
 updateTimeDisplayLabel();

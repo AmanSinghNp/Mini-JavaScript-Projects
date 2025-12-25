@@ -66,6 +66,26 @@
     50% { opacity: 0; }
 }
 
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.high-contrast {
+    filter: contrast(1.2) saturate(1.1);
+}
+
+.text-large {
+    font-size: 1.1em;
+}
+
 /* Timer Progress */
 #progress-track {
     height: 6px;

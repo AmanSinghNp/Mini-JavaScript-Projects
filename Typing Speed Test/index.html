@@ -120,6 +120,13 @@
           aria-label="Time remaining: 60 seconds"
           >60s</span
         >
+        <span
+          id="caps-lock-warning"
+          class="hidden text-xs font-semibold text-red-500 mt-1"
+          aria-live="polite"
+        >
+          Caps Lock is ON
+        </span>
       </div>
     </header>
 
@@ -190,6 +197,13 @@
           >
             Start typing to begin
           </p>
+        </div>
+        <div
+          id="pause-indicator"
+          class="hidden mt-3 text-sm text-amber-500 text-center font-semibold"
+          aria-live="assertive"
+        >
+          Paused (window not focused)
         </div>
 
         <!-- Virtual Keyboard (desktop only) -->
@@ -431,6 +445,14 @@
             <input type="checkbox" id="toggle-strict" class="rounded border-gray-300 dark:border-gray-700" />
             Strict mode (must type correctly to advance)
           </label>
+          <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
+            <input type="checkbox" id="toggle-contrast" class="rounded border-gray-300 dark:border-gray-700" />
+            High contrast
+          </label>
+          <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
+            <input type="checkbox" id="toggle-large-text" class="rounded border-gray-300 dark:border-gray-700" />
+            Larger text
+          </label>
         </div>
 
         <!-- Custom text area -->
@@ -538,5 +560,6 @@
     </div>
 
     <script src="script.js" defer></script>
+    <div id="sr-live" class="sr-only" aria-live="polite"></div>
   </body>
 </html>
