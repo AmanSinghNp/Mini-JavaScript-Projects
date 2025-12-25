@@ -7,6 +7,20 @@ const wpmDisplay = document.getElementById("wpm-display");
 const progressBar = document.getElementById("progress-bar");
 const progressTrack = document.getElementById("progress-track");
 const virtualKeyboard = document.getElementById("virtual-keyboard");
+const settingsBtn = document.getElementById("settings-btn");
+const settingsOverlay = document.getElementById("settings-overlay");
+const settingsModalContent = document.getElementById("settings-modal-content");
+const closeSettingsBtn = document.getElementById("close-settings-btn");
+const modeSelect = document.getElementById("mode-select");
+const timeSelect = document.getElementById("time-select");
+const wordsSelect = document.getElementById("words-select");
+const timeSelectGroup = document.getElementById("time-select-group");
+const wordsSelectGroup = document.getElementById("words-select-group");
+const textSourceSelect = document.getElementById("text-source-select");
+const customTextGroup = document.getElementById("custom-text-group");
+const customTextarea = document.getElementById("custom-textarea");
+const randomizeTextBtn = document.getElementById("randomize-text-btn");
+const applySettingsBtn = document.getElementById("apply-settings-btn");
 const restartBtn = document.getElementById("restart-btn");
 const headerChrome = document.getElementById("header-chrome");
 const instructionHint = document.getElementById("instruction-hint");
@@ -35,17 +49,77 @@ let gameEnded = false;
 let mistakeIndices = new Set();
 let keyElements = new Map();
 let wordBoundaries = [];
+let currentText = "";
+
+const passages = [
+    "The quick brown fox jumps over the lazy dog. Sphinx of black quartz, judge my vow.",
+    "Typing tests improve speed and accuracy. Practice daily to build muscle memory and rhythm.",
+    "JavaScript powers interactive experiences on the web, enabling dynamic content and responsive design.",
+    "Design systems help teams ship consistent UI faster while reducing maintenance overhead.",
+    "Optimizing for performance means measuring, profiling, and iterating with real-world constraints.",
+    "Clear error handling and graceful fallbacks keep user experiences resilient under failure."
+];
+
+const settings = {
+    mode: "time", // "time" or "words"
+    duration: 60,
+    wordCount: 50,
+    textSource: "random", // "random" or "custom"
+    customText: ""
+};
+
+function pickRandomText() {
+    return passages[Math.floor(Math.random() * passages.length)];
+}
+
+function getActiveText() {
+    const source =
+        settings.textSource === "custom" && settings.customText.trim().length > 0
+            ? settings.customText.trim()
+            : pickRandomText();
+
+    if (settings.mode === "words") {
+        const words = source.replace(/\s+/g, " ").trim().split(" ");
+        const limited = words.slice(0, settings.wordCount).join(" ");
+        return limited.length > 0 ? limited : pickRandomText();
+    }
+    return source;
+}
+
+function updateModeVisibility() {
+    if (!timeSelectGroup || !wordsSelectGroup || !customTextGroup) return;
+    if (settings.mode === "time") {
+        timeSelectGroup.classList.remove("hidden");
+        wordsSelectGroup.classList.add("hidden");
+    } else {
+        wordsSelectGroup.classList.remove("hidden");
+        timeSelectGroup.classList.add("hidden");
+    }
+
+    if (settings.textSource === "custom") {
+        customTextGroup.classList.remove("hidden");
+    } else {
+        customTextGroup.classList.add("hidden");
+    }
+}
+
+function updateTimeDisplayLabel() {
+    if (settings.mode === "time") {
+        timeDisplay.innerText = settings.duration + "s";
+        timeDisplay.setAttribute("aria-label", `Time remaining: ${settings.duration} seconds`);
+    } else {
+        timeDisplay.innerText = settings.wordCount + "w";
+        timeDisplay.setAttribute("aria-label", `Target words: ${settings.wordCount}`);
+    }
+}
 
 function loadParagraph() {
-    // Validate text is not empty
-    if (!text || text.trim().length === 0) {
-        console.error('Text is empty. Using default text.');
-        // Use a default text if empty
-        const defaultText = "The quick brown fox jumps over the lazy dog.";
-        renderText(defaultText);
-    } else {
-        renderText(text);
+    // Select current text based on settings
+    currentText = getActiveText();
+    if (!currentText || currentText.trim().length === 0) {
+        currentText = text;
     }
+    renderText(currentText);
 }
 
 function renderText(content) {
@@ -273,6 +347,7 @@ function resetGame() {
     }
     
     loadParagraph();
+    maxTime = settings.duration || 60;
     timeLeft = maxTime;
     charIndex = 0;
     mistakes = 0;
@@ -283,6 +358,7 @@ function resetGame() {
     inputField.disabled = false;
     timeDisplay.innerText = timeLeft + "s";
     wpmDisplay.innerText = 0;
+    updateTimeDisplayLabel();
     setProgress(100);
     
     // Reset UI
@@ -415,6 +491,30 @@ function closeHistory() {
     
     setTimeout(() => {
         historyOverlay.classList.add("hidden");
+    }, 300);
+}
+
+function openSettings() {
+    if (!settingsOverlay) return;
+    settingsOverlay.classList.remove("hidden");
+    settingsOverlay.setAttribute("aria-hidden", "false");
+    requestAnimationFrame(() => {
+        settingsOverlay.classList.remove("opacity-0");
+        if (settingsModalContent) settingsModalContent.classList.remove("scale-95");
+        if (settingsModalContent) settingsModalContent.classList.add("scale-100");
+    });
+}
+
+function closeSettings() {
+    if (!settingsOverlay) return;
+    settingsOverlay.classList.add("opacity-0");
+    settingsOverlay.setAttribute("aria-hidden", "true");
+    if (settingsModalContent) {
+        settingsModalContent.classList.remove("scale-100");
+        settingsModalContent.classList.add("scale-95");
+    }
+    setTimeout(() => {
+        settingsOverlay.classList.add("hidden");
     }, 300);
 }
 
@@ -577,6 +677,48 @@ document.addEventListener("keyup", (e) => {
 
 window.addEventListener("blur", clearAllKeys);
 
+// Settings events
+function applySettings() {
+    if (modeSelect) settings.mode = modeSelect.value;
+    if (timeSelect) settings.duration = parseInt(timeSelect.value, 10) || 60;
+    if (wordsSelect) settings.wordCount = parseInt(wordsSelect.value, 10) || 50;
+    if (textSourceSelect) settings.textSource = textSourceSelect.value;
+    if (customTextarea) settings.customText = customTextarea.value || "";
+
+    updateModeVisibility();
+    closeSettings();
+    resetGame();
+}
+
+if (settingsBtn) settingsBtn.addEventListener("click", openSettings);
+if (closeSettingsBtn) closeSettingsBtn.addEventListener("click", closeSettings);
+if (settingsOverlay) {
+    settingsOverlay.addEventListener("click", (e) => {
+        if (e.target === settingsOverlay) closeSettings();
+    });
+}
+if (modeSelect) {
+    modeSelect.addEventListener("change", () => {
+        settings.mode = modeSelect.value;
+        updateModeVisibility();
+    });
+}
+if (textSourceSelect) {
+    textSourceSelect.addEventListener("change", () => {
+        settings.textSource = textSourceSelect.value;
+        updateModeVisibility();
+    });
+}
+if (randomizeTextBtn) {
+    randomizeTextBtn.addEventListener("click", () => {
+        settings.textSource = "random";
+        if (textSourceSelect) textSourceSelect.value = "random";
+        updateModeVisibility();
+        resetGame();
+    });
+}
+if (applySettingsBtn) applySettingsBtn.addEventListener("click", applySettings);
+
 // Escape key handler for closing modals
 document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
@@ -587,6 +729,10 @@ document.addEventListener("keydown", (e) => {
         // Close results overlay if visible
         else if (!resultsOverlay.classList.contains("hidden")) {
             closeResults();
+        }
+        // Close settings if open
+        else if (!settingsOverlay.classList.contains("hidden")) {
+            closeSettings();
         }
     }
 });
@@ -630,6 +776,8 @@ document.addEventListener("keydown", (e) => {
 textDisplay.addEventListener("click", () => inputField.focus());
 
 // Initialize
+updateModeVisibility();
 loadParagraph();
 setProgress(100);
+updateTimeDisplayLabel();
 renderKeyboard();

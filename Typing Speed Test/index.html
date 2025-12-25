@@ -279,6 +279,7 @@
         <!-- Settings Button (Visual only for now) -->
         <button
           aria-label="Settings"
+          id="settings-btn"
           class="group flex items-center justify-center p-2 rounded-lg text-gray-400 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-200"
         >
           <span
@@ -295,6 +296,129 @@
         </button>
       </div>
     </footer>
+
+    <!-- Settings Overlay -->
+    <div
+      id="settings-overlay"
+      class="hidden fixed inset-0 z-[90] flex items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 transition-opacity duration-300"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="settings-title"
+      aria-hidden="true"
+    >
+      <div
+        class="bg-white dark:bg-surface-dark w-full max-w-xl rounded-2xl shadow-2xl p-6 transform scale-95 transition-transform duration-300 border border-gray-200 dark:border-gray-700"
+        id="settings-modal-content"
+      >
+        <div class="flex justify-between items-center mb-4">
+          <h2
+            id="settings-title"
+            class="text-xl font-bold text-gray-800 dark:text-white"
+          >
+            Session Settings
+          </h2>
+          <button
+            id="close-settings-btn"
+            class="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white transition-colors"
+            aria-label="Close settings"
+          >
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4">
+          <!-- Mode -->
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-semibold text-gray-700 dark:text-gray-200"
+              >Mode</label
+            >
+            <select
+              id="mode-select"
+              class="rounded-md border-gray-300 dark:border-gray-700 bg-white/70 dark:bg-surface-dark"
+            >
+              <option value="time">Time (seconds)</option>
+              <option value="words">Word count</option>
+            </select>
+          </div>
+
+          <!-- Time Presets -->
+          <div class="flex flex-col gap-2" id="time-select-group">
+            <label class="text-sm font-semibold text-gray-700 dark:text-gray-200"
+              >Time limit</label
+            >
+            <select
+              id="time-select"
+              class="rounded-md border-gray-300 dark:border-gray-700 bg-white/70 dark:bg-surface-dark"
+            >
+              <option value="15">15s</option>
+              <option value="30">30s</option>
+              <option value="60" selected>60s</option>
+              <option value="120">120s</option>
+            </select>
+          </div>
+
+          <!-- Word Count Presets -->
+          <div class="flex flex-col gap-2 hidden" id="words-select-group">
+            <label class="text-sm font-semibold text-gray-700 dark:text-gray-200"
+              >Word count</label
+            >
+            <select
+              id="words-select"
+              class="rounded-md border-gray-300 dark:border-gray-700 bg-white/70 dark:bg-surface-dark"
+            >
+              <option value="25">25 words</option>
+              <option value="50" selected>50 words</option>
+              <option value="100">100 words</option>
+            </select>
+          </div>
+
+          <!-- Text Source -->
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-semibold text-gray-700 dark:text-gray-200"
+              >Text source</label
+            >
+            <select
+              id="text-source-select"
+              class="rounded-md border-gray-300 dark:border-gray-700 bg-white/70 dark:bg-surface-dark"
+            >
+              <option value="random" selected>Random passage</option>
+              <option value="custom">Custom text</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Custom text area -->
+        <div class="mt-4 flex flex-col gap-2 hidden" id="custom-text-group">
+          <label class="text-sm font-semibold text-gray-700 dark:text-gray-200"
+            >Custom text</label
+          >
+          <textarea
+            id="custom-textarea"
+            rows="3"
+            class="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white/70 dark:bg-surface-dark text-sm p-3"
+            placeholder="Paste or type your own passage"
+          ></textarea>
+        </div>
+
+        <!-- Actions -->
+        <div class="mt-6 flex flex-wrap gap-3 justify-end">
+          <button
+            id="randomize-text-btn"
+            class="px-4 py-2 rounded-md border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+            type="button"
+          >
+            New random passage
+          </button>
+          <button
+            id="apply-settings-btn"
+            class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+            type="button"
+          >
+            Apply & restart
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- History Overlay -->
     <div
