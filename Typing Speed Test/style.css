@@ -124,6 +124,18 @@
     box-shadow: 0 4px 14px rgba(19, 91, 236, 0.35);
 }
 
+/* Word-level highlighting */
+.word-correct {
+    text-decoration: underline;
+    text-decoration-color: #10b981; /* green-500 */
+    text-decoration-thickness: 2px;
+}
+
+.word-incorrect {
+    background: rgba(239, 68, 68, 0.14);
+    border-radius: 4px;
+}
+
 
 
 

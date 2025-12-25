@@ -34,6 +34,7 @@ let gameEnded = false;
 // Track which character indices had mistakes
 let mistakeIndices = new Set();
 let keyElements = new Map();
+let wordBoundaries = [];
 
 function loadParagraph() {
     // Validate text is not empty
@@ -41,30 +42,85 @@ function loadParagraph() {
         console.error('Text is empty. Using default text.');
         // Use a default text if empty
         const defaultText = "The quick brown fox jumps over the lazy dog.";
-        const chars = defaultText.split("");
-        textDisplay.innerHTML = "";
-        chars.forEach((char, index) => {
-            let span = document.createElement("span");
-            span.innerText = char;
-            if (index === 0) span.classList.add("char-active");
-            textDisplay.appendChild(span);
-        });
-        return;
+        renderText(defaultText);
+    } else {
+        renderText(text);
     }
-    
-    const chars = text.split("");
+}
+
+function renderText(content) {
+    const chars = content.split("");
     textDisplay.innerHTML = "";
+    wordBoundaries = [];
+    let wordIndex = 0;
+    let wordStart = null;
+
     chars.forEach((char, index) => {
-        let span = document.createElement("span");
+        const span = document.createElement("span");
         span.innerText = char;
+
+        // Track word boundaries (split on space)
+        if (char === " ") {
+            span.dataset.wordIndex = -1;
+            if (wordStart !== null) {
+                wordBoundaries[wordIndex] = { start: wordStart, end: index - 1 };
+                wordIndex++;
+                wordStart = null;
+            }
+        } else {
+            span.dataset.wordIndex = wordIndex;
+            if (wordStart === null) {
+                wordStart = index;
+            }
+        }
+
         if (index === 0) span.classList.add("char-active");
         textDisplay.appendChild(span);
+    });
+
+    // Close final word if string didn't end with space
+    if (wordStart !== null) {
+        wordBoundaries[wordIndex] = { start: wordStart, end: chars.length - 1 };
+    }
+}
+
+function getWordIndexAtChar(index) {
+    if (!wordBoundaries || wordBoundaries.length === 0) return -1;
+    for (let i = 0; i < wordBoundaries.length; i++) {
+        const b = wordBoundaries[i];
+        if (!b) continue;
+        if (index >= b.start && index <= b.end) return i;
+    }
+    return -1;
+}
+
+function updateWordHighlight(wordIdx) {
+    if (wordIdx === undefined || wordIdx === null || wordIdx < 0) return;
+    const boundary = wordBoundaries[wordIdx];
+    if (!boundary) return;
+    const spans = textDisplay.querySelectorAll(`span[data-word-index="${wordIdx}"]`);
+    if (!spans || spans.length === 0) return;
+
+    const hasIncorrect = Array.from(spans).some((span) =>
+        span.classList.contains("char-incorrect")
+    );
+
+    const wordTyped = charIndex > boundary.end;
+
+    spans.forEach((span) => {
+        span.classList.remove("word-correct", "word-incorrect");
+        if (hasIncorrect) {
+            span.classList.add("word-incorrect");
+        } else if (wordTyped) {
+            span.classList.add("word-correct");
+        }
     });
 }
 
 function initTyping() {
     const chars = textDisplay.querySelectorAll("span");
     let typedVal = inputField.value;
+    const affectedWords = new Set();
     
     // Limit input length to text length to prevent typing beyond end
     const maxLength = chars.length;
@@ -107,6 +163,9 @@ function initTyping() {
                 chars[charIndex].classList.add("char-incorrect");
             }
 
+            const wordIdx = parseInt(chars[charIndex].dataset.wordIndex, 10);
+            if (wordIdx >= 0) affectedWords.add(wordIdx);
+
             charIndex++;
         }
         
@@ -131,12 +190,18 @@ function initTyping() {
                  mistakes--;
              }
              chars[charIndex].classList.remove("char-correct", "char-incorrect");
+
+             const wordIdx = parseInt(chars[charIndex].dataset.wordIndex, 10);
+             if (wordIdx >= 0) affectedWords.add(wordIdx);
         }
         // Set new active at current index
         if (charIndex < chars.length) {
             chars[charIndex].classList.add("char-active");
         }
     }
+
+    // Update word highlighting for affected words
+    affectedWords.forEach(updateWordHighlight);
 }
 
 function initTimer() {
