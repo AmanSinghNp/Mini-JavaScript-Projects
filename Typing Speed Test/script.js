@@ -32,6 +32,22 @@ let gameEnded = false;
 let mistakeIndices = new Set();
 
 function loadParagraph() {
+    // Validate text is not empty
+    if (!text || text.trim().length === 0) {
+        console.error('Text is empty. Using default text.');
+        // Use a default text if empty
+        const defaultText = "The quick brown fox jumps over the lazy dog.";
+        const chars = defaultText.split("");
+        textDisplay.innerHTML = "";
+        chars.forEach((char, index) => {
+            let span = document.createElement("span");
+            span.innerText = char;
+            if (index === 0) span.classList.add("char-active");
+            textDisplay.appendChild(span);
+        });
+        return;
+    }
+    
     const chars = text.split("");
     textDisplay.innerHTML = "";
     chars.forEach((char, index) => {
@@ -173,8 +189,13 @@ function endGame() {
 }
 
 function resetGame() {
+    // Prevent rapid restarts - ensure timer is cleared first
+    if (timer) {
+        clearInterval(timer);
+        timer = null;
+    }
+    
     loadParagraph();
-    if (timer) clearInterval(timer);
     timeLeft = maxTime;
     charIndex = 0;
     mistakes = 0;
