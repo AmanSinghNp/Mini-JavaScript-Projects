@@ -4,6 +4,7 @@ const textDisplay = document.getElementById("text-display");
 const inputField = document.getElementById("input-field");
 const timeDisplay = document.getElementById("time-display");
 const wpmDisplay = document.getElementById("wpm-display");
+const cpmDisplay = document.getElementById("cpm-display");
 const progressBar = document.getElementById("progress-bar");
 const progressTrack = document.getElementById("progress-track");
 const virtualKeyboard = document.getElementById("virtual-keyboard");
@@ -30,6 +31,8 @@ const headerChrome = document.getElementById("header-chrome");
 const instructionHint = document.getElementById("instruction-hint");
 const resultsOverlay = document.getElementById("results-overlay");
 const finalWpm = document.getElementById("final-wpm");
+const finalRawWpm = document.getElementById("final-raw-wpm");
+const finalCpm = document.getElementById("final-cpm");
 const finalAccuracy = document.getElementById("final-accuracy");
 const finalErrors = document.getElementById("final-errors");
 const closeResultsBtn = document.getElementById("close-results-btn");
@@ -41,6 +44,10 @@ const historyOverlay = document.getElementById("history-overlay");
 const closeHistoryBtn = document.getElementById("close-history-btn");
 const historyList = document.getElementById("history-list");
 const historyModalContent = document.getElementById("history-modal-content");
+const historyFilter = document.getElementById("history-filter");
+const exportJsonBtn = document.getElementById("export-json-btn");
+const exportCsvBtn = document.getElementById("export-csv-btn");
+const clearHistoryBtn = document.getElementById("clear-history-btn");
 
 let timer;
 let maxTime = 60;
@@ -328,9 +335,17 @@ function initTimer() {
         // Live WPM update
         const timeElapsed = maxTime - timeLeft;
         let wpm = Math.round(((charIndex - mistakes) / 5) / (timeElapsed / 60));
+        let rawWpm = Math.round((charIndex / 5) / (timeElapsed / 60));
+        let cpm = Math.round(charIndex / (timeElapsed / 60));
         wpm = (wpm < 0 || !wpm || wpm === Infinity) ? 0 : wpm;
+        rawWpm = (rawWpm < 0 || !rawWpm || rawWpm === Infinity) ? 0 : rawWpm;
+        cpm = (cpm < 0 || !cpm || cpm === Infinity) ? 0 : cpm;
         wpmDisplay.innerText = wpm;
         wpmDisplay.setAttribute("aria-label", `Words per minute: ${wpm}`);
+        if (cpmDisplay) {
+            cpmDisplay.innerText = cpm;
+            cpmDisplay.setAttribute("aria-label", `Characters per minute: ${cpm}`);
+        }
     } else {
         endGame();
     }
@@ -349,7 +364,11 @@ function endGame() {
     const timeInMinutes = (timeElapsed === 0 ? 1 : timeElapsed) / 60;
     
     let wpm = Math.round(((charIndex - mistakes) / 5) / timeInMinutes);
+    let rawWpm = Math.round((charIndex / 5) / timeInMinutes);
+    let cpm = Math.round(charIndex / timeInMinutes);
     wpm = (wpm < 0 || !wpm || wpm === Infinity) ? 0 : wpm;
+    rawWpm = (rawWpm < 0 || !rawWpm || rawWpm === Infinity) ? 0 : rawWpm;
+    cpm = (cpm < 0 || !cpm || cpm === Infinity) ? 0 : cpm;
     
     // Fix division by zero in accuracy calculation
     let accuracy = 0;
@@ -359,6 +378,8 @@ function endGame() {
     }
 
     finalWpm.innerText = wpm;
+    if (finalRawWpm) finalRawWpm.innerText = rawWpm;
+    if (finalCpm) finalCpm.innerText = cpm;
     finalAccuracy.innerText = accuracy + "%";
     finalErrors.innerText = mistakes;
 
@@ -366,7 +387,7 @@ function endGame() {
     setProgress(0);
 
     // Save Result
-    saveResult(wpm, accuracy, mistakes);
+    saveResult(wpm, rawWpm, cpm, accuracy, mistakes);
 
     // Show results
     resultsOverlay.classList.remove("hidden");
@@ -398,6 +419,7 @@ function resetGame() {
     inputField.disabled = false;
     timeDisplay.innerText = timeLeft + "s";
     wpmDisplay.innerText = 0;
+    if (cpmDisplay) cpmDisplay.innerText = 0;
     updateTimeDisplayLabel();
     setProgress(100);
     
@@ -415,7 +437,7 @@ function resetGame() {
 }
 
 // History Functions
-function saveResult(wpm, accuracy, mistakes) {
+function saveResult(wpm, rawWpm, cpm, accuracy, mistakes) {
     try {
         const historyStr = localStorage.getItem('typingTestHistory');
         let history = [];
@@ -431,9 +453,11 @@ function saveResult(wpm, accuracy, mistakes) {
         
         const newResult = {
             date: new Date().toISOString(),
-            wpm: wpm,
-            accuracy: accuracy,
-            mistakes: mistakes
+            wpm,
+            rawWpm,
+            cpm,
+            accuracy,
+            mistakes
         };
         
         history.unshift(newResult);
@@ -454,29 +478,34 @@ function saveResult(wpm, accuracy, mistakes) {
     }
 }
 
-function loadHistory() {
-    let history = [];
-    
+function parseHistory() {
     try {
         const historyStr = localStorage.getItem('typingTestHistory');
-        if (historyStr) {
-            try {
-                history = JSON.parse(historyStr);
-            } catch (parseError) {
-                console.warn('Failed to parse history from localStorage:', parseError);
-                history = [];
-            }
-        }
-    } catch (error) {
-        // Handle disabled localStorage
-        if (error.name === 'SecurityError') {
-            console.warn('localStorage access denied.');
-        } else {
-            console.warn('Failed to load history from localStorage:', error);
-        }
-        history = [];
+        if (!historyStr) return [];
+        return JSON.parse(historyStr);
+    } catch (err) {
+        console.warn('Failed to load history from localStorage:', err);
+        return [];
     }
-    
+}
+
+function filterHistory(history) {
+    if (!historyFilter) return history;
+    const filter = historyFilter.value;
+    if (filter === "all") return history;
+    const now = Date.now();
+    let cutoff = 0;
+    if (filter === "day") cutoff = now - 24 * 60 * 60 * 1000;
+    if (filter === "week") cutoff = now - 7 * 24 * 60 * 60 * 1000;
+    if (filter === "month") cutoff = now - 30 * 24 * 60 * 60 * 1000;
+    if (!cutoff) return history;
+    return history.filter((item) => {
+        const ts = new Date(item.date).getTime();
+        return ts >= cutoff;
+    });
+}
+
+function renderHistoryList(history) {
     historyList.innerHTML = '';
 
     if (history.length === 0) {
@@ -484,32 +513,88 @@ function loadHistory() {
         return;
     }
 
+    const bestWpm = Math.max(...history.map((h) => h.wpm || 0));
+
     history.forEach(item => {
         const date = new Date(item.date);
         const formattedDate = new Intl.DateTimeFormat('en-US', {
             month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
         }).format(date);
 
+        const isBest = item.wpm === bestWpm && bestWpm > 0;
+
         const el = document.createElement('div');
-        el.className = 'flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-gray-700/50';
+        el.className = 'flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-gray-700/50 gap-4';
         el.innerHTML = `
             <div class="flex flex-col">
                 <span class="text-xs text-gray-400 font-medium uppercase tracking-wider">${formattedDate}</span>
-                <span class="text-xl font-bold text-gray-800 dark:text-gray-200">${item.wpm} <span class="text-sm font-normal text-gray-500">WPM</span></span>
+                <div class="flex items-center gap-2">
+                  <span class="text-xl font-bold text-gray-800 dark:text-gray-200">${item.wpm ?? 0} <span class="text-sm font-normal text-gray-500">WPM</span></span>
+                  ${isBest ? '<span class="px-2 py-0.5 text-xs rounded-full bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-200">Best</span>' : ''}
+                </div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 flex gap-3 mt-1">
+                  <span>Raw ${item.rawWpm ?? 0} wpm</span>
+                  <span>${item.cpm ?? 0} cpm</span>
+                </div>
             </div>
             <div class="flex items-center gap-4">
                 <div class="flex flex-col items-end">
                     <span class="text-xs text-gray-400 uppercase">Acc</span>
-                    <span class="font-mono text-green-500 font-medium">${item.accuracy}%</span>
+                    <span class="font-mono text-green-500 font-medium">${item.accuracy ?? 0}%</span>
                 </div>
                 <div class="flex flex-col items-end">
                     <span class="text-xs text-gray-400 uppercase">Err</span>
-                    <span class="font-mono text-red-500 font-medium">${item.mistakes}</span>
+                    <span class="font-mono text-red-500 font-medium">${item.mistakes ?? 0}</span>
                 </div>
             </div>
         `;
         historyList.appendChild(el);
     });
+}
+
+function loadHistory() {
+    let history = parseHistory();
+    history = filterHistory(history);
+    renderHistoryList(history);
+}
+
+function exportHistory(format = "json") {
+    const history = filterHistory(parseHistory());
+    if (!history || history.length === 0) return;
+
+    if (format === "json") {
+        const blob = new Blob([JSON.stringify(history, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "typing-history.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        return;
+    }
+
+    // CSV export
+    const headers = ["date", "wpm", "rawWpm", "cpm", "accuracy", "mistakes"];
+    const rows = history.map((h) =>
+        headers.map((key) => (h[key] !== undefined ? h[key] : "")).join(",")
+    );
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "typing-history.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function clearHistory() {
+    try {
+        localStorage.removeItem('typingTestHistory');
+    } catch (err) {
+        console.warn('Failed to clear history:', err);
+    }
+    renderHistoryList([]);
 }
 
 function openHistory() {
@@ -689,6 +774,15 @@ historyBtn.addEventListener("click", openHistory);
 closeHistoryBtn.addEventListener("click", closeHistory);
 historyOverlay.addEventListener("click", (e) => {
     if (e.target === historyOverlay) closeHistory();
+});
+if (historyFilter) {
+    historyFilter.addEventListener("change", loadHistory);
+}
+if (exportJsonBtn) exportJsonBtn.addEventListener("click", () => exportHistory("json"));
+if (exportCsvBtn) exportCsvBtn.addEventListener("click", () => exportHistory("csv"));
+if (clearHistoryBtn) clearHistoryBtn.addEventListener("click", () => {
+    clearHistory();
+    loadHistory();
 });
 
 // Results Overlay Events
