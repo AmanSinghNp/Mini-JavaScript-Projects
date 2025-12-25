@@ -42,10 +42,18 @@ function loadParagraph() {
 
 function initTyping() {
     const chars = textDisplay.querySelectorAll("span");
-    const typedVal = inputField.value;
+    let typedVal = inputField.value;
+    
+    // Limit input length to text length to prevent typing beyond end
+    const maxLength = chars.length;
+    if (typedVal.length > maxLength) {
+        typedVal = typedVal.substring(0, maxLength);
+        inputField.value = typedVal;
+    }
 
     if (!isTyping && typedVal.length > 0) {
         isTyping = true;
+        if (timer) clearInterval(timer);
         timer = setInterval(initTimer, 1000);
         headerChrome.classList.add("opacity-20");
         instructionHint.style.opacity = "0";
@@ -263,6 +271,25 @@ function closeHistory() {
     }, 300);
 }
 
+// Handle paste events to limit length and process properly
+inputField.addEventListener("paste", (e) => {
+    e.preventDefault();
+    const pastedText = (e.clipboardData || window.clipboardData).getData("text");
+    const chars = textDisplay.querySelectorAll("span");
+    const remainingChars = chars.length - charIndex;
+    
+    // Limit pasted text to remaining characters
+    const textToPaste = pastedText.substring(0, remainingChars);
+    
+    // Insert the pasted text character by character
+    // This ensures proper mistake tracking
+    const currentValue = inputField.value;
+    inputField.value = currentValue + textToPaste;
+    
+    // Trigger typing handler to process the pasted text
+    initTyping();
+});
+
 // Event Listeners
 inputField.addEventListener("input", initTyping);
 restartBtn.addEventListener("click", resetGame);
@@ -274,12 +301,39 @@ historyOverlay.addEventListener("click", (e) => {
     if (e.target === historyOverlay) closeHistory();
 });
 
+// Handle special keys to prevent interference
+inputField.addEventListener("keydown", (e) => {
+    // Prevent Tab from navigating away
+    if (e.key === "Tab") {
+        e.preventDefault();
+        return;
+    }
+    
+    // Prevent Enter from submitting forms
+    if (e.key === "Enter") {
+        e.preventDefault();
+        return;
+    }
+    
+    // Prevent Arrow keys, Home, End, Delete from moving cursor
+    // (We want to control cursor position ourselves)
+    if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "Delete"].includes(e.key)) {
+        e.preventDefault();
+        return;
+    }
+    
+    // Allow Backspace and printable characters
+    // Everything else is handled by the input event
+});
+
 // Focus handling
 document.addEventListener("keydown", (e) => {
     // Ignore if modifier keys are pressed (shortcuts)
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     // Ignore if history modal is open
     if (!historyOverlay.classList.contains("hidden")) return;
+    // Ignore if results overlay is visible
+    if (!resultsOverlay.classList.contains("hidden")) return;
     
     inputField.focus();
 });
