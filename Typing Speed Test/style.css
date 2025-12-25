@@ -86,6 +86,13 @@
     font-size: 1.1em;
 }
 
+/* Touch targets */
+@media (max-width: 768px) {
+    footer button {
+        padding: 12px;
+    }
+}
+
 /* Timer Progress */
 #progress-track {
     height: 6px;

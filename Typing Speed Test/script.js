@@ -28,6 +28,7 @@ const toggleNoBackspace = document.getElementById("toggle-nobackspace");
 const toggleStrict = document.getElementById("toggle-strict");
 const toggleContrast = document.getElementById("toggle-contrast");
 const toggleLargeText = document.getElementById("toggle-large-text");
+const toggleFeedback = document.getElementById("toggle-feedback");
 const restartBtn = document.getElementById("restart-btn");
 const headerChrome = document.getElementById("header-chrome");
 const instructionHint = document.getElementById("instruction-hint");
@@ -88,7 +89,8 @@ const settings = {
     noBackspace: false,
     strictMode: false,
     highContrast: false,
-    largeText: false
+    largeText: false,
+    feedbackEnabled: false
 };
 
 function pickRandomText() {
@@ -142,6 +144,7 @@ function syncSettingsUI() {
     if (toggleStrict) toggleStrict.checked = settings.strictMode;
     if (toggleContrast) toggleContrast.checked = settings.highContrast;
     if (toggleLargeText) toggleLargeText.checked = settings.largeText;
+    if (toggleFeedback) toggleFeedback.checked = settings.feedbackEnabled;
 }
 
 function applyAppearanceSettings() {
@@ -302,6 +305,7 @@ function initTyping() {
                     if (!mistakeIndices.has(charIndex)) {
                         mistakes++;
                         mistakeIndices.add(charIndex);
+                        triggerFeedback();
                     }
                     chars[charIndex].classList.add("char-incorrect");
                     // Revert latest character so input matches position
@@ -312,6 +316,7 @@ function initTyping() {
                     if (!mistakeIndices.has(charIndex)) {
                         mistakes++;
                         mistakeIndices.add(charIndex);
+                        triggerFeedback();
                     }
                     chars[charIndex].classList.add("char-incorrect");
                 }
@@ -747,6 +752,23 @@ function resumeTest() {
     if (pauseIndicator) pauseIndicator.classList.add("hidden");
 }
 
+function triggerFeedback() {
+    if (!settings.feedbackEnabled) return;
+    try {
+        if (navigator.vibrate) navigator.vibrate(10);
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.value = 220;
+        gain.gain.value = 0.05;
+        osc.connect(gain).connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.05);
+    } catch (err) {
+        // Ignore audio errors
+    }
+}
+
 // Virtual keyboard rendering + highlighting
 function normalizeKeyLabel(key) {
     if (key === " ") return "SPACE";
@@ -888,6 +910,7 @@ function applySettings() {
     if (toggleStrict) settings.strictMode = toggleStrict.checked;
     if (toggleContrast) settings.highContrast = toggleContrast.checked;
     if (toggleLargeText) settings.largeText = toggleLargeText.checked;
+    if (toggleFeedback) settings.feedbackEnabled = toggleFeedback.checked;
 
     updateModeVisibility();
     applyAppearanceSettings();
@@ -998,6 +1021,14 @@ document.addEventListener("keydown", (e) => {
     inputField.focus();
 });
 textDisplay.addEventListener("click", () => inputField.focus());
+
+function ensureInputVisible() {
+    if (textDisplay && textDisplay.scrollIntoView) {
+        textDisplay.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
+}
+inputField.addEventListener("focus", ensureInputVisible);
+textDisplay.addEventListener("focus", ensureInputVisible);
 
 // Initialize
 updateModeVisibility();
