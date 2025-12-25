@@ -346,6 +346,7 @@ function closeHistory() {
 
 function closeResults() {
     resultsOverlay.classList.add("opacity-0");
+    resultsOverlay.setAttribute("aria-hidden", "true");
     resultsOverlay.querySelector("#results-content").classList.remove("scale-100");
     resultsOverlay.querySelector("#results-content").classList.add("scale-95");
     
