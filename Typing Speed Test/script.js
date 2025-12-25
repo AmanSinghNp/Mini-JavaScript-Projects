@@ -68,6 +68,7 @@ let mistakeIndices = new Set();
 let keyElements = new Map();
 let wordBoundaries = [];
 let currentText = "";
+let memoryHistory = [];
 
 const passages = [
     "The quick brown fox jumps over the lazy dog. Sphinx of black quartz, judge my vow.",
@@ -166,6 +167,12 @@ function announce(message) {
     setTimeout(() => {
         srLive.textContent = message;
     }, 10);
+}
+
+// Placeholder cloud sync hook
+function syncToCloud(history) {
+    // Implement cloud sync here if authentication is available
+    // console.log("Syncing to cloud", history);
 }
 
 function updateTimeDisplayLabel() {
@@ -490,6 +497,8 @@ function saveResult(wpm, rawWpm, cpm, accuracy, mistakes) {
                 console.warn('Failed to parse history from localStorage:', parseError);
                 history = [];
             }
+        } else {
+            history = memoryHistory;
         }
         
         const newResult = {
@@ -506,6 +515,9 @@ function saveResult(wpm, rawWpm, cpm, accuracy, mistakes) {
         if (history.length > 50) history.pop();
         
         localStorage.setItem('typingTestHistory', JSON.stringify(history));
+        memoryHistory = history;
+        // Placeholder for future cloud sync hook
+        // syncToCloud(history);
     } catch (error) {
         // Handle quota exceeded or disabled localStorage
         if (error.name === 'QuotaExceededError') {
@@ -515,6 +527,17 @@ function saveResult(wpm, rawWpm, cpm, accuracy, mistakes) {
         } else {
             console.warn('Failed to save result to localStorage:', error);
         }
+        // Store in memory as a fallback
+        const fallbackResult = {
+            date: new Date().toISOString(),
+            wpm,
+            rawWpm,
+            cpm,
+            accuracy,
+            mistakes
+        };
+        memoryHistory.unshift(fallbackResult);
+        if (memoryHistory.length > 50) memoryHistory.pop();
         // Gracefully degrade - continue without saving
     }
 }
@@ -526,7 +549,7 @@ function parseHistory() {
         return JSON.parse(historyStr);
     } catch (err) {
         console.warn('Failed to load history from localStorage:', err);
-        return [];
+        return memoryHistory;
     }
 }
 
@@ -635,6 +658,7 @@ function clearHistory() {
     } catch (err) {
         console.warn('Failed to clear history:', err);
     }
+    memoryHistory = [];
     renderHistoryList([]);
 }
 
