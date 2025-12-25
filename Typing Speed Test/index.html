@@ -66,6 +66,9 @@
       <!-- WPM Counter -->
       <div
         class="flex flex-col items-start gap-1 opacity-60 hover:opacity-100 transition-opacity"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
       >
         <span
           class="text-xs uppercase tracking-wider font-bold text-gray-500 dark:text-gray-400"
@@ -74,6 +77,7 @@
         <span
           class="text-2xl font-mono font-medium text-gray-800 dark:text-gray-200"
           id="wpm-display"
+          aria-label="Words per minute: 0"
           >0</span
         >
       </div>
@@ -86,6 +90,9 @@
       <!-- Timer -->
       <div
         class="flex flex-col items-end gap-1 opacity-60 hover:opacity-100 transition-opacity"
+        role="timer"
+        aria-live="polite"
+        aria-atomic="true"
       >
         <span
           class="text-xs uppercase tracking-wider font-bold text-gray-500 dark:text-gray-400"
@@ -94,6 +101,7 @@
         <span
           class="text-2xl font-mono font-medium text-primary"
           id="time-display"
+          aria-label="Time remaining: 60 seconds"
           >60s</span
         >
       </div>
@@ -118,10 +126,13 @@
           class="relative no-select cursor-text outline-none"
           id="typing-area"
           tabindex="0"
+          role="textbox"
+          aria-label="Typing test area"
         >
           <p
             class="font-mono text-2xl md:text-3xl lg:text-[2rem] leading-relaxed tracking-wide text-gray-400 dark:text-gray-600 text-left transition-colors"
             id="text-display"
+            aria-label="Text to type"
           >
             <!-- Text will be injected here by JS -->
           </p>
@@ -133,11 +144,13 @@
             autocapitalize="off"
             autocorrect="off"
             spellcheck="false"
+            aria-label="Typing input field"
+            aria-describedby="instruction-hint"
           />
         </div>
 
         <!-- Instruction Hint -->
-        <div class="mt-12 flex justify-center" id="instruction-hint">
+        <div class="mt-12 flex justify-center" id="instruction-hint" role="status" aria-live="polite">
           <p
             class="text-gray-400 dark:text-gray-500 text-sm font-medium tracking-wide animate-pulse"
           >
@@ -149,6 +162,10 @@
         <div
           id="results-overlay"
           class="hidden absolute inset-0 z-20 flex flex-col items-center justify-center bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md opacity-0 transition-opacity duration-500"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="results-title"
+          aria-hidden="true"
         >
           <div
             class="text-center transform transition-all duration-500 scale-95 relative"
@@ -163,7 +180,7 @@
               <span class="material-symbols-outlined">close</span>
             </button>
             
-            <h2 class="text-xl text-gray-500 font-medium mb-2">
+            <h2 id="results-title" class="text-xl text-gray-500 font-medium mb-2">
               Test Completed
             </h2>
             <div
@@ -196,6 +213,7 @@
             <button
               id="try-again-btn"
               class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
+              aria-label="Start a new typing test"
             >
               Try Again
             </button>
@@ -254,13 +272,17 @@
     <div
       id="history-overlay"
       class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 transition-opacity duration-300"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="history-title"
+      aria-hidden="true"
     >
       <div
         class="bg-white dark:bg-surface-dark w-full max-w-lg rounded-2xl shadow-2xl p-6 transform scale-95 transition-transform duration-300 border border-gray-200 dark:border-gray-700"
         id="history-modal-content"
       >
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-xl font-bold text-gray-800 dark:text-white">
+          <h2 id="history-title" class="text-xl font-bold text-gray-800 dark:text-white">
             Recent Attempts
           </h2>
           <button

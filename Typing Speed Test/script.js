@@ -139,11 +139,14 @@ function initTimer() {
     if (timeLeft > 0) {
         timeLeft--;
         timeDisplay.innerText = timeLeft + "s";
+        timeDisplay.setAttribute("aria-label", `Time remaining: ${timeLeft} seconds`);
         
         // Live WPM update
         const timeElapsed = maxTime - timeLeft;
         let wpm = Math.round(((charIndex - mistakes) / 5) / (timeElapsed / 60));
-        wpmDisplay.innerText = (wpm < 0 || !wpm || wpm === Infinity) ? 0 : wpm;
+        wpm = (wpm < 0 || !wpm || wpm === Infinity) ? 0 : wpm;
+        wpmDisplay.innerText = wpm;
+        wpmDisplay.setAttribute("aria-label", `Words per minute: ${wpm}`);
     } else {
         endGame();
     }
@@ -180,6 +183,7 @@ function endGame() {
 
     // Show results
     resultsOverlay.classList.remove("hidden");
+    resultsOverlay.setAttribute("aria-hidden", "false");
     // Trigger fade in
     requestAnimationFrame(() => {
         resultsOverlay.classList.remove("opacity-0");
@@ -321,6 +325,7 @@ function loadHistory() {
 function openHistory() {
     loadHistory();
     historyOverlay.classList.remove("hidden");
+    historyOverlay.setAttribute("aria-hidden", "false");
     requestAnimationFrame(() => {
         historyOverlay.classList.remove("opacity-0");
         historyModalContent.classList.remove("scale-95");
@@ -330,6 +335,7 @@ function openHistory() {
 
 function closeHistory() {
     historyOverlay.classList.add("opacity-0");
+    historyOverlay.setAttribute("aria-hidden", "true");
     historyModalContent.classList.remove("scale-100");
     historyModalContent.classList.add("scale-95");
     
