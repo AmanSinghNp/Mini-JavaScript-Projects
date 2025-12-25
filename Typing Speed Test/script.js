@@ -69,6 +69,7 @@ let keyElements = new Map();
 let wordBoundaries = [];
 let currentText = "";
 let memoryHistory = [];
+let lastKeyHighlight = 0;
 
 const passages = [
     "The quick brown fox jumps over the lazy dog. Sphinx of black quartz, judge my vow.",
@@ -852,6 +853,9 @@ function renderKeyboard() {
 }
 
 function highlightKey(key) {
+    const now = performance.now ? performance.now() : Date.now();
+    if (now - lastKeyHighlight < 20) return;
+    lastKeyHighlight = now;
     const normalized = normalizeKeyLabel(key);
     const el = keyElements.get(normalized);
     if (!el) return;
