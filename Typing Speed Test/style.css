@@ -66,6 +66,22 @@
     50% { opacity: 0; }
 }
 
+/* Timer Progress */
+#progress-track {
+    height: 6px;
+    background: rgba(148, 163, 184, 0.25); /* slate-400/25 */
+    border-radius: 9999px;
+    overflow: hidden;
+}
+#progress-bar {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #135bec, #4f46e5);
+    transition: width 0.2s linear;
+    border-radius: 9999px;
+    box-shadow: 0 0 10px rgba(19, 91, 236, 0.35);
+}
+
 
 
 

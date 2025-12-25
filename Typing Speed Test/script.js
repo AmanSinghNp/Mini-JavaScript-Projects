@@ -4,6 +4,8 @@ const textDisplay = document.getElementById("text-display");
 const inputField = document.getElementById("input-field");
 const timeDisplay = document.getElementById("time-display");
 const wpmDisplay = document.getElementById("wpm-display");
+const progressBar = document.getElementById("progress-bar");
+const progressTrack = document.getElementById("progress-track");
 const restartBtn = document.getElementById("restart-btn");
 const headerChrome = document.getElementById("header-chrome");
 const instructionHint = document.getElementById("instruction-hint");
@@ -140,6 +142,7 @@ function initTimer() {
         timeLeft--;
         timeDisplay.innerText = timeLeft + "s";
         timeDisplay.setAttribute("aria-label", `Time remaining: ${timeLeft} seconds`);
+        updateProgressBar();
         
         // Live WPM update
         const timeElapsed = maxTime - timeLeft;
@@ -178,6 +181,9 @@ function endGame() {
     finalAccuracy.innerText = accuracy + "%";
     finalErrors.innerText = mistakes;
 
+    // Deplete progress on completion
+    setProgress(0);
+
     // Save Result
     saveResult(wpm, accuracy, mistakes);
 
@@ -210,6 +216,7 @@ function resetGame() {
     inputField.disabled = false;
     timeDisplay.innerText = timeLeft + "s";
     wpmDisplay.innerText = 0;
+    setProgress(100);
     
     // Reset UI
     headerChrome.classList.remove("opacity-20");
@@ -374,6 +381,20 @@ inputField.addEventListener("paste", (e) => {
     initTyping();
 });
 
+// Progress helpers
+function setProgress(percent) {
+    if (!progressBar || !progressTrack) return;
+    const clamped = Math.max(0, Math.min(100, percent));
+    progressBar.style.width = clamped + "%";
+    progressTrack.setAttribute("aria-valuenow", clamped.toString());
+}
+
+function updateProgressBar() {
+    if (maxTime <= 0) return;
+    const percent = (timeLeft / maxTime) * 100;
+    setProgress(percent);
+}
+
 // Event Listeners
 inputField.addEventListener("input", initTyping);
 restartBtn.addEventListener("click", resetGame);
@@ -450,3 +471,4 @@ textDisplay.addEventListener("click", () => inputField.focus());
 
 // Initialize
 loadParagraph();
+setProgress(100);
