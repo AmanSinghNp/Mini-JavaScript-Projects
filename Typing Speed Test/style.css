@@ -82,6 +82,48 @@
     box-shadow: 0 0 10px rgba(19, 91, 236, 0.35);
 }
 
+/* Virtual Keyboard */
+#virtual-keyboard .kb-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+#virtual-keyboard .kb-key {
+    min-width: 36px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(148, 163, 184, 0.25); /* slate-400/25 */
+    color: #e5e7eb; /* gray-200 */
+    font-weight: 600;
+    font-size: 14px;
+    text-align: center;
+    transition: all 0.12s ease;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.dark #virtual-keyboard .kb-key {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+#virtual-keyboard .kb-key.key-wide {
+    min-width: 72px;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+#virtual-keyboard .kb-key.key-space {
+    min-width: 200px;
+}
+
+#virtual-keyboard .kb-key.key-active {
+    background: #135bec;
+    color: #fff;
+    border-color: rgba(19, 91, 236, 0.8);
+    box-shadow: 0 4px 14px rgba(19, 91, 236, 0.35);
+}
+
 
 
 

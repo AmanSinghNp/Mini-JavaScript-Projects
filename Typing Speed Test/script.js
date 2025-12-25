@@ -6,6 +6,7 @@ const timeDisplay = document.getElementById("time-display");
 const wpmDisplay = document.getElementById("wpm-display");
 const progressBar = document.getElementById("progress-bar");
 const progressTrack = document.getElementById("progress-track");
+const virtualKeyboard = document.getElementById("virtual-keyboard");
 const restartBtn = document.getElementById("restart-btn");
 const headerChrome = document.getElementById("header-chrome");
 const instructionHint = document.getElementById("instruction-hint");
@@ -32,6 +33,7 @@ let isTyping = false;
 let gameEnded = false;
 // Track which character indices had mistakes
 let mistakeIndices = new Set();
+let keyElements = new Map();
 
 function loadParagraph() {
     // Validate text is not empty
@@ -395,6 +397,82 @@ function updateProgressBar() {
     setProgress(percent);
 }
 
+// Virtual keyboard rendering + highlighting
+function normalizeKeyLabel(key) {
+    if (key === " ") return "SPACE";
+    if (key.length === 1) return key.toUpperCase();
+    const map = {
+        Enter: "ENTER",
+        Backspace: "BACKSPACE",
+        Tab: "TAB",
+        Spacebar: "SPACE",
+    };
+    return map[key] || key.toUpperCase();
+}
+
+function renderKeyboard() {
+    if (!virtualKeyboard) return;
+    const layout = [
+        ["1","2","3","4","5","6","7","8","9","0","-","="],
+        ["Q","W","E","R","T","Y","U","I","O","P"],
+        ["A","S","D","F","G","H","J","K","L",";"],
+        ["Z","X","C","V","B","N","M",",",".","/"],
+        ["SPACE","BACKSPACE","ENTER"]
+    ];
+
+    virtualKeyboard.innerHTML = "";
+    keyElements = new Map();
+
+    layout.forEach(rowKeys => {
+        const row = document.createElement("div");
+        row.className = "kb-row";
+
+        rowKeys.forEach(keyLabel => {
+            const keyButton = document.createElement("button");
+            keyButton.type = "button";
+            keyButton.className = "kb-key";
+            keyButton.setAttribute("aria-hidden", "true");
+            keyButton.tabIndex = -1;
+
+            const normalized = normalizeKeyLabel(keyLabel);
+
+            // Display label
+            if (normalized === "SPACE") {
+                keyButton.textContent = "Space";
+                keyButton.classList.add("key-space");
+            } else if (normalized === "BACKSPACE" || normalized === "ENTER") {
+                keyButton.textContent = normalized.charAt(0) + normalized.slice(1).toLowerCase();
+                keyButton.classList.add("key-wide");
+            } else {
+                keyButton.textContent = keyLabel;
+            }
+
+            keyElements.set(normalized, keyButton);
+            row.appendChild(keyButton);
+        });
+
+        virtualKeyboard.appendChild(row);
+    });
+}
+
+function highlightKey(key) {
+    const normalized = normalizeKeyLabel(key);
+    const el = keyElements.get(normalized);
+    if (!el) return;
+    el.classList.add("key-active");
+}
+
+function clearKey(key) {
+    const normalized = normalizeKeyLabel(key);
+    const el = keyElements.get(normalized);
+    if (!el) return;
+    el.classList.remove("key-active");
+}
+
+function clearAllKeys() {
+    keyElements.forEach(el => el.classList.remove("key-active"));
+}
+
 // Event Listeners
 inputField.addEventListener("input", initTyping);
 restartBtn.addEventListener("click", resetGame);
@@ -416,6 +494,23 @@ if (tryAgainBtn) {
 resultsOverlay.addEventListener("click", (e) => {
     if (e.target === resultsOverlay) closeResults();
 });
+
+// Virtual keyboard highlight events
+document.addEventListener("keydown", (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (!virtualKeyboard) return;
+    // Ignore when overlays are open
+    if (!historyOverlay.classList.contains("hidden")) return;
+    if (!resultsOverlay.classList.contains("hidden")) return;
+    highlightKey(e.key === " " ? "SPACE" : e.key);
+});
+
+document.addEventListener("keyup", (e) => {
+    if (!virtualKeyboard) return;
+    clearKey(e.key === " " ? "SPACE" : e.key);
+});
+
+window.addEventListener("blur", clearAllKeys);
 
 // Escape key handler for closing modals
 document.addEventListener("keydown", (e) => {
@@ -472,3 +567,4 @@ textDisplay.addEventListener("click", () => inputField.focus());
 // Initialize
 loadParagraph();
 setProgress(100);
+renderKeyboard();
