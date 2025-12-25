@@ -201,23 +201,67 @@ function resetGame() {
 
 // History Functions
 function saveResult(wpm, accuracy, mistakes) {
-    const history = JSON.parse(localStorage.getItem('typingTestHistory') || '[]');
-    const newResult = {
-        date: new Date().toISOString(),
-        wpm: wpm,
-        accuracy: accuracy,
-        mistakes: mistakes
-    };
-    
-    history.unshift(newResult);
-    // Keep last 50 attempts
-    if (history.length > 50) history.pop();
-    
-    localStorage.setItem('typingTestHistory', JSON.stringify(history));
+    try {
+        const historyStr = localStorage.getItem('typingTestHistory');
+        let history = [];
+        
+        if (historyStr) {
+            try {
+                history = JSON.parse(historyStr);
+            } catch (parseError) {
+                console.warn('Failed to parse history from localStorage:', parseError);
+                history = [];
+            }
+        }
+        
+        const newResult = {
+            date: new Date().toISOString(),
+            wpm: wpm,
+            accuracy: accuracy,
+            mistakes: mistakes
+        };
+        
+        history.unshift(newResult);
+        // Keep last 50 attempts
+        if (history.length > 50) history.pop();
+        
+        localStorage.setItem('typingTestHistory', JSON.stringify(history));
+    } catch (error) {
+        // Handle quota exceeded or disabled localStorage
+        if (error.name === 'QuotaExceededError') {
+            console.warn('localStorage quota exceeded. History not saved.');
+        } else if (error.name === 'SecurityError') {
+            console.warn('localStorage access denied. History not saved.');
+        } else {
+            console.warn('Failed to save result to localStorage:', error);
+        }
+        // Gracefully degrade - continue without saving
+    }
 }
 
 function loadHistory() {
-    const history = JSON.parse(localStorage.getItem('typingTestHistory') || '[]');
+    let history = [];
+    
+    try {
+        const historyStr = localStorage.getItem('typingTestHistory');
+        if (historyStr) {
+            try {
+                history = JSON.parse(historyStr);
+            } catch (parseError) {
+                console.warn('Failed to parse history from localStorage:', parseError);
+                history = [];
+            }
+        }
+    } catch (error) {
+        // Handle disabled localStorage
+        if (error.name === 'SecurityError') {
+            console.warn('localStorage access denied.');
+        } else {
+            console.warn('Failed to load history from localStorage:', error);
+        }
+        history = [];
+    }
+    
     historyList.innerHTML = '';
 
     if (history.length === 0) {
