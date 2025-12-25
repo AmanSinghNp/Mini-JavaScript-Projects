@@ -25,6 +25,9 @@ let timeLeft = maxTime;
 let charIndex = 0;
 let mistakes = 0;
 let isTyping = false;
+let gameEnded = false;
+// Track which character indices had mistakes
+let mistakeIndices = new Set();
 
 function loadParagraph() {
     const chars = text.split("");
@@ -60,8 +63,17 @@ function initTyping() {
             // Check correctness
             if (chars[charIndex].innerText === typedChar) {
                 chars[charIndex].classList.add("char-correct");
+                // Remove from mistake indices if it was previously incorrect
+                if (mistakeIndices.has(charIndex)) {
+                    mistakeIndices.delete(charIndex);
+                    mistakes--;
+                }
             } else {
-                mistakes++;
+                // Only increment if this index wasn't already marked as a mistake
+                if (!mistakeIndices.has(charIndex)) {
+                    mistakes++;
+                    mistakeIndices.add(charIndex);
+                }
                 chars[charIndex].classList.add("char-incorrect");
             }
 
@@ -83,6 +95,11 @@ function initTyping() {
                  chars[charIndex].classList.remove("char-active");
              }
              charIndex--;
+             // Decrement mistake count if this index had a mistake
+             if (mistakeIndices.has(charIndex)) {
+                 mistakeIndices.delete(charIndex);
+                 mistakes--;
+             }
              chars[charIndex].classList.remove("char-correct", "char-incorrect");
         }
         // Set new active at current index
@@ -107,7 +124,11 @@ function initTimer() {
 }
 
 function endGame() {
-    clearInterval(timer);
+    // Prevent double calls
+    if (gameEnded) return;
+    gameEnded = true;
+    
+    if (timer) clearInterval(timer);
     inputField.disabled = true;
     
     // Calculate Stats
@@ -117,8 +138,12 @@ function endGame() {
     let wpm = Math.round(((charIndex - mistakes) / 5) / timeInMinutes);
     wpm = (wpm < 0 || !wpm || wpm === Infinity) ? 0 : wpm;
     
-    let accuracy = Math.round(((charIndex - mistakes) / charIndex) * 100);
-    if (isNaN(accuracy)) accuracy = 0;
+    // Fix division by zero in accuracy calculation
+    let accuracy = 0;
+    if (charIndex > 0) {
+        accuracy = Math.round(((charIndex - mistakes) / charIndex) * 100);
+        if (isNaN(accuracy)) accuracy = 0;
+    }
 
     finalWpm.innerText = wpm;
     finalAccuracy.innerText = accuracy + "%";
@@ -139,11 +164,13 @@ function endGame() {
 
 function resetGame() {
     loadParagraph();
-    clearInterval(timer);
+    if (timer) clearInterval(timer);
     timeLeft = maxTime;
     charIndex = 0;
     mistakes = 0;
     isTyping = false;
+    gameEnded = false;
+    mistakeIndices.clear();
     inputField.value = "";
     inputField.disabled = false;
     timeDisplay.innerText = timeLeft + "s";
