@@ -247,14 +247,24 @@
             >
               0
             </div>
-            <div class="flex gap-6 justify-center mb-4 text-gray-500 dark:text-gray-400 text-sm">
+            <div
+              class="flex gap-6 justify-center mb-4 text-gray-500 dark:text-gray-400 text-sm"
+            >
               <div class="flex items-center gap-2">
                 <span class="font-semibold">Raw WPM:</span>
-                <span id="final-raw-wpm" class="font-mono text-gray-800 dark:text-gray-100">0</span>
+                <span
+                  id="final-raw-wpm"
+                  class="font-mono text-gray-800 dark:text-gray-100"
+                  >0</span
+                >
               </div>
               <div class="flex items-center gap-2">
                 <span class="font-semibold">CPM:</span>
-                <span id="final-cpm" class="font-mono text-gray-800 dark:text-gray-100">0</span>
+                <span
+                  id="final-cpm"
+                  class="font-mono text-gray-800 dark:text-gray-100"
+                  >0</span
+                >
               </div>
             </div>
             <div class="flex gap-8 justify-center mb-6">
@@ -369,7 +379,8 @@
         <div class="grid md:grid-cols-2 gap-4">
           <!-- Mode -->
           <div class="flex flex-col gap-2">
-            <label class="text-sm font-semibold text-gray-700 dark:text-gray-200"
+            <label
+              class="text-sm font-semibold text-gray-700 dark:text-gray-200"
               >Mode</label
             >
             <select
@@ -383,7 +394,8 @@
 
           <!-- Time Presets -->
           <div class="flex flex-col gap-2" id="time-select-group">
-            <label class="text-sm font-semibold text-gray-700 dark:text-gray-200"
+            <label
+              class="text-sm font-semibold text-gray-700 dark:text-gray-200"
               >Time limit</label
             >
             <select
@@ -399,7 +411,8 @@
 
           <!-- Word Count Presets -->
           <div class="flex flex-col gap-2 hidden" id="words-select-group">
-            <label class="text-sm font-semibold text-gray-700 dark:text-gray-200"
+            <label
+              class="text-sm font-semibold text-gray-700 dark:text-gray-200"
               >Word count</label
             >
             <select
@@ -414,7 +427,8 @@
 
           <!-- Text Source -->
           <div class="flex flex-col gap-2">
-            <label class="text-sm font-semibold text-gray-700 dark:text-gray-200"
+            <label
+              class="text-sm font-semibold text-gray-700 dark:text-gray-200"
               >Text source</label
             >
             <select
@@ -429,32 +443,75 @@
 
         <!-- Difficulty Toggles -->
         <div class="mt-4 grid md:grid-cols-2 gap-4">
-          <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
-            <input type="checkbox" id="toggle-case" class="rounded border-gray-300 dark:border-gray-700" />
+          <label
+            class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200"
+          >
+            <input
+              type="checkbox"
+              id="toggle-case"
+              class="rounded border-gray-300 dark:border-gray-700"
+            />
             Case sensitive
           </label>
-          <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
-            <input type="checkbox" id="toggle-punctuation" class="rounded border-gray-300 dark:border-gray-700" checked />
+          <label
+            class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200"
+          >
+            <input
+              type="checkbox"
+              id="toggle-punctuation"
+              class="rounded border-gray-300 dark:border-gray-700"
+              checked
+            />
             Include punctuation
           </label>
-          <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
-            <input type="checkbox" id="toggle-nobackspace" class="rounded border-gray-300 dark:border-gray-700" />
+          <label
+            class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200"
+          >
+            <input
+              type="checkbox"
+              id="toggle-nobackspace"
+              class="rounded border-gray-300 dark:border-gray-700"
+            />
             No backspace mode
           </label>
-          <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
-            <input type="checkbox" id="toggle-strict" class="rounded border-gray-300 dark:border-gray-700" />
+          <label
+            class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200"
+          >
+            <input
+              type="checkbox"
+              id="toggle-strict"
+              class="rounded border-gray-300 dark:border-gray-700"
+            />
             Strict mode (must type correctly to advance)
           </label>
-          <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
-            <input type="checkbox" id="toggle-contrast" class="rounded border-gray-300 dark:border-gray-700" />
+          <label
+            class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200"
+          >
+            <input
+              type="checkbox"
+              id="toggle-contrast"
+              class="rounded border-gray-300 dark:border-gray-700"
+            />
             High contrast
           </label>
-          <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
-            <input type="checkbox" id="toggle-large-text" class="rounded border-gray-300 dark:border-gray-700" />
+          <label
+            class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200"
+          >
+            <input
+              type="checkbox"
+              id="toggle-large-text"
+              class="rounded border-gray-300 dark:border-gray-700"
+            />
             Larger text
           </label>
-          <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
-            <input type="checkbox" id="toggle-feedback" class="rounded border-gray-300 dark:border-gray-700" />
+          <label
+            class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200"
+          >
+            <input
+              type="checkbox"
+              id="toggle-feedback"
+              class="rounded border-gray-300 dark:border-gray-700"
+            />
             Sound / haptic feedback
           </label>
         </div>
@@ -520,7 +577,9 @@
           </button>
         </div>
         <div class="flex flex-wrap gap-3 items-center mb-4">
-          <label class="text-sm text-gray-500 dark:text-gray-300 flex items-center gap-2">
+          <label
+            class="text-sm text-gray-500 dark:text-gray-300 flex items-center gap-2"
+          >
             Filter:
             <select
               id="history-filter"

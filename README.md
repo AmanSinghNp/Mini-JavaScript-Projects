@@ -105,6 +105,7 @@ A brick-breaking arcade game powered by the custom physics engine.
 - **[Color Flipper](./Color%20Flipper/):** Background color generator demonstrating basic DOM manipulation.
 - **[Random Quote Generator](./Random%20Quote%20Generator/):** Displays random inspirational quotes.
 - **[Palindrome Checker](./Palindrome%20Checker/):** Checks whether input text reads the same forwards and backwards.
+- **[Stack Visualizer](./Stack%20Visualization/):** Interactive visualization of Stack data structure operations (Push, Pop, Peek) with animations.
 
 ---
 

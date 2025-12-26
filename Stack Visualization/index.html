@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Stack Visualizer</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="stylesheet" href="style.css" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+            },
+            colors: {
+              primary: "#6366f1", // Indigo 500
+              "primary-hover": "#4f46e5", // Indigo 600
+              secondary: "#ec4899", // Pink 500
+              success: "#22c55e", // Green 500
+              warning: "#eab308", // Yellow 500
+              danger: "#ef4444", // Red 500
+              surface: "#ffffff",
+              background: "#f8fafc", // Slate 50
+            },
+            boxShadow: {
+              glass: "0 8px 32px 0 rgba(31, 38, 135, 0.07)",
+              card: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body
+    class="bg-background text-slate-800 font-sans min-h-screen flex flex-col"
+  >
+    <!-- Header -->
+    <header
+      class="bg-surface/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-10"
+    >
+      <div
+        class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between"
+      >
+        <div class="flex items-center gap-3">
+          <div class="p-2 bg-primary/10 rounded-lg text-primary">
+            <span class="material-symbols-outlined">layers</span>
+          </div>
+          <h1 class="text-xl font-bold tracking-tight text-slate-900">
+            Stack Visualizer
+          </h1>
+        </div>
+        <a
+          href="../index.html"
+          class="text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors flex items-center gap-1"
+        >
+          <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+          Back
+        </a>
+      </div>
+    </header>
+
+    <main
+      class="flex-1 max-w-5xl mx-auto w-full p-4 md:p-8 grid md:grid-cols-[350px_1fr] gap-8"
+    >
+      <!-- Controls & Info Panel -->
+      <div class="flex flex-col gap-6">
+        <!-- Controls -->
+        <div
+          class="bg-surface p-6 rounded-2xl shadow-card border border-slate-100"
+        >
+          <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-slate-400">tune</span>
+            Operations
+          </h2>
+
+          <div class="flex flex-col gap-4">
+            <!-- Push Control -->
+            <div class="flex gap-2">
+              <input
+                type="text"
+                id="push-input"
+                placeholder="Value"
+                maxlength="5"
+                class="flex-1 rounded-lg border-slate-200 focus:border-primary focus:ring-primary/20 text-sm"
+                autocomplete="off"
+              />
+              <button
+                id="push-btn"
+                class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 shadow-sm shadow-indigo-200"
+              >
+                <span class="material-symbols-outlined text-[20px]">add</span>
+                Push
+              </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                id="pop-btn"
+                class="bg-white border border-slate-200 hover:border-danger hover:text-danger text-slate-700 px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
+              >
+                <span class="material-symbols-outlined text-[20px]"
+                  >remove</span
+                >
+                Pop
+              </button>
+              <button
+                id="peek-btn"
+                class="bg-white border border-slate-200 hover:border-warning hover:text-warning text-slate-700 px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
+              >
+                <span class="material-symbols-outlined text-[20px]"
+                  >visibility</span
+                >
+                Peek
+              </button>
+            </div>
+
+            <button
+              id="clear-btn"
+              class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 mt-2"
+            >
+              <span class="material-symbols-outlined text-[20px]"
+                >delete_sweep</span
+              >
+              Clear Stack
+            </button>
+          </div>
+        </div>
+
+        <!-- Info / Stats -->
+        <div
+          class="bg-surface p-6 rounded-2xl shadow-card border border-slate-100 flex-1"
+        >
+          <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-slate-400">info</span>
+            Status
+          </h2>
+
+          <div class="space-y-4">
+            <div
+              class="flex justify-between items-center p-3 bg-slate-50 rounded-lg"
+            >
+              <span class="text-slate-500 text-sm font-medium">Size</span>
+              <span id="stack-size" class="text-slate-900 font-bold text-lg"
+                >0</span
+              >
+            </div>
+
+            <div
+              class="flex justify-between items-center p-3 bg-slate-50 rounded-lg"
+            >
+              <span class="text-slate-500 text-sm font-medium">Top Item</span>
+              <span id="top-item" class="text-slate-900 font-bold text-lg"
+                >-</span
+              >
+            </div>
+
+            <div class="p-3 bg-slate-50 rounded-lg min-h-[60px]">
+              <span
+                class="text-slate-500 text-xs font-bold uppercase tracking-wider block mb-1"
+                >Log</span
+              >
+              <p id="message-box" class="text-sm text-slate-600 leading-snug">
+                Ready to start.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visualization Area -->
+      <div
+        class="bg-surface rounded-2xl shadow-card border border-slate-100 p-8 flex flex-col relative overflow-hidden"
+      >
+        <div
+          class="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none"
+        ></div>
+
+        <div class="flex items-center justify-between mb-6 relative z-10">
+          <h2 class="text-lg font-semibold flex items-center gap-2">
+            <span class="material-symbols-outlined text-slate-400"
+              >view_kanban</span
+            >
+            Stack View
+          </h2>
+          <span
+            class="text-xs font-medium px-2 py-1 bg-slate-100 rounded text-slate-500"
+            >Max Capacity: 7</span
+          >
+        </div>
+
+        <!-- The Bucket -->
+        <div
+          class="flex-1 flex justify-center items-end relative z-10 min-h-[400px]"
+        >
+          <div
+            class="relative w-48 h-full border-b-4 border-l-4 border-r-4 border-slate-300 rounded-b-xl bg-slate-50/50 flex flex-col-reverse justify-start items-center p-2 gap-2 transition-all"
+            id="stack-container"
+          >
+            <!-- Items will be injected here -->
+            <div
+              class="text-slate-300 text-sm font-medium absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+              id="empty-message"
+            >
+              Stack is Empty
+            </div>
+          </div>
+
+          <!-- LIFO Indicator -->
+          <div
+            class="absolute right-10 top-1/2 -translate-y-1/2 hidden lg:flex flex-col gap-12 text-slate-400"
+          >
+            <div class="flex items-center gap-3">
+              <span
+                class="text-xs font-bold uppercase [writing-mode:vertical-rl] rotate-180"
+                >Push</span
+              >
+              <span class="material-symbols-outlined text-4xl animate-bounce"
+                >arrow_downward</span
+              >
+            </div>
+            <div class="flex items-center gap-3">
+              <span
+                class="text-xs font-bold uppercase [writing-mode:vertical-rl] rotate-180"
+                >Pop</span
+              >
+              <span class="material-symbols-outlined text-4xl animate-bounce"
+                >arrow_upward</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
