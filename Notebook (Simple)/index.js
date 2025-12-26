@@ -73,11 +73,22 @@ class NotebookApp {
 
       const date = new Date(note.updated).toLocaleDateString();
 
-      li.innerHTML = `
-                <div class="note-title">${note.title || "Untitled"}</div>
-                <div class="note-preview">${preview || "No content"}</div>
-                <div class="note-date">${date}</div>
-            `;
+      // Use textContent for security (prevents XSS)
+      const titleDiv = document.createElement("div");
+      titleDiv.className = "note-title";
+      titleDiv.textContent = note.title || "Untitled";
+
+      const previewDiv = document.createElement("div");
+      previewDiv.className = "note-preview";
+      previewDiv.textContent = preview || "No content";
+
+      const dateDiv = document.createElement("div");
+      dateDiv.className = "note-date";
+      dateDiv.textContent = date;
+
+      li.appendChild(titleDiv);
+      li.appendChild(previewDiv);
+      li.appendChild(dateDiv);
 
       notesList.appendChild(li);
     });
