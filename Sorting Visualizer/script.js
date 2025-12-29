@@ -181,7 +181,7 @@ async function insertionSort() {
             const bars = document.querySelectorAll('.bar');
             bars[j+1].style.height = bars[j].style.height;
             
-            await delay(DELAY_MS);
+            await delay(delayMs);
             await setColor([j, j+1], null);
             
             j = j - 1;
