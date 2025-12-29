@@ -15,3 +15,4 @@ An interactive visualization of popular **Sorting Algorithms**.
 3.  Select an algorithm (default: Bubble Sort).
 4.  Click **Start Sorting** to watch the animation.
 
+

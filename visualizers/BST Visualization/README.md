@@ -14,3 +14,4 @@ An interactive visualization of a **Binary Search Tree**.
 1.  Open `index.html` in your web browser.
 2.  Use the inputs to build and search the tree.
 
+

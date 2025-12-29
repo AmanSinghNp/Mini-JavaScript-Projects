@@ -18,3 +18,4 @@ An interactive visualization of a **Min-Heap**.
 2.  Use the inputs to Insert numbers.
 3.  Click Extract Min to remove the smallest number.
 
+

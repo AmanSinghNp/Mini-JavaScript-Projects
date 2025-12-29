@@ -16,3 +16,4 @@ A simple, interactive visualization of the **Queue** data structure (FIFO - Firs
 2. Use the input field to type a value (max 5 chars).
 3. Click buttons or press Enter to interact.
 
+

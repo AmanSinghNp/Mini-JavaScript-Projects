@@ -19,3 +19,4 @@ An interactive visualization of a **Hash Table** using Chaining for collision re
 2.  Enter a numeric **Key** and text **Value**.
 3.  Click **Put** to insert.
 
+

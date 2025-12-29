@@ -15,3 +15,4 @@ A simple, interactive visualization of a **Singly Linked List**.
 1.  Open `index.html` in your web browser.
 2.  Use the inputs to add or remove values.
 
+
