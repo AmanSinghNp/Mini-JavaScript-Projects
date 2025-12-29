@@ -9,6 +9,7 @@ const enqueueBtn = document.getElementById('enqueue-btn');
 const dequeueBtn = document.getElementById('dequeue-btn');
 const peekBtn = document.getElementById('peek-btn');
 const clearBtn = document.getElementById('clear-btn');
+const seedBtn = document.getElementById('seed-btn');
 const emptyMessage = document.getElementById('empty-message');
 const queueSizeDisplay = document.getElementById('queue-size');
 const frontItemDisplay = document.getElementById('front-item');
@@ -170,6 +171,7 @@ function toggleControls(enable) {
   dequeueBtn.disabled = !enable;
   peekBtn.disabled = !enable;
   clearBtn.disabled = !enable;
+  seedBtn.disabled = !enable;
   
   if (enable) {
     enqueueBtn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -185,6 +187,7 @@ enqueueBtn.addEventListener('click', enqueue);
 dequeueBtn.addEventListener('click', dequeue);
 peekBtn.addEventListener('click', peek);
 clearBtn.addEventListener('click', clear);
+seedBtn.addEventListener('click', seedQueue);
 
 // Allow Enter key in input
 enqueueInput.addEventListener('keypress', (e) => {
@@ -195,4 +198,24 @@ enqueueInput.addEventListener('keypress', (e) => {
 
 // Init
 updateStats();
+
+// Seed demo data
+function seedQueue() {
+  toggleControls(false);
+  queue.length = 0;
+  queueContainer.innerHTML = '';
+  queueContainer.appendChild(emptyMessage);
+  emptyMessage.style.display = 'block';
+
+  const sample = ['A', 'B', 'C'];
+  sample.forEach((value) => {
+    queue.push(value);
+    queueContainer.appendChild(createQueueItem(value));
+  });
+
+  updateStats();
+  log('Seeded queue with demo values (A, B, C).', 'success');
+  toggleControls(true);
+}
+
 

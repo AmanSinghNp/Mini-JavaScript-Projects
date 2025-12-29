@@ -60,6 +60,7 @@ const putBtn = document.getElementById('put-btn');
 const getBtn = document.getElementById('get-btn');
 const removeBtn = document.getElementById('remove-btn');
 const clearBtn = document.getElementById('clear-btn');
+const seedBtn = document.getElementById('seed-btn');
 const messageBox = document.getElementById('message-box');
 
 // Helper: Log
@@ -220,7 +221,7 @@ function clear() {
 }
 
 function toggleControls(enable) {
-    const btns = [putBtn, getBtn, removeBtn, clearBtn];
+    const btns = [putBtn, getBtn, removeBtn, clearBtn, seedBtn];
     btns.forEach(b => b.disabled = !enable);
 }
 
@@ -229,7 +230,29 @@ putBtn.addEventListener('click', put);
 getBtn.addEventListener('click', get);
 removeBtn.addEventListener('click', remove);
 clearBtn.addEventListener('click', clear);
+seedBtn.addEventListener('click', seedTable);
 
 // Init
 initTableUI();
+
+function seedTable() {
+    toggleControls(false);
+    hashTable.clear();
+    initTableUI();
+    const sample = [
+        { key: 12, value: 'Alpha' },
+        { key: 25, value: 'Beta' },
+        { key: 33, value: 'Gamma' },
+        { key: 44, value: 'Delta' }
+    ];
+
+    sample.forEach(({ key, value }) => {
+        const { index } = hashTable.put(key, value);
+        renderChain(index);
+    });
+
+    log('Seeded table with demo pairs.', 'success');
+    toggleControls(true);
+}
+
 

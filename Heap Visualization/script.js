@@ -58,6 +58,7 @@ const insertInput = document.getElementById('insert-input');
 const insertBtn = document.getElementById('insert-btn');
 const extractBtn = document.getElementById('extract-btn');
 const clearBtn = document.getElementById('clear-btn');
+const seedBtn = document.getElementById('seed-btn');
 const messageBox = document.getElementById('message-box');
 
 // Helper: Log
@@ -357,7 +358,7 @@ function clear() {
 }
 
 function toggleControls(enable) {
-    const btns = [insertBtn, extractBtn, clearBtn];
+    const btns = [insertBtn, extractBtn, clearBtn, seedBtn];
     btns.forEach(b => b.disabled = !enable);
 }
 
@@ -365,7 +366,18 @@ window.addEventListener('resize', draw);
 insertBtn.addEventListener('click', insert);
 extractBtn.addEventListener('click', extractMin);
 clearBtn.addEventListener('click', clear);
+seedBtn.addEventListener('click', seedHeap);
 
 // Init
 draw();
+
+function seedHeap() {
+    toggleControls(false);
+    const sample = [15, 7, 22, 3, 9, 18, 30].slice(0, MAX_SIZE);
+    heap.heap = [...sample];
+    draw();
+    log('Seeded heap with demo values.', 'success');
+    toggleControls(true);
+}
+
 

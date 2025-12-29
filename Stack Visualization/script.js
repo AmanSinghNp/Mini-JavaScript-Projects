@@ -9,6 +9,7 @@ const pushBtn = document.getElementById('push-btn');
 const popBtn = document.getElementById('pop-btn');
 const peekBtn = document.getElementById('peek-btn');
 const clearBtn = document.getElementById('clear-btn');
+const seedBtn = document.getElementById('seed-btn');
 const emptyMessage = document.getElementById('empty-message');
 const stackSizeDisplay = document.getElementById('stack-size');
 const topItemDisplay = document.getElementById('top-item');
@@ -179,6 +180,7 @@ function toggleControls(enable) {
   popBtn.disabled = !enable;
   peekBtn.disabled = !enable;
   clearBtn.disabled = !enable;
+  seedBtn.disabled = !enable;
   
   if (enable) {
     pushBtn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -194,6 +196,7 @@ pushBtn.addEventListener('click', push);
 popBtn.addEventListener('click', pop);
 peekBtn.addEventListener('click', peek);
 clearBtn.addEventListener('click', clear);
+seedBtn.addEventListener('click', seedStack);
 
 // Allow Enter key in input
 pushInput.addEventListener('keypress', (e) => {
@@ -204,4 +207,25 @@ pushInput.addEventListener('keypress', (e) => {
 
 // Init
 updateStats();
+
+function seedStack() {
+  toggleControls(false);
+  stack.length = 0;
+  stackContainer.innerHTML = '';
+  stackContainer.appendChild(emptyMessage);
+  emptyMessage.style.display = 'block';
+
+  const sample = ['X', 'Y', 'Z', 'W'].slice(0, MAX_CAPACITY);
+  sample.forEach((value) => {
+    stack.push(value);
+    stackContainer.appendChild(createStackItem(value));
+  });
+
+  updateStats();
+  log('Seeded stack with demo values.', 'success');
+  toggleControls(true);
+}
+
+
+
 

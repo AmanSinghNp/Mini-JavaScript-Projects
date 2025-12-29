@@ -1,8 +1,8 @@
 // Configuration
-const ARRAY_SIZE = 20;
 const MIN_VAL = 5;
 const MAX_VAL = 100;
-const DELAY_MS = 100;
+let arraySize = 20;
+let delayMs = 120;
 
 // State
 let array = [];
@@ -16,6 +16,10 @@ const startBtn = document.getElementById('start-btn');
 const compCountDisplay = document.getElementById('comp-count');
 const swapCountDisplay = document.getElementById('swap-count');
 const messageBox = document.getElementById('message-box');
+const sizeInput = document.getElementById('size-input');
+const speedInput = document.getElementById('speed-input');
+const sizeValue = document.getElementById('size-value');
+const speedValue = document.getElementById('speed-value');
 
 // Algo Buttons
 const algoBtns = {
@@ -38,19 +42,19 @@ function generateArray() {
     array = [];
     container.innerHTML = '';
     
-    for (let i = 0; i < ARRAY_SIZE; i++) {
+    for (let i = 0; i < arraySize; i++) {
         const val = Math.floor(Math.random() * (MAX_VAL - MIN_VAL + 1)) + MIN_VAL;
         array.push(val);
         
         const bar = document.createElement('div');
         bar.className = 'bar';
         bar.style.height = `${val}%`;
-        bar.style.width = `${100/ARRAY_SIZE}%`; // fluid width
+        bar.style.width = `${100/arraySize}%`; // fluid width
         container.appendChild(bar);
     }
     
     resetStats();
-    log(`Generated new array of ${ARRAY_SIZE} items.`);
+    log(`Generated new array of ${arraySize} items.`);
 }
 
 function resetStats() {
@@ -96,7 +100,7 @@ async function bubbleSort() {
             // Compare
             await setColor([j, j+1], 'bar-compare');
             await updateStats(1, 0);
-            await delay(DELAY_MS);
+            await delay(delayMs);
 
             if (array[j] > array[j + 1]) {
                 // Swap Logic
@@ -108,7 +112,7 @@ async function bubbleSort() {
                 await setColor([j, j+1], 'bar-swap');
                 await swapBars(j, j+1);
                 await updateStats(0, 1);
-                await delay(DELAY_MS);
+                await delay(delayMs);
             }
             
             // Reset color
@@ -130,7 +134,7 @@ async function selectionSort() {
 
             await setColor([j, minIdx], 'bar-compare');
             await updateStats(1, 0);
-            await delay(DELAY_MS/2);
+            await delay(delayMs/2);
 
             if (array[j] < array[minIdx]) {
                 await setColor([minIdx], null); // unmark old min
@@ -162,7 +166,7 @@ async function insertionSort() {
         let j = i - 1;
         
         await setColor([i], 'bar-compare'); // Key
-        await delay(DELAY_MS);
+        await delay(delayMs);
 
         while (j >= 0 && array[j] > key) {
             if(!isSorting) return;
@@ -244,6 +248,20 @@ Object.keys(algoBtns).forEach(algo => {
     });
 });
 
+// Controls: size & speed
+sizeInput.addEventListener('input', (e) => {
+    if(isSorting) return;
+    arraySize = parseInt(e.target.value, 10);
+    sizeValue.textContent = arraySize;
+    generateArray();
+});
+
+speedInput.addEventListener('input', (e) => {
+    delayMs = parseInt(e.target.value, 10);
+    speedValue.textContent = delayMs;
+});
+
 // Init
 generateArray();
+
 

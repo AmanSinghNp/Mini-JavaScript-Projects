@@ -91,6 +91,7 @@ const appendBtn = document.getElementById('append-btn');
 const prependBtn = document.getElementById('prepend-btn');
 const removeBtn = document.getElementById('remove-btn');
 const clearBtn = document.getElementById('clear-btn');
+const seedBtn = document.getElementById('seed-btn');
 const listSizeDisplay = document.getElementById('list-size');
 const headValueDisplay = document.getElementById('head-value');
 const tailValueDisplay = document.getElementById('tail-value');
@@ -329,10 +330,35 @@ appendBtn.addEventListener('click', append);
 prependBtn.addEventListener('click', prepend);
 removeBtn.addEventListener('click', remove);
 clearBtn.addEventListener('click', clear);
+seedBtn.addEventListener('click', seedList);
 
 valueInput.addEventListener('keypress', e => { if(e.key === 'Enter') append(); });
 removeInput.addEventListener('keypress', e => { if(e.key === 'Enter') remove(); });
 
 // Init
 updateStats();
+
+function seedList() {
+    toggleControls(false);
+    list.clear();
+    listContainer.innerHTML = '';
+    listContainer.appendChild(emptyMessage);
+
+    const sample = ['A', 'B', 'C', 'D'].slice(0, MAX_NODES);
+    sample.forEach((value, idx) => {
+        list.append(value);
+        const nodeEl = createNodeElement(value);
+        if (idx > 0) {
+            nodeEl.prepend(createArrowElement());
+        }
+        listContainer.appendChild(nodeEl);
+    });
+
+    emptyMessage.style.display = sample.length === 0 ? 'block' : 'none';
+
+    updateStats();
+    log('Seeded list with demo values.', 'success');
+    toggleControls(true);
+}
+
 

@@ -72,6 +72,7 @@ const searchInput = document.getElementById('search-input');
 const insertBtn = document.getElementById('insert-btn');
 const searchBtn = document.getElementById('search-btn');
 const clearBtn = document.getElementById('clear-btn');
+const seedBtn = document.getElementById('seed-btn');
 const messageBox = document.getElementById('message-box');
 
 // Helper: Log
@@ -232,7 +233,7 @@ function clear() {
 }
 
 function toggleControls(enable) {
-    const btns = [insertBtn, searchBtn, clearBtn];
+    const btns = [insertBtn, searchBtn, clearBtn, seedBtn];
     btns.forEach(b => b.disabled = !enable);
 }
 
@@ -244,7 +245,20 @@ window.addEventListener('resize', () => {
 insertBtn.addEventListener('click', insert);
 searchBtn.addEventListener('click', search);
 clearBtn.addEventListener('click', clear);
+seedBtn.addEventListener('click', seedTree);
 
 // Init
 updatePositions();
+
+function seedTree() {
+    toggleControls(false);
+    bst.root = null;
+    const sample = [20, 10, 30, 5, 15, 25, 35];
+    sample.forEach(v => bst.insert(v));
+    updatePositions();
+    drawTree();
+    log('Seeded BST with demo values.', 'success');
+    toggleControls(true);
+}
+
 
