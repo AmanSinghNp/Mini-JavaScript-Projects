@@ -120,48 +120,59 @@
         class="relative w-full max-w-6xl aspect-video bg-black rounded-lg border-2 border-ui-border shadow-glow overflow-hidden z-10 flex flex-col"
       >
         <!-- The "Canvas" -->
-        <div class="relative flex-1 w-full h-full bg-[#050505] overflow-hidden group">
-            <canvas id="screen" class="w-full h-full block"></canvas>
-            
-            <!-- CRT Scanline Effect Overlay -->
-            <div
-                class="absolute inset-0 scanlines opacity-30 pointer-events-none"
-            ></div>
-            <div
-                class="absolute inset-0 shadow-crt pointer-events-none rounded-lg"
-            ></div>
-            
-            <!-- Crosshair -->
-            <div
-                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none text-primary/80"
+        <div
+          class="relative flex-1 w-full h-full bg-[#050505] overflow-hidden group"
+        >
+          <canvas id="screen" class="w-full h-full block"></canvas>
+
+          <!-- CRT Scanline Effect Overlay -->
+          <div
+            class="absolute inset-0 scanlines opacity-30 pointer-events-none"
+          ></div>
+          <div
+            class="absolute inset-0 shadow-crt pointer-events-none rounded-lg"
+          ></div>
+
+          <!-- Crosshair -->
+          <div
+            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none text-primary/80"
+          >
+            <span class="material-symbols-outlined text-3xl font-light"
+              >add</span
             >
-                <span class="material-symbols-outlined text-3xl font-light">add</span>
-            </div>
-            
-            <!-- Top Left: Mini Map -->
+          </div>
+
+          <!-- Top Left: Mini Map -->
+          <div
+            class="absolute top-4 left-4 w-32 h-32 bg-black/80 border border-primary/30 rounded p-1 backdrop-blur-sm shadow-lg"
+          >
+            <canvas
+              id="minimap"
+              class="w-full h-full bg-ui-dark rounded relative overflow-hidden"
+            ></canvas>
+          </div>
+
+          <!-- Top Right: FPS Counter -->
+          <div
+            class="absolute top-4 right-4 bg-black/60 border border-ui-border px-3 py-1 rounded text-[#9db99d] font-mono text-xs backdrop-blur-sm"
+          >
+            FPS: <span id="fps-counter" class="text-primary font-bold">60</span>
+          </div>
+
+          <!-- Messages/Log Area -->
+          <div
+            class="absolute top-20 left-1/2 -translate-x-1/2 text-center"
+            id="message-area"
+            style="display: none"
+          >
             <div
-                class="absolute top-4 left-4 w-32 h-32 bg-black/80 border border-primary/30 rounded p-1 backdrop-blur-sm shadow-lg"
+              class="bg-primary/10 border border-primary/30 text-primary px-4 py-1 rounded-full text-sm font-display uppercase tracking-widest animate-pulse"
             >
-                <canvas id="minimap" class="w-full h-full bg-ui-dark rounded relative overflow-hidden"></canvas>
+              Sector Clear
             </div>
-            
-            <!-- Top Right: FPS Counter -->
-            <div
-                class="absolute top-4 right-4 bg-black/60 border border-ui-border px-3 py-1 rounded text-[#9db99d] font-mono text-xs backdrop-blur-sm"
-            >
-                FPS: <span id="fps-counter" class="text-primary font-bold">60</span>
-            </div>
-            
-            <!-- Messages/Log Area -->
-            <div class="absolute top-20 left-1/2 -translate-x-1/2 text-center" id="message-area" style="display: none;">
-                <div
-                class="bg-primary/10 border border-primary/30 text-primary px-4 py-1 rounded-full text-sm font-display uppercase tracking-widest animate-pulse"
-                >
-                Sector Clear
-                </div>
-            </div>
+          </div>
         </div>
-        
+
         <!-- HUD / Status Bar -->
         <div
           class="h-20 bg-ui-dark border-t border-ui-border flex items-center px-6 gap-8 shrink-0"
@@ -220,16 +231,36 @@
             </div>
             <!-- Discrete ammo blocks -->
             <div class="flex gap-1 justify-end w-full">
-              <div class="h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm"></div>
-              <div class="h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm"></div>
-              <div class="h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm"></div>
-              <div class="h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm"></div>
-              <div class="h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm"></div>
-              <div class="h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm"></div>
-              <div class="h-4 w-2 bg-[#1a2e1a] border border-[#2a4e2a] rounded-sm"></div>
-              <div class="h-4 w-2 bg-[#1a2e1a] border border-[#2a4e2a] rounded-sm"></div>
-              <div class="h-4 w-2 bg-[#1a2e1a] border border-[#2a4e2a] rounded-sm"></div>
-              <div class="h-4 w-2 bg-[#1a2e1a] border border-[#2a4e2a] rounded-sm"></div>
+              <div
+                class="h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm"
+              ></div>
+              <div
+                class="h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm"
+              ></div>
+              <div
+                class="h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm"
+              ></div>
+              <div
+                class="h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm"
+              ></div>
+              <div
+                class="h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm"
+              ></div>
+              <div
+                class="h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm"
+              ></div>
+              <div
+                class="h-4 w-2 bg-[#1a2e1a] border border-[#2a4e2a] rounded-sm"
+              ></div>
+              <div
+                class="h-4 w-2 bg-[#1a2e1a] border border-[#2a4e2a] rounded-sm"
+              ></div>
+              <div
+                class="h-4 w-2 bg-[#1a2e1a] border border-[#2a4e2a] rounded-sm"
+              ></div>
+              <div
+                class="h-4 w-2 bg-[#1a2e1a] border border-[#2a4e2a] rounded-sm"
+              ></div>
             </div>
           </div>
         </div>
@@ -243,17 +274,35 @@
           id="dpad"
           class="size-32 bg-white/10 rounded-full border border-white/20 backdrop-blur-sm active:bg-white/20 transition-colors touch-none relative"
         >
-            <div class="absolute top-2 left-1/2 -translate-x-1/2 text-white/50 text-xs">W</div>
-            <div class="absolute bottom-2 left-1/2 -translate-x-1/2 text-white/50 text-xs">S</div>
-            <div class="absolute left-2 top-1/2 -translate-y-1/2 text-white/50 text-xs">A</div>
-            <div class="absolute right-2 top-1/2 -translate-y-1/2 text-white/50 text-xs">D</div>
+          <div
+            class="absolute top-2 left-1/2 -translate-x-1/2 text-white/50 text-xs"
+          >
+            W
+          </div>
+          <div
+            class="absolute bottom-2 left-1/2 -translate-x-1/2 text-white/50 text-xs"
+          >
+            S
+          </div>
+          <div
+            class="absolute left-2 top-1/2 -translate-y-1/2 text-white/50 text-xs"
+          >
+            A
+          </div>
+          <div
+            class="absolute right-2 top-1/2 -translate-y-1/2 text-white/50 text-xs"
+          >
+            D
+          </div>
         </div>
         <!-- Action Button -->
         <div
           id="btn-shoot"
           class="size-32 bg-white/10 rounded-full border border-white/20 backdrop-blur-sm active:bg-primary/20 transition-colors touch-none flex items-center justify-center"
         >
-            <span class="material-symbols-outlined text-4xl text-white/70">my_location</span>
+          <span class="material-symbols-outlined text-4xl text-white/70"
+            >my_location</span
+          >
         </div>
       </div>
     </main>
@@ -271,4 +320,3 @@
     <script type="module" src="main.js"></script>
   </body>
 </html>
-
