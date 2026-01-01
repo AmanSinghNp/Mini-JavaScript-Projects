@@ -1,7 +1,7 @@
 import { WORLD_MAP } from './map.js';
 import { player } from './player.js';
 import { textures, initTextures, TEXTURE_SIZE } from './textures.js';
-import { renderSprites, spawnSprite } from './sprite.js';
+import { renderSprites, spawnSprite, updateSprites } from './sprite.js';
 
 // Initialize procedural textures
 initTextures();
@@ -23,10 +23,28 @@ const debugDir = document.getElementById('debug-dir');
 
 let lastTime = 0;
 
-// Input handling
-const keys = {};
-window.addEventListener('keydown', (e) => { keys[e.code] = true; });
-window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+    // Input handling
+    const keys = {};
+    window.addEventListener('keydown', (e) => { 
+        keys[e.code] = true; 
+        if (e.code === 'Space' || e.code === 'ControlLeft') {
+            shoot();
+        }
+    });
+    window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+
+    // Shooting
+    function shoot() {
+        // Spawn projectile slightly in front of player
+        const spawnDist = 0.5;
+        const pX = player.x + player.dirX * spawnDist;
+        const pY = player.y + player.dirY * spawnDist;
+        
+        spawnSprite(pX, pY, 'projectile', player.dirX, player.dirY, 8.0); // 8.0 speed
+        
+        // Visual kickback (optional)
+        // const weaponEl = document.querySelector('.weapon-sprite'); // If we had one
+    }
 
 function resize() {
     // Make sure the canvas buffer matches the display size for crisp rendering
@@ -305,6 +323,7 @@ function gameLoop(time) {
 
     if (fpsCounter) fpsCounter.innerText = Math.round(1 / dt);
 
+    updateSprites(dt);
     update(dt);
     render();
     

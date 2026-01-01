@@ -1,16 +1,61 @@
 import { player } from './player.js';
 import { textures, TEXTURE_SIZE } from './textures.js';
+import { WORLD_MAP } from './map.js';
 
 export const sprites = [];
 
-export function spawnSprite(x, y, type) {
-    sprites.push({ x, y, type });
+export function spawnSprite(x, y, type, dirX = 0, dirY = 0, speed = 0) {
+    sprites.push({ x, y, type, dirX, dirY, speed });
 }
 
 export function removeSprite(sprite) {
     const index = sprites.indexOf(sprite);
     if (index > -1) {
         sprites.splice(index, 1);
+    }
+}
+
+export function updateSprites(dt) {
+    for (let i = sprites.length - 1; i >= 0; i--) {
+        const sprite = sprites[i];
+
+        // Projectile Logic
+        if (sprite.type === 'projectile') {
+            const moveStep = sprite.speed * dt;
+            const newX = sprite.x + sprite.dirX * moveStep;
+            const newY = sprite.y + sprite.dirY * moveStep;
+
+            // Check Wall Collision
+            if (WORLD_MAP[Math.floor(newX)] && WORLD_MAP[Math.floor(newX)][Math.floor(newY)] > 0) {
+                // Hit wall
+                removeSprite(sprite);
+                continue;
+            }
+
+            // Check Enemy Collision
+            let hitEnemy = false;
+            for (let j = sprites.length - 1; j >= 0; j--) {
+                const other = sprites[j];
+                if (other.type === 'enemy') {
+                    const dist = Math.sqrt((other.x - newX) ** 2 + (other.y - newY) ** 2);
+                    if (dist < 0.5) { // Hitbox size
+                        removeSprite(other); // Kill enemy
+                        removeSprite(sprite); // Destroy bullet
+                        hitEnemy = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!hitEnemy) {
+                sprite.x = newX;
+                sprite.y = newY;
+                
+                // Despawn if too far
+                const distFromPlayer = Math.sqrt((sprite.x - player.x)**2 + (sprite.y - player.y)**2);
+                if (distFromPlayer > 30) removeSprite(sprite);
+            }
+        }
     }
 }
 
@@ -84,4 +129,3 @@ export function renderSprites(ctx, canvas, zBuffer) {
         }
     }
 }
-
