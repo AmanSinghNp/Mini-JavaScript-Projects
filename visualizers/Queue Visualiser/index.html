@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Stack Visualizer</title>
+    <title>Queue Visualiser</title>
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
     <link
@@ -25,8 +25,8 @@
               sans: ["Inter", "sans-serif"],
             },
             colors: {
-              primary: "#6366f1", // Indigo 500
-              "primary-hover": "#4f46e5", // Indigo 600
+              primary: "#8b5cf6", // Violet 500
+              "primary-hover": "#7c3aed", // Violet 600
               secondary: "#ec4899", // Pink 500
               success: "#22c55e", // Green 500
               warning: "#eab308", // Yellow 500
@@ -48,15 +48,15 @@
   >
     <nav class="app-nav">
       <div class="nav-inner">
-        <a class="brand" href="../index.html">DS Visualizers</a>
+        <a class="brand" href="../index.html">DS Visualisers</a>
         <div class="links">
-          <a class="link" href="../Sorting Visualizer/index.html">Sorting</a>
-          <a class="link" href="../Stack Visualization/index.html">Stack</a>
-          <a class="link" href="../Queue Visualization/index.html">Queue</a>
-          <a class="link" href="../Linked List Visualization/index.html">Linked List</a>
-          <a class="link" href="../Hash Table Visualization/index.html">Hash Table</a>
-          <a class="link" href="../Heap Visualization/index.html">Heap</a>
-          <a class="link" href="../BST Visualization/index.html">BST</a>
+          <a class="link" href="../Sorting Visualiser/index.html">Sorting</a>
+          <a class="link" href="../Stack Visualiser/index.html">Stack</a>
+          <a class="link" href="../Queue Visualiser/index.html">Queue</a>
+          <a class="link" href="../Linked List Visualiser/index.html">Linked List</a>
+          <a class="link" href="../Hash Table Visualiser/index.html">Hash Table</a>
+          <a class="link" href="../Heap Visualiser/index.html">Heap</a>
+          <a class="link" href="../BST Visualiser/index.html">BST</a>
         </div>
       </div>
     </nav>
@@ -69,10 +69,10 @@
       >
         <div class="flex items-center gap-3">
           <div class="p-2 bg-primary/10 rounded-lg text-primary">
-            <span class="material-symbols-outlined">layers</span>
+            <span class="material-symbols-outlined">queue</span>
           </div>
           <h1 class="text-xl font-bold tracking-tight text-slate-900">
-            Stack Visualizer
+            Queue Visualiser
           </h1>
         </div>
         <a
@@ -100,34 +100,34 @@
           </h2>
 
           <div class="flex flex-col gap-4">
-            <!-- Push Control -->
+            <!-- Enqueue Control -->
             <div class="flex gap-2">
               <input
                 type="text"
-                id="push-input"
+                id="enqueue-input"
                 placeholder="Value"
                 maxlength="5"
                 class="flex-1 rounded-lg border-slate-200 focus:border-primary focus:ring-primary/20 text-sm"
                 autocomplete="off"
               />
               <button
-                id="push-btn"
-                class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 shadow-sm shadow-indigo-200"
+                id="enqueue-btn"
+                class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 shadow-sm shadow-violet-200"
               >
                 <span class="material-symbols-outlined text-[20px]">add</span>
-                Push
+                Enqueue
               </button>
             </div>
 
             <div class="grid grid-cols-2 gap-2">
               <button
-                id="pop-btn"
+                id="dequeue-btn"
                 class="bg-white border border-slate-200 hover:border-danger hover:text-danger text-slate-700 px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
               >
                 <span class="material-symbols-outlined text-[20px]"
                   >remove</span
                 >
-                Pop
+                Dequeue
               </button>
               <button
                 id="peek-btn"
@@ -147,14 +147,14 @@
               <span class="material-symbols-outlined text-[20px]"
                 >delete_sweep</span
               >
-              Clear Stack
+              Clear Queue
             </button>
             <button
               id="seed-btn"
               class="w-full bg-white border border-slate-200 hover:border-secondary hover:text-secondary text-slate-700 px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
             >
               <span class="material-symbols-outlined text-[20px]">auto_awesome</span>
-              Seed Demo Stack
+              Seed Demo Queue
             </button>
           </div>
         </div>
@@ -173,18 +173,28 @@
               class="flex justify-between items-center p-3 bg-slate-50 rounded-lg"
             >
               <span class="text-slate-500 text-sm font-medium">Size</span>
-              <span id="stack-size" class="text-slate-900 font-bold text-lg"
+              <span id="queue-size" class="text-slate-900 font-bold text-lg"
                 >0</span
               >
             </div>
 
-            <div
-              class="flex justify-between items-center p-3 bg-slate-50 rounded-lg"
-            >
-              <span class="text-slate-500 text-sm font-medium">Top Item</span>
-              <span id="top-item" class="text-slate-900 font-bold text-lg"
-                >-</span
-              >
+            <div class="grid grid-cols-2 gap-4">
+                <div
+                class="flex flex-col p-3 bg-slate-50 rounded-lg"
+                >
+                <span class="text-slate-500 text-xs font-medium uppercase">Front</span>
+                <span id="front-item" class="text-slate-900 font-bold text-lg"
+                    >-</span
+                >
+                </div>
+                <div
+                class="flex flex-col p-3 bg-slate-50 rounded-lg"
+                >
+                <span class="text-slate-500 text-xs font-medium uppercase">Rear</span>
+                <span id="rear-item" class="text-slate-900 font-bold text-lg"
+                    >-</span
+                >
+                </div>
             </div>
 
             <div class="p-3 bg-slate-50 rounded-lg min-h-[60px]">
@@ -208,12 +218,12 @@
           class="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none"
         ></div>
 
-        <div class="flex items-center justify-between mb-6 relative z-10">
+        <div class="flex items-center justify-between mb-12 relative z-10">
           <h2 class="text-lg font-semibold flex items-center gap-2">
             <span class="material-symbols-outlined text-slate-400"
               >view_kanban</span
             >
-            Stack View
+            Queue View
           </h2>
           <span
             class="text-xs font-medium px-2 py-1 bg-slate-100 rounded text-slate-500"
@@ -221,47 +231,39 @@
           >
         </div>
 
-        <!-- The Bucket -->
+        <!-- The Queue Channel -->
         <div
-          class="flex-1 flex justify-center items-end relative z-10 min-h-[400px]"
+          class="flex-1 flex justify-center items-center relative z-10 min-h-[300px]"
         >
+          <!-- Horizontal Container -->
           <div
-            class="relative w-48 h-full border-b-4 border-l-4 border-r-4 border-slate-300 rounded-b-xl bg-slate-50/50 flex flex-col-reverse justify-start items-center p-2 gap-2 transition-all"
-            id="stack-container"
+            class="relative h-24 w-full max-w-2xl border-t-4 border-b-4 border-slate-300 bg-slate-50/50 flex flex-row items-center px-2 gap-2 transition-all overflow-hidden"
+            id="queue-container"
           >
             <!-- Items will be injected here -->
             <div
-              class="text-slate-300 text-sm font-medium absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+              class="text-slate-300 text-sm font-medium absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none whitespace-nowrap"
               id="empty-message"
             >
-              Stack is Empty
+              Queue is Empty
             </div>
           </div>
 
-          <!-- LIFO Indicator -->
-          <div
-            class="absolute right-10 top-1/2 -translate-y-1/2 hidden lg:flex flex-col gap-12 text-slate-400"
-          >
-            <div class="flex items-center gap-3">
-              <span
-                class="text-xs font-bold uppercase [writing-mode:vertical-rl] rotate-180"
-                >Push</span
-              >
-              <span class="material-symbols-outlined text-4xl animate-bounce"
-                >arrow_downward</span
-              >
-            </div>
-            <div class="flex items-center gap-3">
-              <span
-                class="text-xs font-bold uppercase [writing-mode:vertical-rl] rotate-180"
-                >Pop</span
-              >
-              <span class="material-symbols-outlined text-4xl animate-bounce"
-                >arrow_upward</span
-              >
-            </div>
-          </div>
+          <!-- Labels -->
+           <div class="absolute -top-8 left-0 text-slate-400 text-xs font-bold uppercase flex flex-col items-center">
+             <span>Front</span>
+             <span class="material-symbols-outlined text-sm">arrow_downward</span>
+           </div>
+           <div class="absolute -top-8 right-0 text-slate-400 text-xs font-bold uppercase flex flex-col items-center">
+             <span>Rear</span>
+             <span class="material-symbols-outlined text-sm">arrow_downward</span>
+           </div>
         </div>
+        
+        <div class="text-center text-slate-400 text-xs mt-4">
+             FIFO (First In, First Out)
+        </div>
+
       </div>
     </main>
 

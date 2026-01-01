@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Hash Table Visualizer</title>
+    <title>BST Visualiser</title>
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
     <link
@@ -25,12 +25,12 @@
               sans: ["Inter", "sans-serif"],
             },
             colors: {
-              primary: "#0ea5e9", // Sky 500
-              "primary-hover": "#0284c7", // Sky 600
-              secondary: "#8b5cf6", // Violet 500
+              primary: "#22c55e", // Green 500
+              "primary-hover": "#16a34a", // Green 600
+              secondary: "#6366f1", // Indigo 500
               success: "#22c55e", 
-              warning: "#eab308",
-              danger: "#ef4444",
+              warning: "#eab308", // Yellow 500
+              danger: "#ef4444", // Red 500
               surface: "#ffffff",
               background: "#f8fafc", // Slate 50
             },
@@ -48,15 +48,15 @@
   >
     <nav class="app-nav">
       <div class="nav-inner">
-        <a class="brand" href="../index.html">DS Visualizers</a>
+        <a class="brand" href="../index.html">DS Visualisers</a>
         <div class="links">
-          <a class="link" href="../Sorting Visualizer/index.html">Sorting</a>
-          <a class="link" href="../Stack Visualization/index.html">Stack</a>
-          <a class="link" href="../Queue Visualization/index.html">Queue</a>
-          <a class="link" href="../Linked List Visualization/index.html">Linked List</a>
-          <a class="link" href="../Hash Table Visualization/index.html">Hash Table</a>
-          <a class="link" href="../Heap Visualization/index.html">Heap</a>
-          <a class="link" href="../BST Visualization/index.html">BST</a>
+          <a class="link" href="../Sorting Visualiser/index.html">Sorting</a>
+          <a class="link" href="../Stack Visualiser/index.html">Stack</a>
+          <a class="link" href="../Queue Visualiser/index.html">Queue</a>
+          <a class="link" href="../Linked List Visualiser/index.html">Linked List</a>
+          <a class="link" href="../Hash Table Visualiser/index.html">Hash Table</a>
+          <a class="link" href="../Heap Visualiser/index.html">Heap</a>
+          <a class="link" href="../BST Visualiser/index.html">BST</a>
         </div>
       </div>
     </nav>
@@ -69,10 +69,10 @@
       >
         <div class="flex items-center gap-3">
           <div class="p-2 bg-primary/10 rounded-lg text-primary">
-            <span class="material-symbols-outlined">data_object</span>
+            <span class="material-symbols-outlined">account_tree</span>
           </div>
           <h1 class="text-xl font-bold tracking-tight text-slate-900">
-            Hash Table Visualizer
+            BST Visualiser
           </h1>
         </div>
         <a
@@ -86,7 +86,7 @@
     </header>
 
     <main
-      class="flex-1 max-w-5xl mx-auto w-full p-4 md:p-8 grid md:grid-cols-[300px_1fr] gap-8"
+      class="flex-1 max-w-5xl mx-auto w-full p-4 md:p-8 grid md:grid-cols-[350px_1fr] gap-8"
     >
       <!-- Controls -->
       <div class="flex flex-col gap-6">
@@ -99,61 +99,53 @@
           </h2>
 
           <div class="flex flex-col gap-4">
-            <!-- Put -->
-            <div class="space-y-2">
-                <input
-                    type="number"
-                    id="key-input"
-                    placeholder="Key (Number)"
-                    class="w-full rounded-lg border-slate-200 focus:border-primary focus:ring-primary/20 text-sm"
-                />
-                <input
-                    type="text"
-                    id="value-input"
-                    placeholder="Value (Text)"
-                    class="w-full rounded-lg border-slate-200 focus:border-primary focus:ring-primary/20 text-sm"
-                    maxlength="10"
-                />
-                <button
-                    id="put-btn"
-                    class="w-full bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 shadow-sm shadow-sky-200"
-                >
-                    <span class="material-symbols-outlined text-[20px]">input</span>
-                    Put (Insert/Update)
-                </button>
+            <!-- Insert -->
+            <div class="flex gap-2">
+              <input
+                type="number"
+                id="insert-input"
+                placeholder="Number"
+                class="flex-1 rounded-lg border-slate-200 focus:border-primary focus:ring-primary/20 text-sm"
+              />
+              <button
+                id="insert-btn"
+                class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 shadow-sm shadow-green-200"
+              >
+                <span class="material-symbols-outlined text-[20px]">add_circle</span>
+                Insert
+              </button>
             </div>
 
-            <!-- Get/Remove -->
-            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
+            <!-- Search -->
+            <div class="flex gap-2 pt-2 border-t border-slate-100">
+              <input
+                type="number"
+                id="search-input"
+                placeholder="Find Num"
+                class="flex-1 rounded-lg border-slate-200 focus:border-warning focus:ring-warning/20 text-sm"
+              />
               <button
-                id="get-btn"
+                id="search-btn"
                 class="bg-white border border-slate-200 hover:border-warning hover:text-warning text-slate-700 px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
               >
                 <span class="material-symbols-outlined text-[20px]">search</span>
-                Get
-              </button>
-              <button
-                id="remove-btn"
-                class="bg-white border border-slate-200 hover:border-danger hover:text-danger text-slate-700 px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
-              >
-                <span class="material-symbols-outlined text-[20px]">delete</span>
-                Remove
+                Search
               </button>
             </div>
-            
+
             <button
               id="clear-btn"
               class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 mt-2"
             >
               <span class="material-symbols-outlined text-[20px]">delete_sweep</span>
-              Clear Table
+              Clear Tree
             </button>
             <button
               id="seed-btn"
               class="w-full bg-white border border-slate-200 hover:border-secondary hover:text-secondary text-slate-700 px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
             >
               <span class="material-symbols-outlined text-[20px]">auto_awesome</span>
-              Seed Demo Table
+              Seed Demo Tree
             </button>
           </div>
         </div>
@@ -174,13 +166,13 @@
                 >Log</span
               >
               <p id="message-box" class="text-sm text-slate-600 leading-snug">
-                Ready.
+                Ready to start.
               </p>
             </div>
             
-             <div class="text-xs text-slate-400 space-y-1">
-                <p><strong>Hash Function:</strong> Key % 10</p>
-                <p><strong>Collision Handling:</strong> Chaining (Linked List)</p>
+             <div class="text-xs text-slate-400">
+                <p>Left Child < Parent</p>
+                <p>Right Child > Parent</p>
              </div>
           </div>
         </div>
@@ -188,18 +180,25 @@
 
       <!-- Visualization Area -->
       <div
-        class="bg-surface rounded-2xl shadow-card border border-slate-100 p-8 flex flex-col relative overflow-hidden"
+        class="bg-surface rounded-2xl shadow-card border border-slate-100 p-8 flex flex-col relative overflow-hidden min-h-[500px]"
       >
-        <div class="flex items-center justify-between mb-4">
+         <div
+          class="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none"
+        ></div>
+
+        <div class="flex items-center justify-between mb-4 relative z-10">
           <h2 class="text-lg font-semibold flex items-center gap-2">
-            <span class="material-symbols-outlined text-slate-400">table_chart</span>
-            Table View
+            <span class="material-symbols-outlined text-slate-400">forest</span>
+            Tree View
           </h2>
         </div>
 
-        <!-- Table Container -->
-        <div id="table-container" class="flex-1 space-y-2 overflow-y-auto max-h-[600px] pr-2">
-             <!-- Buckets will be generated here -->
+        <!-- SVG Container for Lines -->
+        <svg id="tree-svg" class="absolute inset-0 w-full h-full pointer-events-none z-0"></svg>
+        
+        <!-- Nodes Container -->
+        <div id="tree-container" class="relative w-full h-full z-10">
+            <!-- Nodes injected here -->
         </div>
 
       </div>
@@ -208,5 +207,3 @@
     <script src="script.js"></script>
   </body>
 </html>
-
-

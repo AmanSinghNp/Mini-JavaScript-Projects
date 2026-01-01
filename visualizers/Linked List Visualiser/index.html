@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Queue Visualizer</title>
+    <title>Linked List Visualiser</title>
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
     <link
@@ -25,9 +25,9 @@
               sans: ["Inter", "sans-serif"],
             },
             colors: {
-              primary: "#8b5cf6", // Violet 500
-              "primary-hover": "#7c3aed", // Violet 600
-              secondary: "#ec4899", // Pink 500
+              primary: "#ec4899", // Pink 500
+              "primary-hover": "#db2777", // Pink 600
+              secondary: "#6366f1", // Indigo 500
               success: "#22c55e", // Green 500
               warning: "#eab308", // Yellow 500
               danger: "#ef4444", // Red 500
@@ -48,15 +48,15 @@
   >
     <nav class="app-nav">
       <div class="nav-inner">
-        <a class="brand" href="../index.html">DS Visualizers</a>
+        <a class="brand" href="../index.html">DS Visualisers</a>
         <div class="links">
-          <a class="link" href="../Sorting Visualizer/index.html">Sorting</a>
-          <a class="link" href="../Stack Visualization/index.html">Stack</a>
-          <a class="link" href="../Queue Visualization/index.html">Queue</a>
-          <a class="link" href="../Linked List Visualization/index.html">Linked List</a>
-          <a class="link" href="../Hash Table Visualization/index.html">Hash Table</a>
-          <a class="link" href="../Heap Visualization/index.html">Heap</a>
-          <a class="link" href="../BST Visualization/index.html">BST</a>
+          <a class="link" href="../Sorting Visualiser/index.html">Sorting</a>
+          <a class="link" href="../Stack Visualiser/index.html">Stack</a>
+          <a class="link" href="../Queue Visualiser/index.html">Queue</a>
+          <a class="link" href="../Linked List Visualiser/index.html">Linked List</a>
+          <a class="link" href="../Hash Table Visualiser/index.html">Hash Table</a>
+          <a class="link" href="../Heap Visualiser/index.html">Heap</a>
+          <a class="link" href="../BST Visualiser/index.html">BST</a>
         </div>
       </div>
     </nav>
@@ -69,10 +69,10 @@
       >
         <div class="flex items-center gap-3">
           <div class="p-2 bg-primary/10 rounded-lg text-primary">
-            <span class="material-symbols-outlined">queue</span>
+            <span class="material-symbols-outlined">link</span>
           </div>
           <h1 class="text-xl font-bold tracking-tight text-slate-900">
-            Queue Visualizer
+            Linked List Visualiser
           </h1>
         </div>
         <a
@@ -100,43 +100,52 @@
           </h2>
 
           <div class="flex flex-col gap-4">
-            <!-- Enqueue Control -->
+            <!-- Add Control -->
             <div class="flex gap-2">
               <input
                 type="text"
-                id="enqueue-input"
+                id="value-input"
                 placeholder="Value"
                 maxlength="5"
                 class="flex-1 rounded-lg border-slate-200 focus:border-primary focus:ring-primary/20 text-sm"
                 autocomplete="off"
               />
-              <button
-                id="enqueue-btn"
-                class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 shadow-sm shadow-violet-200"
-              >
-                <span class="material-symbols-outlined text-[20px]">add</span>
-                Enqueue
-              </button>
             </div>
-
-            <div class="grid grid-cols-2 gap-2">
+            
+             <div class="grid grid-cols-2 gap-2">
+               <button
+                id="prepend-btn"
+                class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 shadow-sm shadow-pink-200"
+              >
+                <span class="material-symbols-outlined text-[20px]">first_page</span>
+                Prepend
+              </button>
               <button
-                id="dequeue-btn"
+                id="append-btn"
+                class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 shadow-sm shadow-pink-200"
+              >
+                <span class="material-symbols-outlined text-[20px]">last_page</span>
+                Append
+              </button>
+             </div>
+
+            <div class="flex gap-2 pt-2 border-t border-slate-100">
+                <input
+                type="text"
+                id="remove-input"
+                placeholder="Val to Remove"
+                maxlength="5"
+                class="flex-1 rounded-lg border-slate-200 focus:border-danger focus:ring-danger/20 text-sm"
+                autocomplete="off"
+              />
+              <button
+                id="remove-btn"
                 class="bg-white border border-slate-200 hover:border-danger hover:text-danger text-slate-700 px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
               >
                 <span class="material-symbols-outlined text-[20px]"
-                  >remove</span
+                  >delete</span
                 >
-                Dequeue
-              </button>
-              <button
-                id="peek-btn"
-                class="bg-white border border-slate-200 hover:border-warning hover:text-warning text-slate-700 px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
-              >
-                <span class="material-symbols-outlined text-[20px]"
-                  >visibility</span
-                >
-                Peek
+                Remove
               </button>
             </div>
 
@@ -147,14 +156,14 @@
               <span class="material-symbols-outlined text-[20px]"
                 >delete_sweep</span
               >
-              Clear Queue
+              Clear List
             </button>
             <button
               id="seed-btn"
               class="w-full bg-white border border-slate-200 hover:border-secondary hover:text-secondary text-slate-700 px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
             >
               <span class="material-symbols-outlined text-[20px]">auto_awesome</span>
-              Seed Demo Queue
+              Seed Demo List
             </button>
           </div>
         </div>
@@ -172,29 +181,21 @@
             <div
               class="flex justify-between items-center p-3 bg-slate-50 rounded-lg"
             >
-              <span class="text-slate-500 text-sm font-medium">Size</span>
-              <span id="queue-size" class="text-slate-900 font-bold text-lg"
+              <span class="text-slate-500 text-sm font-medium">Nodes</span>
+              <span id="list-size" class="text-slate-900 font-bold text-lg"
                 >0</span
               >
             </div>
-
+            
             <div class="grid grid-cols-2 gap-4">
-                <div
-                class="flex flex-col p-3 bg-slate-50 rounded-lg"
-                >
-                <span class="text-slate-500 text-xs font-medium uppercase">Front</span>
-                <span id="front-item" class="text-slate-900 font-bold text-lg"
-                    >-</span
-                >
-                </div>
-                <div
-                class="flex flex-col p-3 bg-slate-50 rounded-lg"
-                >
-                <span class="text-slate-500 text-xs font-medium uppercase">Rear</span>
-                <span id="rear-item" class="text-slate-900 font-bold text-lg"
-                    >-</span
-                >
-                </div>
+                 <div class="flex flex-col p-3 bg-slate-50 rounded-lg">
+                    <span class="text-slate-500 text-xs font-medium uppercase">Head</span>
+                    <span id="head-value" class="text-slate-900 font-bold text-lg truncate">-</span>
+                 </div>
+                 <div class="flex flex-col p-3 bg-slate-50 rounded-lg">
+                    <span class="text-slate-500 text-xs font-medium uppercase">Tail</span>
+                    <span id="tail-value" class="text-slate-900 font-bold text-lg truncate">-</span>
+                 </div>
             </div>
 
             <div class="p-3 bg-slate-50 rounded-lg min-h-[60px]">
@@ -218,50 +219,37 @@
           class="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none"
         ></div>
 
-        <div class="flex items-center justify-between mb-12 relative z-10">
+        <div class="flex items-center justify-between mb-8 relative z-10">
           <h2 class="text-lg font-semibold flex items-center gap-2">
             <span class="material-symbols-outlined text-slate-400"
-              >view_kanban</span
+              >view_timeline</span
             >
-            Queue View
+            List View
           </h2>
           <span
             class="text-xs font-medium px-2 py-1 bg-slate-100 rounded text-slate-500"
-            >Max Capacity: 7</span
+            >Max: 8 Nodes</span
           >
         </div>
 
-        <!-- The Queue Channel -->
+        <!-- The List Container -->
         <div
-          class="flex-1 flex justify-center items-center relative z-10 min-h-[300px]"
+          class="flex-1 flex items-center relative z-10 min-h-[300px] overflow-x-auto pb-4"
+          id="list-scroll-area"
         >
-          <!-- Horizontal Container -->
-          <div
-            class="relative h-24 w-full max-w-2xl border-t-4 border-b-4 border-slate-300 bg-slate-50/50 flex flex-row items-center px-2 gap-2 transition-all overflow-hidden"
-            id="queue-container"
-          >
-            <!-- Items will be injected here -->
-            <div
+           <div class="flex items-center gap-0 mx-auto transition-all" id="list-container">
+             <!-- Nodes will be injected here -->
+              <div
               class="text-slate-300 text-sm font-medium absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none whitespace-nowrap"
               id="empty-message"
             >
-              Queue is Empty
+              List is Empty
             </div>
-          </div>
-
-          <!-- Labels -->
-           <div class="absolute -top-8 left-0 text-slate-400 text-xs font-bold uppercase flex flex-col items-center">
-             <span>Front</span>
-             <span class="material-symbols-outlined text-sm">arrow_downward</span>
-           </div>
-           <div class="absolute -top-8 right-0 text-slate-400 text-xs font-bold uppercase flex flex-col items-center">
-             <span>Rear</span>
-             <span class="material-symbols-outlined text-sm">arrow_downward</span>
            </div>
         </div>
         
         <div class="text-center text-slate-400 text-xs mt-4">
-             FIFO (First In, First Out)
+             Singly Linked List
         </div>
 
       </div>
@@ -270,5 +258,3 @@
     <script src="script.js"></script>
   </body>
 </html>
-
-
