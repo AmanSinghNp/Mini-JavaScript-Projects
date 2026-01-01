@@ -27,12 +27,12 @@
             colors: {
               primary: "#ef4444", // Red 500
               "primary-hover": "#dc2626", // Red 600
-              secondary: "#1e293b", // Slate 800 (Black node)
-              success: "#22c55e",
+              secondary: "#1f2937", // Gray 800 (Black)
+              success: "#22c55e", 
               warning: "#eab308",
               danger: "#ef4444",
               surface: "#ffffff",
-              background: "#f8fafc",
+              background: "#f8fafc", // Slate 50
             },
             boxShadow: {
               glass: "0 8px 32px 0 rgba(31, 38, 135, 0.07)",
@@ -52,9 +52,10 @@
         <div class="links">
           <a class="link" href="../Sorting Visualiser/index.html">Sorting</a>
           <a class="link" href="../Stack Visualiser/index.html">Stack</a>
+          <a class="link" href="../Queue Visualiser/index.html">Queue</a>
+          <a class="link" href="../Linked List Visualiser/index.html">Linked List</a>
           <a class="link" href="../BST Visualiser/index.html">BST</a>
           <a class="link" href="../AVL Tree Visualiser/index.html">AVL</a>
-          <a class="link" href="../Red-Black Tree Visualiser/index.html">Red-Black</a>
         </div>
       </div>
     </nav>
@@ -84,7 +85,7 @@
     </header>
 
     <main
-      class="flex-1 max-w-5xl mx-auto w-full p-4 md:p-8 grid md:grid-cols-[300px_1fr] gap-8"
+      class="flex-1 max-w-5xl mx-auto w-full p-4 md:p-8 grid md:grid-cols-[350px_1fr] gap-8"
     >
       <!-- Controls -->
       <div class="flex flex-col gap-6">
@@ -97,6 +98,7 @@
           </h2>
 
           <div class="flex flex-col gap-4">
+            <!-- Insert -->
             <div class="flex gap-2">
               <input
                 type="number"
@@ -113,6 +115,23 @@
               </button>
             </div>
 
+            <!-- Search -->
+            <div class="flex gap-2 pt-2 border-t border-slate-100">
+              <input
+                type="number"
+                id="search-input"
+                placeholder="Find Num"
+                class="flex-1 rounded-lg border-slate-200 focus:border-warning focus:ring-warning/20 text-sm"
+              />
+              <button
+                id="search-btn"
+                class="bg-white border border-slate-200 hover:border-warning hover:text-warning text-slate-700 px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
+              >
+                <span class="material-symbols-outlined text-[20px]">search</span>
+                Search
+              </button>
+            </div>
+
             <button
               id="clear-btn"
               class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 mt-2"
@@ -125,7 +144,7 @@
               class="w-full bg-white border border-slate-200 hover:border-secondary hover:text-secondary text-slate-700 px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
             >
               <span class="material-symbols-outlined text-[20px]">auto_awesome</span>
-              Seed Demo
+              Seed Demo Tree
             </button>
           </div>
         </div>
@@ -146,15 +165,14 @@
                 >Log</span
               >
               <p id="message-box" class="text-sm text-slate-600 leading-snug">
-                Ready.
+                Ready to start.
               </p>
             </div>
             
-             <div class="text-xs text-slate-500 space-y-1">
-                <p>1. Nodes are Red or Black.</p>
-                <p>2. Root is Black.</p>
-                <p>3. No two Red nodes adjacent.</p>
-                <p>4. Black depth consistent.</p>
+             <div class="text-xs text-slate-400">
+                <p><strong>Property 1:</strong> Nodes are Red or Black.</p>
+                <p><strong>Property 2:</strong> Root is always Black.</p>
+                <p><strong>Property 3:</strong> No two Red nodes adjacent.</p>
              </div>
           </div>
         </div>
@@ -171,16 +189,21 @@
         <div class="flex items-center justify-between mb-4 relative z-10">
           <h2 class="text-lg font-semibold flex items-center gap-2">
             <span class="material-symbols-outlined text-slate-400">forest</span>
-            RB Tree View
+            Tree View
           </h2>
         </div>
 
+        <!-- SVG Container for Lines -->
         <svg id="tree-svg" class="absolute inset-0 w-full h-full pointer-events-none z-0"></svg>
-        <div id="tree-container" class="relative w-full h-full z-10"></div>
+        
+        <!-- Nodes Container -->
+        <div id="tree-container" class="relative w-full h-full z-10">
+            <!-- Nodes injected here -->
+        </div>
+
       </div>
     </main>
 
     <script src="script.js"></script>
   </body>
 </html>
-
