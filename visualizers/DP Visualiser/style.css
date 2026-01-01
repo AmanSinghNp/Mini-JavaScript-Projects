@@ -1,0 +1,72 @@
+.item-tag {
+    background: #e0e7ff;
+    color: #4338ca;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.del-btn {
+    cursor: pointer;
+    font-size: 14px;
+    color: #6366f1;
+}
+
+.del-btn:hover {
+    color: #ef4444;
+}
+
+.dp-table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 400px;
+}
+
+.dp-table th, .dp-table td {
+    border: 1px solid #e2e8f0;
+    padding: 8px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.dp-table th {
+    background: #f8fafc;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.dp-table td {
+    background: white;
+    color: #334155;
+    transition: all 0.2s;
+}
+
+.highlight-current {
+    background: #fef08a !important; /* Yellow */
+    border: 2px solid #eab308;
+}
+
+.highlight-dependency {
+    background: #bfdbfe !important; /* Blue */
+    color: #1e40af;
+}
+
+.highlight-final {
+    background: #bbf7d0 !important; /* Green */
+    font-weight: bold;
+    color: #15803d;
+}
+
+.cell-filled {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
