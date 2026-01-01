@@ -1,0 +1,36 @@
+.node {
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    background: white;
+    border: 2px solid #cbd5e1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #334155;
+    z-index: 10;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.node.node-end {
+    background: #dcfce7; /* Green 100 */
+    border-color: #22c55e;
+    color: #166534;
+}
+
+.node.node-highlight {
+    background: #fef3c7; /* Amber 100 */
+    border-color: #f59e0b;
+    transform: scale(1.2);
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2);
+    z-index: 20;
+}
+
+svg line {
+    stroke: #cbd5e1;
+    stroke-width: 1.5;
+}
+
