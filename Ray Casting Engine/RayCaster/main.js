@@ -33,6 +33,61 @@ let lastTime = 0;
     });
     window.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
+    // Mobile Controls
+    const dpad = document.getElementById('dpad');
+    const btnShoot = document.getElementById('btn-shoot');
+
+    if (dpad) {
+        const handleDpad = (e) => {
+            e.preventDefault();
+            const touch = e.targetTouches[0];
+            if (!touch) {
+                keys['KeyW'] = false; keys['KeyS'] = false;
+                keys['KeyA'] = false; keys['KeyD'] = false;
+                return;
+            }
+
+            const rect = dpad.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const dx = touch.clientX - centerX;
+            const dy = touch.clientY - centerY;
+            
+            // Simple threshold logic
+            const threshold = 10;
+            
+            keys['KeyW'] = dy < -threshold;
+            keys['KeyS'] = dy > threshold;
+            keys['KeyA'] = dx < -threshold; // Strafe Left
+            keys['KeyD'] = dx > threshold; // Strafe Right
+            
+            // Optional: Rotate with D-Pad X axis instead of strafe?
+            // For now, let's keep WASD logic (Strafe on A/D)
+            // If user wants to rotate, we might need a separate area or use A/D for rotate on mobile.
+            // Let's swap A/D to Rotate for mobile to make it playable
+            keys['ArrowLeft'] = dx < -threshold;
+            keys['ArrowRight'] = dx > threshold;
+            keys['KeyA'] = false; 
+            keys['KeyD'] = false;
+        };
+
+        dpad.addEventListener('touchstart', handleDpad);
+        dpad.addEventListener('touchmove', handleDpad);
+        dpad.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            keys['KeyW'] = false; keys['KeyS'] = false;
+            keys['ArrowLeft'] = false; keys['ArrowRight'] = false;
+        });
+    }
+
+    if (btnShoot) {
+        btnShoot.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            shoot();
+        });
+    }
+
     // Shooting
     function shoot() {
         // Spawn projectile slightly in front of player

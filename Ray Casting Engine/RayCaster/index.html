@@ -234,18 +234,27 @@
           </div>
         </div>
       </div>
-      <!-- Mobile Controls (Visible only on small screens if needed, otherwise hidden in desktop view as requested) -->
+      <!-- Mobile Controls -->
       <div
-        class="absolute bottom-8 left-0 right-0 px-8 flex justify-between md:hidden pointer-events-none opacity-50"
+        class="absolute bottom-8 left-0 right-0 px-8 flex justify-between md:hidden z-50 select-none"
       >
-        <!-- D-Pad Placeholder -->
+        <!-- D-Pad -->
         <div
-          class="size-32 bg-white/5 rounded-full border border-white/10"
-        ></div>
-        <!-- Action Buttons Placeholder -->
+          id="dpad"
+          class="size-32 bg-white/10 rounded-full border border-white/20 backdrop-blur-sm active:bg-white/20 transition-colors touch-none relative"
+        >
+            <div class="absolute top-2 left-1/2 -translate-x-1/2 text-white/50 text-xs">W</div>
+            <div class="absolute bottom-2 left-1/2 -translate-x-1/2 text-white/50 text-xs">S</div>
+            <div class="absolute left-2 top-1/2 -translate-y-1/2 text-white/50 text-xs">A</div>
+            <div class="absolute right-2 top-1/2 -translate-y-1/2 text-white/50 text-xs">D</div>
+        </div>
+        <!-- Action Button -->
         <div
-          class="size-32 bg-white/5 rounded-full border border-white/10"
-        ></div>
+          id="btn-shoot"
+          class="size-32 bg-white/10 rounded-full border border-white/20 backdrop-blur-sm active:bg-primary/20 transition-colors touch-none flex items-center justify-center"
+        >
+            <span class="material-symbols-outlined text-4xl text-white/70">my_location</span>
+        </div>
       </div>
     </main>
     <!-- Footer / Debug Info -->
