@@ -1,0 +1,59 @@
+.node {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: white;
+    border: 2px solid #ec4899;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #334155;
+    z-index: 10;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.node .idx {
+    font-size: 8px;
+    color: #94a3b8;
+    position: absolute;
+    top: -12px;
+}
+
+.node .val {
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.node.node-active {
+    background: #fdf2f8;
+    border-color: #be185d;
+    transform: scale(1.2);
+    box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.3);
+    z-index: 20;
+}
+
+.node.node-update {
+    background: #fef08a;
+    border-color: #eab308;
+}
+
+.arr-item {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #cbd5e1;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    border-radius: 4px;
+}
+
+svg line {
+    stroke: #cbd5e1;
+    stroke-width: 1.5;
+}
+
