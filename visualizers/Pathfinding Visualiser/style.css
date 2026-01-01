@@ -1,0 +1,96 @@
+.grid-canvas {
+    display: grid;
+    /* Grid Template Columns set via JS */
+    gap: 0;
+    background: #e2e8f0;
+    user-select: none;
+}
+
+.node {
+    background: white;
+    border: 1px solid #cbd5e1; /* Slate 300 */
+    width: 100%;
+    height: 100%;
+    transition: transform 0.1s ease, background-color 0.2s ease;
+}
+
+.node.node-wall {
+    background: #1e293b; /* Slate 800 */
+    border-color: #0f172a;
+    animation: popIn 0.2s ease;
+}
+
+.node.node-start {
+    background: #22c55e; /* Green 500 */
+    border-color: #16a34a;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="white"><path d="M480-80q-139-35-229.5-159.5T160-516v-244l320-120 320 120v244q0 152-90.5 276.5T480-80Zm0-84q97-30 162.5-116.5T708-480v-108l-228-85-228 85v108q0 85 65.5 171.5T480-164Zm0-273Z"/></svg>');
+    background-size: 80%;
+    background-position: center;
+    background-repeat: no-repeat;
+    cursor: grab;
+}
+
+.node.node-end {
+    background: #ef4444; /* Red 500 */
+    border-color: #dc2626;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="white"><path d="M480-80C333.33-228 260-332.33 260-393q0-103.67 71.67-168.67t160.83-65Q568-626.67 634-586.33 700-546 700-474q0 52.67-27.67 116.33Q644.67-294 480-80Zm-12.5-470q23.17 0 39.58-16.17Q523.5-582.33 523.5-605.5q0-23.17-16.42-39.33Q490.67-661 467.5-661q-23.17 0-39.58 16.17Q411.5-628.67 411.5-605.5q0 23.17 16.42 39.33Q444.33-550 467.5-550Z"/></svg>');
+    background-size: 80%;
+    background-position: center;
+    background-repeat: no-repeat;
+    cursor: grab;
+}
+
+.node.node-visited {
+    background: #93c5fd; /* Blue 300 */
+    border-color: #60a5fa;
+    animation: visitedAnim 1.5s ease-out alternate infinite;
+}
+
+.node.node-visited.node-start, .node.node-visited.node-end {
+    /* Keep start/end colors */
+}
+
+.node.node-path {
+    background: #facc15; /* Yellow 400 */
+    border-color: #eab308;
+    animation: pathAnim 0.3s ease-in forwards;
+}
+
+.algo-btn {
+    padding: 0.5rem 1rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    color: #334155;
+    transition: all 0.2s;
+    text-align: left;
+}
+
+.algo-btn:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+.algo-btn.active {
+    background: #eff6ff;
+    border-color: #3b82f6;
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+@keyframes popIn {
+    0% { transform: scale(0.3); }
+    100% { transform: scale(1); }
+}
+
+@keyframes visitedAnim {
+    0% { background: #93c5fd; transform: scale(0.8); border-radius: 50%; }
+    100% { background: #60a5fa; transform: scale(1); border-radius: 0; }
+}
+
+@keyframes pathAnim {
+    0% { transform: scale(0.6); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
