@@ -32,15 +32,232 @@ window.addEventListener('resize', resize);
 resize();
 
 function update(dt) {
-    // Movement logic will go here
+    // Normalize speed for frame rate (assuming target 60 FPS)
+    const timeScale = dt * 60;
+    const moveSpeed = (keys['ShiftLeft'] ? player.moveSpeed * 1.8 : player.moveSpeed) * timeScale;
+    const rotSpeed = player.rotSpeed * timeScale;
+
+    // Rotation
+    // Use Left/Right Arrow keys or Q/E for rotation
+    let rot = 0;
+    if (keys['ArrowLeft'] || keys['KeyQ']) rot = rotSpeed;
+    if (keys['ArrowRight'] || keys['KeyE']) rot = -rotSpeed;
+
+    if (rot !== 0) {
+        // Rotate direction
+        const oldDirX = player.dirX;
+        player.dirX = player.dirX * Math.cos(rot) - player.dirY * Math.sin(rot);
+        player.dirY = oldDirX * Math.sin(rot) + player.dirY * Math.cos(rot);
+        
+        // Rotate camera plane
+        const oldPlaneX = player.planeX;
+        player.planeX = player.planeX * Math.cos(rot) - player.planeY * Math.sin(rot);
+        player.planeY = oldPlaneX * Math.sin(rot) + player.planeY * Math.cos(rot);
+    }
+
+    // Movement
+    let moveStep = 0;
+    if (keys['KeyW'] || keys['ArrowUp']) moveStep = moveSpeed;
+    if (keys['KeyS'] || keys['ArrowDown']) moveStep = -moveSpeed;
+
+    if (moveStep !== 0) {
+        const newX = player.x + player.dirX * moveStep;
+        const newY = player.y + player.dirY * moveStep;
+
+        // Collision detection (check X and Y independently for sliding)
+        // Check X
+        if (WORLD_MAP[Math.floor(newX)][Math.floor(player.y)] === 0) {
+            player.x = newX;
+        }
+        // Check Y
+        if (WORLD_MAP[Math.floor(player.x)][Math.floor(newY)] === 0) {
+            player.y = newY;
+        }
+    }
+
+    // Strafe (A/D)
+    let strafeStep = 0;
+    if (keys['KeyA']) strafeStep = -moveSpeed;
+    if (keys['KeyD']) strafeStep = moveSpeed;
+
+    if (strafeStep !== 0) {
+        // Strafe direction is perpendicular to direction (rotate 90 deg)
+        // Dir vector (x, y) -> Perpendicular (-y, x)
+        const strafeDirX = -player.dirY;
+        const strafeDirY = player.dirX;
+
+        const newX = player.x + strafeDirX * strafeStep;
+        const newY = player.y + strafeDirY * strafeStep;
+
+        if (WORLD_MAP[Math.floor(newX)][Math.floor(player.y)] === 0) {
+            player.x = newX;
+        }
+        if (WORLD_MAP[Math.floor(player.x)][Math.floor(newY)] === 0) {
+            player.y = newY;
+        }
+    }
+
+    // Update Debug UI
+    if (debugX) debugX.innerText = player.x.toFixed(2);
+    if (debugY) debugY.innerText = player.y.toFixed(2);
+    if (debugDir) {
+        const angleDeg = Math.atan2(player.dirY, player.dirX) * 180 / Math.PI;
+        debugDir.innerText = ((angleDeg + 360) % 360).toFixed(0) + '°';
+    }
 }
 
 function render() {
-    // Clear screen
-    ctx.fillStyle = '#050505';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // 1. Draw Floor and Ceiling
+    // Ceiling
+    ctx.fillStyle = '#111';
+    ctx.fillRect(0, 0, canvas.width, canvas.height / 2);
+    // Floor
+    ctx.fillStyle = '#080808';
+    ctx.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
 
-    // Raycasting logic will go here
+    // 2. Ray Casting
+    for (let x = 0; x < canvas.width; x++) {
+        // Calculate ray position and direction
+        const cameraX = 2 * x / canvas.width - 1; // x-coordinate in camera space
+        const rayDirX = player.dirX + player.planeX * cameraX;
+        const rayDirY = player.dirY + player.planeY * cameraX;
+
+        // Which box of the map we're in
+        let mapX = Math.floor(player.x);
+        let mapY = Math.floor(player.y);
+
+        // Length of ray from current position to next x or y-side
+        let sideDistX;
+        let sideDistY;
+
+        // Length of ray from one x or y-side to next x or y-side
+        // Avoid division by zero
+        const deltaDistX = (rayDirX === 0) ? 1e30 : Math.abs(1 / rayDirX);
+        const deltaDistY = (rayDirY === 0) ? 1e30 : Math.abs(1 / rayDirY);
+
+        let perpWallDist;
+
+        // What direction to step in x or y-direction (either +1 or -1)
+        let stepX;
+        let stepY;
+
+        let hit = 0; // Was there a wall hit?
+        let side; // Was a NS or a EW wall hit?
+
+        // Calculate step and initial sideDist
+        if (rayDirX < 0) {
+            stepX = -1;
+            sideDistX = (player.x - mapX) * deltaDistX;
+        } else {
+            stepX = 1;
+            sideDistX = (mapX + 1.0 - player.x) * deltaDistX;
+        }
+        if (rayDirY < 0) {
+            stepY = -1;
+            sideDistY = (player.y - mapY) * deltaDistY;
+        } else {
+            stepY = 1;
+            sideDistY = (mapY + 1.0 - player.y) * deltaDistY;
+        }
+
+        // Perform DDA
+        while (hit === 0) {
+            // Jump to next map square, OR in x-direction, OR in y-direction
+            if (sideDistX < sideDistY) {
+                sideDistX += deltaDistX;
+                mapX += stepX;
+                side = 0;
+            } else {
+                sideDistY += deltaDistY;
+                mapY += stepY;
+                side = 1;
+            }
+            // Check if ray has hit a wall
+            if (WORLD_MAP[mapX] && WORLD_MAP[mapX][mapY] > 0) {
+                hit = 1;
+            }
+        }
+
+        // Calculate distance projected on camera direction (Euclidean distance will give fisheye effect!)
+        if (side === 0) {
+            perpWallDist = (sideDistX - deltaDistX);
+        } else {
+            perpWallDist = (sideDistY - deltaDistY);
+        }
+
+        // Calculate height of line to draw on screen
+        const lineHeight = Math.floor(canvas.height / perpWallDist);
+
+        // Calculate lowest and highest pixel to fill in current stripe
+        let drawStart = -lineHeight / 2 + canvas.height / 2;
+        if (drawStart < 0) drawStart = 0;
+        let drawEnd = lineHeight / 2 + canvas.height / 2;
+        if (drawEnd >= canvas.height) drawEnd = canvas.height - 1;
+
+        // Choose wall color with distance shading
+        // Base color (Green theme)
+        // Adjust brightness based on distance
+        const maxDist = 20.0;
+        let brightness = 1.0 - (Math.min(perpWallDist, maxDist) / maxDist);
+        if (brightness < 0) brightness = 0;
+        
+        // Side 1 is darker
+        let val = 255 * brightness;
+        if (side === 1) {
+            val = val * 0.7; // Darker for y-sides
+        }
+
+        const color = `rgb(0, ${Math.floor(val)}, 0)`;
+
+        // Draw the vertical stripe
+        ctx.fillStyle = color;
+        ctx.fillRect(x, drawStart, 1, drawEnd - drawStart);
+        
+        // Wireframe edges for brutalist look (optional)
+        /*
+        ctx.fillStyle = `rgba(19, 236, 19, ${0.3 * brightness})`;
+        ctx.fillRect(x, drawStart, 1, 2);
+        ctx.fillRect(x, drawEnd - 2, 1, 2);
+        */
+    }
+
+    drawMinimap();
+}
+
+function drawMinimap() {
+    // Clear minimap
+    mCtx.fillStyle = '#0a140a';
+    mCtx.fillRect(0, 0, minimapCanvas.width, minimapCanvas.height);
+
+    // Scaling
+    const gridSize = WORLD_MAP.length;
+    const tileSize = minimapCanvas.width / gridSize;
+
+    // Draw Map
+    for (let x = 0; x < gridSize; x++) {
+        for (let y = 0; y < gridSize; y++) {
+            if (WORLD_MAP[x][y] > 0) {
+                mCtx.fillStyle = '#1a2e1a';
+                mCtx.fillRect(x * tileSize, y * tileSize, tileSize - 1, tileSize - 1);
+            }
+        }
+    }
+
+    // Draw Player
+    const pX = player.x * tileSize;
+    const pY = player.y * tileSize;
+    
+    mCtx.fillStyle = '#13ec13';
+    mCtx.beginPath();
+    mCtx.arc(pX, pY, 3, 0, Math.PI * 2);
+    mCtx.fill();
+
+    // Draw Player Direction (View Cone or Line)
+    mCtx.strokeStyle = '#13ec13';
+    mCtx.beginPath();
+    mCtx.moveTo(pX, pY);
+    mCtx.lineTo(pX + player.dirX * 10, pY + player.dirY * 10);
+    mCtx.stroke();
 }
 
 function gameLoop(time) {
