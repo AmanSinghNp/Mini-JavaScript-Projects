@@ -1,0 +1,44 @@
+.node {
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    background: #f1f5f9; /* Slate 100 */
+    border: 2px solid #cbd5e1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: #334155;
+    z-index: 10;
+    transform: translate(-50%, -50%);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.node.node-active {
+    background: #fef08a; /* Yellow 200 */
+    border-color: #eab308;
+    color: #854d0e;
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.2);
+}
+
+.node.node-pending {
+    background: #e2e8f0;
+    color: #64748b;
+}
+
+.node.node-returned {
+    background: #22c55e;
+    border-color: #16a34a;
+    color: white;
+}
+
+svg line {
+    stroke: #cbd5e1;
+    stroke-width: 2;
+    transition: all 0.3s ease;
+}
+
