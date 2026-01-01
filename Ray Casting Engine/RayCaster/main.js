@@ -1,5 +1,9 @@
 import { WORLD_MAP } from './map.js';
 import { player } from './player.js';
+import { textures, initTextures, TEXTURE_SIZE } from './textures.js';
+
+// Initialize procedural textures
+initTextures();
 
 const canvas = document.getElementById('screen');
 const ctx = canvas.getContext('2d');
@@ -194,31 +198,52 @@ function render() {
         let drawEnd = lineHeight / 2 + canvas.height / 2;
         if (drawEnd >= canvas.height) drawEnd = canvas.height - 1;
 
-        // Choose wall color with distance shading
-        // Base color (Green theme)
-        // Adjust brightness based on distance
-        const maxDist = 20.0;
-        let brightness = 1.0 - (Math.min(perpWallDist, maxDist) / maxDist);
-        if (brightness < 0) brightness = 0;
-        
-        // Side 1 is darker
-        let val = 255 * brightness;
-        if (side === 1) {
-            val = val * 0.7; // Darker for y-sides
+        // Texture Mapping
+        const texNum = WORLD_MAP[mapX][mapY] || 1; // Default to 1 if undefined
+        let wallX; // Where exactly the wall was hit
+        if (side === 0) {
+            wallX = player.y + perpWallDist * rayDirY;
+        } else {
+            wallX = player.x + perpWallDist * rayDirX;
         }
+        wallX -= Math.floor(wallX);
 
-        const color = `rgb(0, ${Math.floor(val)}, 0)`;
+        // x coordinate on the texture
+        let texX = Math.floor(wallX * TEXTURE_SIZE);
+        if (side === 0 && rayDirX > 0) texX = TEXTURE_SIZE - texX - 1;
+        if (side === 1 && rayDirY < 0) texX = TEXTURE_SIZE - texX - 1;
 
-        // Draw the vertical stripe
-        ctx.fillStyle = color;
-        ctx.fillRect(x, drawStart, 1, drawEnd - drawStart);
+        // Draw texture strip
+        const texture = textures.walls[texNum] || textures.walls[1];
         
-        // Wireframe edges for brutalist look (optional)
-        /*
-        ctx.fillStyle = `rgba(19, 236, 19, ${0.3 * brightness})`;
-        ctx.fillRect(x, drawStart, 1, 2);
-        ctx.fillRect(x, drawEnd - 2, 1, 2);
-        */
+        // Intensity based on distance (Darkness)
+        const maxDist = 20.0;
+        let intensity = 1.0 - (Math.min(perpWallDist, maxDist) / maxDist);
+        if (side === 1) intensity *= 0.7; // Darker on y-sides
+
+        if (texture) {
+             // We can use drawImage to draw a slice of the texture
+             // Source: (texX, 0, 1, TEXTURE_SIZE)
+             // Dest: (x, drawStart, 1, lineHeight) - Note: lineHeight, not drawEnd-drawStart to handle clipping correctly?
+             // Actually, for clipping we need to be careful. drawImage handles scaling.
+             
+             // Simplest approach: drawImage
+             ctx.drawImage(
+                 texture, 
+                 texX, 0, 1, TEXTURE_SIZE, 
+                 x, -lineHeight / 2 + canvas.height / 2, 1, lineHeight
+             );
+             
+             // Apply shading overlay
+             ctx.fillStyle = `rgba(0, 0, 0, ${1 - intensity})`;
+             ctx.fillRect(x, drawStart, 1, drawEnd - drawStart);
+        } else {
+             // Fallback to solid color
+            let val = 255 * intensity;
+            const color = `rgb(0, ${Math.floor(val)}, 0)`;
+            ctx.fillStyle = color;
+            ctx.fillRect(x, drawStart, 1, drawEnd - drawStart);
+        }
     }
 
     drawMinimap();
