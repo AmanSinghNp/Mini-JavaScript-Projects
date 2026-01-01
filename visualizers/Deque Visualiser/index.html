@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Deque Visualiser</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="stylesheet" href="../shared.css" />
+    <link rel="stylesheet" href="style.css" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+            },
+            colors: {
+              primary: "#8b5cf6", // Violet 500
+              "primary-hover": "#7c3aed", // Violet 600
+              secondary: "#ec4899", // Pink 500
+              success: "#22c55e",
+              warning: "#eab308",
+              danger: "#ef4444",
+              surface: "#ffffff",
+              background: "#f8fafc",
+            },
+            boxShadow: {
+              glass: "0 8px 32px 0 rgba(31, 38, 135, 0.07)",
+              card: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body
+    class="bg-background text-slate-800 font-sans min-h-screen flex flex-col"
+  >
+    <nav class="app-nav">
+      <div class="nav-inner">
+        <a class="brand" href="../index.html">DS Visualisers</a>
+        <div class="links">
+          <a class="link" href="../Sorting Visualiser/index.html">Sorting</a>
+          <a class="link" href="../Stack Visualiser/index.html">Stack</a>
+          <a class="link" href="../Queue Visualiser/index.html">Queue</a>
+          <a class="link" href="../Linked List Visualiser/index.html">Linked List</a>
+          <a class="link" href="../BST Visualiser/index.html">BST</a>
+        </div>
+      </div>
+    </nav>
+    <!-- Header -->
+    <header
+      class="bg-surface/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-10"
+    >
+      <div
+        class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between"
+      >
+        <div class="flex items-center gap-3">
+          <div class="p-2 bg-primary/10 rounded-lg text-primary">
+            <span class="material-symbols-outlined">swap_horiz</span>
+          </div>
+          <h1 class="text-xl font-bold tracking-tight text-slate-900">
+            Deque (Double-Ended Queue)
+          </h1>
+        </div>
+        <a
+          href="../index.html"
+          class="text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors flex items-center gap-1"
+        >
+          <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+          Back
+        </a>
+      </div>
+    </header>
+
+    <main
+      class="flex-1 max-w-5xl mx-auto w-full p-4 md:p-8 grid md:grid-cols-[350px_1fr] gap-8"
+    >
+      <!-- Controls -->
+      <div class="flex flex-col gap-6">
+        <div
+          class="bg-surface p-6 rounded-2xl shadow-card border border-slate-100"
+        >
+          <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-slate-400">tune</span>
+            Operations
+          </h2>
+
+          <div class="flex flex-col gap-4">
+            <div class="flex gap-2">
+              <input
+                type="text"
+                id="value-input"
+                placeholder="Value"
+                maxlength="5"
+                class="flex-1 rounded-lg border-slate-200 focus:border-primary focus:ring-primary/20 text-sm"
+              />
+            </div>
+
+            <!-- Front Ops -->
+            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
+                <span class="col-span-2 text-xs font-bold text-slate-400 uppercase text-center">Front Operations</span>
+                <button
+                    id="push-front-btn"
+                    class="bg-primary hover:bg-primary-hover text-white px-2 py-2 rounded-lg font-medium transition-colors text-sm flex items-center justify-center gap-1"
+                >
+                    <span class="material-symbols-outlined text-[18px]">add_circle</span> Push Front
+                </button>
+                <button
+                    id="pop-front-btn"
+                    class="bg-white border border-slate-200 hover:border-danger hover:text-danger text-slate-700 px-2 py-2 rounded-lg font-medium transition-colors text-sm flex items-center justify-center gap-1"
+                >
+                    <span class="material-symbols-outlined text-[18px]">remove_circle</span> Pop Front
+                </button>
+            </div>
+
+            <!-- Rear Ops -->
+            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
+                <span class="col-span-2 text-xs font-bold text-slate-400 uppercase text-center">Rear Operations</span>
+                <button
+                    id="push-rear-btn"
+                    class="bg-primary hover:bg-primary-hover text-white px-2 py-2 rounded-lg font-medium transition-colors text-sm flex items-center justify-center gap-1"
+                >
+                    <span class="material-symbols-outlined text-[18px]">add_circle</span> Push Rear
+                </button>
+                <button
+                    id="pop-rear-btn"
+                    class="bg-white border border-slate-200 hover:border-danger hover:text-danger text-slate-700 px-2 py-2 rounded-lg font-medium transition-colors text-sm flex items-center justify-center gap-1"
+                >
+                    <span class="material-symbols-outlined text-[18px]">remove_circle</span> Pop Rear
+                </button>
+            </div>
+
+            <button
+              id="clear-btn"
+              class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 mt-2"
+            >
+              <span class="material-symbols-outlined text-[20px]">delete_sweep</span>
+              Clear
+            </button>
+          </div>
+        </div>
+
+        <!-- Info -->
+        <div
+          class="bg-surface p-6 rounded-2xl shadow-card border border-slate-100 flex-1"
+        >
+          <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-slate-400">info</span>
+            Status
+          </h2>
+
+          <div class="space-y-4">
+             <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                 <span class="text-slate-500 text-sm font-medium">Size</span>
+                 <span id="deque-size" class="text-slate-900 font-bold text-lg">0</span>
+             </div>
+             
+             <div class="p-3 bg-slate-50 rounded-lg min-h-[60px]">
+              <span
+                class="text-slate-500 text-xs font-bold uppercase tracking-wider block mb-1"
+                >Log</span
+              >
+              <p id="message-box" class="text-sm text-slate-600 leading-snug">
+                Ready.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visualization Area -->
+      <div
+        class="bg-surface rounded-2xl shadow-card border border-slate-100 p-8 flex flex-col relative overflow-hidden h-[400px]"
+      >
+         <div
+          class="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none"
+        ></div>
+
+        <div class="flex items-center justify-between mb-8 relative z-10">
+          <h2 class="text-lg font-semibold flex items-center gap-2">
+            <span class="material-symbols-outlined text-slate-400">view_column</span>
+            Deque View
+          </h2>
+        </div>
+
+        <div class="relative flex-1 flex items-center justify-center">
+            <!-- Labels -->
+            <div class="absolute left-4 top-1/2 -translate-y-1/2 -translate-x-full pr-4 text-slate-400 font-bold uppercase text-xs">Front</div>
+            <div class="absolute right-4 top-1/2 -translate-y-1/2 translate-x-full pl-4 text-slate-400 font-bold uppercase text-xs">Rear</div>
+
+            <!-- Container -->
+            <div id="deque-container" class="flex items-center gap-2 p-2 min-h-[60px] border-2 border-dashed border-slate-300 rounded-lg transition-all duration-300">
+                <!-- Items -->
+                <div class="text-slate-400 text-sm pointer-events-none" id="empty-msg">Empty</div>
+            </div>
+        </div>
+
+      </div>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
+
