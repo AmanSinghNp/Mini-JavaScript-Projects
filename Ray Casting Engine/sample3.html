@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Raycaster Map Editor</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Theme Config -->
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#13ec13",
+              "background-light": "#f6f8f6",
+              "background-dark": "#102210",
+              "surface-dark": "#1a2e1a",
+              "border-green": "#283928",
+            },
+            fontFamily: {
+              display: ["Space Grotesk", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            boxShadow: {
+              glow: "0 0 10px rgba(19, 236, 19, 0.3)",
+              "glow-sm": "0 0 5px rgba(19, 236, 19, 0.2)",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      /* Custom scrollbar for webkit */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #102210;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #283928;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #13ec13;
+      }
+
+      .grid-pattern {
+        background-image: linear-gradient(
+            to right,
+            #1a2e1a 1px,
+            transparent 1px
+          ),
+          linear-gradient(to bottom, #1a2e1a 1px, transparent 1px);
+        background-size: 40px 40px;
+      }
+    </style>
+  </head>
+  <body
+    class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-white overflow-hidden h-screen flex flex-col"
+  >
+    <!-- Top Navigation -->
+    <header
+      class="flex shrink-0 items-center justify-between whitespace-nowrap border-b border-solid border-border-green px-6 py-3 bg-background-dark z-20"
+    >
+      <div class="flex items-center gap-4 text-white">
+        <div class="size-8 flex items-center justify-center text-primary">
+          <span class="material-symbols-outlined text-3xl">deployed_code</span>
+        </div>
+        <h2 class="text-white text-xl font-bold leading-tight tracking-tight">
+          RAYCASTER <span class="text-primary">//</span> MAP EDITOR
+        </h2>
+      </div>
+      <div class="flex gap-3">
+        <button
+          class="flex items-center gap-2 cursor-pointer justify-center overflow-hidden rounded-lg h-9 px-4 bg-primary text-background-dark hover:bg-white transition-colors text-sm font-bold shadow-glow"
+        >
+          <span class="material-symbols-outlined text-lg">play_arrow</span>
+          <span class="truncate">Play Level</span>
+        </button>
+        <button
+          class="flex items-center gap-2 cursor-pointer justify-center overflow-hidden rounded-lg h-9 px-4 bg-surface-dark border border-border-green hover:border-primary text-white text-sm font-bold transition-all"
+        >
+          <span class="material-symbols-outlined text-lg">save</span>
+          <span class="truncate">Save Map</span>
+        </button>
+        <button
+          class="flex items-center justify-center overflow-hidden rounded-lg size-9 bg-surface-dark border border-border-green hover:border-primary text-white transition-all"
+        >
+          <span class="material-symbols-outlined">settings</span>
+        </button>
+      </div>
+    </header>
+    <!-- Main Layout -->
+    <div class="flex grow h-full overflow-hidden">
+      <!-- Sidebar -->
+      <aside
+        class="w-80 flex flex-col border-r border-border-green bg-background-dark shrink-0"
+      >
+        <div class="p-4 flex flex-col gap-4 h-full">
+          <!-- Header -->
+          <div class="flex flex-col gap-1 pb-4 border-b border-border-green">
+            <h1
+              class="text-white text-base font-medium uppercase tracking-wider"
+            >
+              Map Library
+            </h1>
+            <p class="text-[#9db99d] text-xs font-normal">
+              Select a level to edit
+            </p>
+          </div>
+          <!-- Map List -->
+          <div class="flex flex-col gap-2 overflow-y-auto grow pr-2">
+            <!-- Active Item -->
+            <div
+              class="group flex items-center gap-3 p-3 rounded-lg bg-primary/10 border border-primary/30 cursor-pointer hover:bg-primary/20 transition-all"
+            >
+              <div
+                class="flex items-center justify-center rounded bg-primary text-background-dark shrink-0 size-10 shadow-glow-sm"
+              >
+                <span class="material-symbols-outlined">grid_view</span>
+              </div>
+              <div class="flex flex-col flex-1 min-w-0">
+                <p class="text-white text-sm font-bold truncate">
+                  E1M1: The Entrance
+                </p>
+                <p class="text-primary text-xs truncate">Modified: 2m ago</p>
+              </div>
+              <span class="material-symbols-outlined text-primary">edit</span>
+            </div>
+            <!-- Inactive Items -->
+            <div
+              class="group flex items-center gap-3 p-3 rounded-lg hover:bg-surface-dark border border-transparent hover:border-border-green cursor-pointer transition-all"
+            >
+              <div
+                class="flex items-center justify-center rounded bg-surface-dark text-[#9db99d] shrink-0 size-10"
+              >
+                <span class="material-symbols-outlined">map</span>
+              </div>
+              <div class="flex flex-col flex-1 min-w-0">
+                <p class="text-gray-300 text-sm font-medium truncate">
+                  E1M2: Guardhouse
+                </p>
+                <p class="text-gray-500 text-xs truncate">Size: 16x16</p>
+              </div>
+            </div>
+            <div
+              class="group flex items-center gap-3 p-3 rounded-lg hover:bg-surface-dark border border-transparent hover:border-border-green cursor-pointer transition-all"
+            >
+              <div
+                class="flex items-center justify-center rounded bg-surface-dark text-[#9db99d] shrink-0 size-10"
+              >
+                <span class="material-symbols-outlined">map</span>
+              </div>
+              <div class="flex flex-col flex-1 min-w-0">
+                <p class="text-gray-300 text-sm font-medium truncate">
+                  E1M3: Lab Complex
+                </p>
+                <p class="text-gray-500 text-xs truncate">Size: 24x24</p>
+              </div>
+            </div>
+            <div
+              class="group flex items-center gap-3 p-3 rounded-lg hover:bg-surface-dark border border-transparent hover:border-border-green cursor-pointer transition-all"
+            >
+              <div
+                class="flex items-center justify-center rounded bg-surface-dark text-[#9db99d] shrink-0 size-10"
+              >
+                <span class="material-symbols-outlined">lock</span>
+              </div>
+              <div class="flex flex-col flex-1 min-w-0">
+                <p class="text-gray-500 text-sm font-medium truncate">
+                  E1M4: Boss Arena
+                </p>
+                <p class="text-gray-600 text-xs truncate">Locked</p>
+              </div>
+            </div>
+          </div>
+          <!-- Bottom Actions -->
+          <div
+            class="mt-auto pt-4 border-t border-border-green flex flex-col gap-3"
+          >
+            <button
+              class="flex items-center justify-center w-full gap-2 rounded-lg h-10 bg-primary text-background-dark text-sm font-bold shadow-glow hover:brightness-110 transition-all"
+            >
+              <span class="material-symbols-outlined">add_circle</span>
+              Create New Map
+            </button>
+            <button
+              class="flex items-center justify-center w-full gap-2 rounded-lg h-10 bg-transparent border border-border-green text-gray-400 hover:text-white hover:border-white text-sm font-medium transition-all"
+            >
+              <span class="material-symbols-outlined">data_object</span>
+              Export JSON Data
+            </button>
+          </div>
+        </div>
+      </aside>
+      <!-- Editor Area -->
+      <main class="flex-1 flex flex-col relative bg-[#0a140a]">
+        <!-- Toolbar -->
+        <div
+          class="absolute top-6 left-1/2 -translate-x-1/2 bg-surface-dark/90 backdrop-blur border border-border-green p-1.5 rounded-xl flex gap-1 shadow-xl z-10"
+        >
+          <button
+            class="size-10 flex flex-col items-center justify-center rounded-lg bg-primary text-background-dark shadow-glow transition-all"
+            title="Wall Brush"
+          >
+            <span class="material-symbols-outlined">grid_view</span>
+          </button>
+          <button
+            class="size-10 flex flex-col items-center justify-center rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-all"
+            title="Eraser"
+          >
+            <span class="material-symbols-outlined"
+              >check_box_outline_blank</span
+            >
+          </button>
+          <div class="w-px h-6 bg-border-green my-auto mx-1"></div>
+          <button
+            class="size-10 flex flex-col items-center justify-center rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-all"
+            title="Player Start"
+          >
+            <span class="material-symbols-outlined">person_pin_circle</span>
+          </button>
+          <button
+            class="size-10 flex flex-col items-center justify-center rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-all"
+            title="Enemy Spawn"
+          >
+            <span class="material-symbols-outlined">bug_report</span>
+          </button>
+          <button
+            class="size-10 flex flex-col items-center justify-center rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-all"
+            title="Loot"
+          >
+            <span class="material-symbols-outlined">medical_services</span>
+          </button>
+        </div>
+        <!-- Canvas Container -->
+        <div
+          class="flex-1 overflow-auto flex items-center justify-center p-10 grid-pattern"
+        >
+          <!-- The Grid Wrapper -->
+          <div
+            class="relative bg-background-dark border-2 border-primary/50 shadow-glow rounded p-1"
+          >
+            <!-- Grid: 12x12 for demo purposes -->
+            <div class="grid grid-cols-12 gap-px bg-surface-dark">
+              <!-- Row 1: Border Walls -->
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <!-- Row 2 -->
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer flex items-center justify-center"
+              >
+                <span class="material-symbols-outlined text-primary text-2xl"
+                  >person_pin_circle</span
+                >
+              </div>
+              <!-- Player Start -->
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <!-- Row 3 -->
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <!-- Row 4 -->
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <!-- Row 5 -->
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer flex items-center justify-center"
+              >
+                <span class="material-symbols-outlined text-red-500 text-xl"
+                  >bug_report</span
+                >
+              </div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <!-- Row 6 -->
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <!-- Row 7 -->
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <!-- Row 8 -->
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer flex items-center justify-center"
+              >
+                <span class="material-symbols-outlined text-blue-400 text-xl"
+                  >medical_services</span
+                >
+              </div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <!-- Row 9-11 (Generic floor/wall mix) -->
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer flex items-center justify-center"
+              >
+                <span class="material-symbols-outlined text-red-500 text-xl"
+                  >bug_report</span
+                >
+              </div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-background-dark hover:bg-surface-dark cursor-pointer"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+              <div
+                class="size-10 bg-primary cursor-pointer hover:bg-primary/80"
+              ></div>
+            </div>
+          </div>
+        </div>
+        <!-- Footer / Data Panel -->
+        <div
+          class="h-48 border-t border-border-green bg-background-dark flex flex-col shrink-0"
+        >
+          <div
+            class="px-4 py-2 flex items-center justify-between border-b border-border-green bg-surface-dark"
+          >
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[#9db99d] text-lg"
+                >code</span
+              >
+              <span
+                class="text-xs font-bold uppercase tracking-wide text-[#9db99d]"
+                >Raw Map Data</span
+              >
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-xs text-[#9db99d]">Grid: 12x12</span>
+              <button
+                class="text-xs text-primary hover:text-white underline decoration-dashed"
+              >
+                Copy Array
+              </button>
+            </div>
+          </div>
+          <div class="flex-1 overflow-hidden relative group">
+            <pre
+              class="w-full h-full p-4 overflow-auto text-xs text-[#9db99d] font-mono leading-relaxed bg-[#0a0a0a]"
+            >
+[
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1],
+  [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1],
+  [1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1],
+  [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+]</pre
+            >
+            <div
+              class="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-background-dark to-transparent"
+            ></div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

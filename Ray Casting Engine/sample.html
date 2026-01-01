@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MONOLITH // RAYCASTING ENGINE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #050505;
+        --surface: #0a0a0a;
+        --accent: #ff4d00;
+        --text: #e0e0e0;
+        --mono: "JetBrains Mono", monospace;
+        --sans: "Space Grotesk", sans-serif;
+        --border: 2px solid #1a1a1a;
+        --glow: 0 0 20px rgba(255, 77, 0, 0.2);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: var(--bg);
+        color: var(--text);
+        font-family: var(--sans);
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      /* Brutalist Container */
+      .monolith-container {
+        position: relative;
+        width: 90vw;
+        height: 85vh;
+        background: var(--surface);
+        border: var(--border);
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        grid-template-rows: auto 1fr auto;
+        box-shadow: 40px 40px 0px rgba(0, 0, 0, 0.5);
+      }
+
+      /* Header Area */
+      .header {
+        grid-column: 1 / -1;
+        padding: 20px 40px;
+        border-bottom: var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(90deg, #0a0a0a 0%, #111 100%);
+      }
+
+      .header h1 {
+        font-weight: 700;
+        font-size: 1.2rem;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+
+      .header .status {
+        font-family: var(--mono);
+        font-size: 0.8rem;
+        color: #555;
+      }
+
+      /* Main Viewport */
+      .viewport-wrapper {
+        position: relative;
+        overflow: hidden;
+        background: #000;
+        border-right: var(--border);
+      }
+
+      canvas#viewport {
+        width: 100%;
+        height: 100%;
+        image-rendering: pixelated;
+      }
+
+      .scanlines {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            rgba(18, 16, 16, 0) 50%,
+            rgba(0, 0, 0, 0.25) 50%
+          ),
+          linear-gradient(
+            90deg,
+            rgba(255, 0, 0, 0.06),
+            rgba(0, 255, 0, 0.02),
+            rgba(0, 0, 255, 0.06)
+          );
+        background-size: 100% 4px, 3px 100%;
+        pointer-events: none;
+      }
+
+      /* Sidebar / Telemetry */
+      .sidebar {
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+        background: #080808;
+      }
+
+      .minimap-container {
+        width: 100%;
+        aspect-ratio: 1;
+        background: #000;
+        border: 1px solid #222;
+        position: relative;
+      }
+
+      canvas#minimap {
+        width: 100%;
+        height: 100%;
+      }
+
+      .telemetry {
+        font-family: var(--mono);
+      }
+
+      .telemetry-item {
+        margin-bottom: 15px;
+      }
+
+      .telemetry-label {
+        font-size: 0.6rem;
+        color: #555;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+
+      .telemetry-value {
+        font-size: 1.1rem;
+        color: var(--text);
+        font-weight: 700;
+      }
+
+      /* Controls Footer */
+      .footer {
+        grid-column: 1 / -1;
+        border-top: var(--border);
+        padding: 15px 40px;
+        display: flex;
+        gap: 40px;
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        color: #444;
+      }
+
+      .key-hint b {
+        color: var(--accent);
+        margin-right: 5px;
+      }
+
+      /* HUD Overlays */
+      .crosshair {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 20px;
+        height: 20px;
+        pointer-events: none;
+      }
+
+      .crosshair::before,
+      .crosshair::after {
+        content: "";
+        position: absolute;
+        background: var(--accent);
+        opacity: 0.5;
+      }
+
+      .crosshair::before {
+        top: 50%;
+        left: 0;
+        width: 100%;
+        height: 1px;
+      }
+      .crosshair::after {
+        left: 50%;
+        top: 0;
+        width: 1px;
+        height: 100%;
+      }
+
+      .vignette {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.8);
+        pointer-events: none;
+      }
+
+      .glitch-text {
+        animation: flicker 2s infinite;
+      }
+
+      @keyframes flicker {
+        0% {
+          opacity: 1;
+        }
+        5% {
+          opacity: 0.4;
+        }
+        10% {
+          opacity: 1;
+        }
+        15% {
+          opacity: 0.8;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="monolith-container">
+      <header class="header">
+        <h1 class="glitch-text">ENGINE_V.01 // RAY_TRACER</h1>
+        <div class="status">SYSTEM: OPTIMAL // COORDS: SEC-04</div>
+      </header>
+
+      <main class="viewport-wrapper">
+        <canvas id="viewport"></canvas>
+        <div class="scanlines"></div>
+        <div class="vignette"></div>
+        <div class="crosshair"></div>
+      </main>
+
+      <aside class="sidebar">
+        <div class="telemetry">
+          <div class="telemetry-item">
+            <div class="telemetry-label">Process ID</div>
+            <div class="telemetry-value" id="val-pid">0x4F92-A</div>
+          </div>
+          <div class="telemetry-item">
+            <div class="telemetry-label">Frame Latency</div>
+            <div class="telemetry-value" id="val-fps">60 FPS</div>
+          </div>
+          <div class="telemetry-item">
+            <div class="telemetry-label">Position Vector</div>
+            <div class="telemetry-value" id="val-pos">X: 2.00 Y: 2.00</div>
+          </div>
+        </div>
+
+        <div class="minimap-container">
+          <canvas id="minimap"></canvas>
+          <div
+            style="
+              position: absolute;
+              top: -10px;
+              right: -10px;
+              background: var(--accent);
+              color: #000;
+              padding: 2px 6px;
+              font-size: 10px;
+              font-weight: bold;
+              font-family: var(--mono);
+            "
+          >
+            NAV_SAT
+          </div>
+        </div>
+
+        <div
+          style="
+            margin-top: auto;
+            border-top: 1px solid #222;
+            padding-top: 20px;
+          "
+        >
+          <p style="font-size: 0.7rem; color: #444; line-height: 1.6">
+            Brutalist DDA Algorithm implementation. Optimized for
+            zero-dependency projection of 2D Euclidean planes into 1D visual
+            strips.
+          </p>
+        </div>
+      </aside>
+
+      <footer class="footer">
+        <div class="key-hint"><b>WASD</b> MOVEMENT</div>
+        <div class="key-hint"><b>QE</b> ROTATE</div>
+        <div class="key-hint"><b>SHIFT</b> OVERDRIVE</div>
+        <div
+          style="margin-left: auto; color: var(--accent); letter-spacing: 2px"
+        >
+          SECURE_PROTOCOL_INITIATED
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      const canvas = document.getElementById("viewport");
+      const ctx = canvas.getContext("2d");
+      const minimapCanvas = document.getElementById("minimap");
+      const mCtx = minimapCanvas.getContext("2d");
+
+      // Logic Constraints
+      const WORLD_MAP = [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1],
+        [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+        [1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1],
+        [1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
+        [1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      ];
+
+      const player = {
+        x: 3.5,
+        y: 3.5,
+        dirX: -1,
+        dirY: 0,
+        planeX: 0,
+        planeY: 0.66, // FOV approx 66deg
+        moveSpeed: 0.05,
+        rotSpeed: 0.03,
+      };
+
+      const keys = {};
+      window.onkeydown = (e) => (keys[e.code] = true);
+      window.onkeyup = (e) => (keys[e.code] = false);
+
+      function resize() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+        minimapCanvas.width = 200;
+        minimapCanvas.height = 200;
+      }
+      window.onresize = resize;
+      resize();
+
+      function update() {
+        let moveSpeed = keys["ShiftLeft"]
+          ? player.moveSpeed * 1.8
+          : player.moveSpeed;
+
+        if (keys["KeyW"]) {
+          if (
+            WORLD_MAP[Math.floor(player.x + player.dirX * moveSpeed)][
+              Math.floor(player.y)
+            ] === 0
+          )
+            player.x += player.dirX * moveSpeed;
+          if (
+            WORLD_MAP[Math.floor(player.x)][
+              Math.floor(player.y + player.dirY * moveSpeed)
+            ] === 0
+          )
+            player.y += player.dirY * moveSpeed;
+        }
+        if (keys["KeyS"]) {
+          if (
+            WORLD_MAP[Math.floor(player.x - player.dirX * moveSpeed)][
+              Math.floor(player.y)
+            ] === 0
+          )
+            player.x -= player.dirX * moveSpeed;
+          if (
+            WORLD_MAP[Math.floor(player.x)][
+              Math.floor(player.y - player.dirY * moveSpeed)
+            ] === 0
+          )
+            player.y -= player.dirY * moveSpeed;
+        }
+        if (keys["KeyA"]) {
+          let strafeX = player.dirY;
+          let strafeY = -player.dirX;
+          if (
+            WORLD_MAP[Math.floor(player.x - strafeX * moveSpeed)][
+              Math.floor(player.y)
+            ] === 0
+          )
+            player.x -= strafeX * moveSpeed;
+          if (
+            WORLD_MAP[Math.floor(player.x)][
+              Math.floor(player.y - strafeY * moveSpeed)
+            ] === 0
+          )
+            player.y -= strafeY * moveSpeed;
+        }
+        if (keys["KeyD"]) {
+          let strafeX = player.dirY;
+          let strafeY = -player.dirX;
+          if (
+            WORLD_MAP[Math.floor(player.x + strafeX * moveSpeed)][
+              Math.floor(player.y)
+            ] === 0
+          )
+            player.x += strafeX * moveSpeed;
+          if (
+            WORLD_MAP[Math.floor(player.x)][
+              Math.floor(player.y + strafeY * moveSpeed)
+            ] === 0
+          )
+            player.y += strafeY * moveSpeed;
+        }
+
+        // Rotation
+        const rot = keys["KeyQ"]
+          ? player.rotSpeed
+          : keys["KeyE"]
+          ? -player.rotSpeed
+          : 0;
+        if (rot !== 0) {
+          let oldDirX = player.dirX;
+          player.dirX =
+            player.dirX * Math.cos(rot) - player.dirY * Math.sin(rot);
+          player.dirY = oldDirX * Math.sin(rot) + player.dirY * Math.cos(rot);
+          let oldPlaneX = player.planeX;
+          player.planeX =
+            player.planeX * Math.cos(rot) - player.planeY * Math.sin(rot);
+          player.planeY =
+            oldPlaneX * Math.sin(rot) + player.planeY * Math.cos(rot);
+        }
+
+        // Update UI
+        document.getElementById("val-pos").innerText = `X: ${player.x.toFixed(
+          2
+        )} Y: ${player.y.toFixed(2)}`;
+      }
+
+      function drawMinimap() {
+        const size = minimapCanvas.width;
+        const step = size / WORLD_MAP.length;
+
+        mCtx.fillStyle = "#050505";
+        mCtx.fillRect(0, 0, size, size);
+
+        for (let x = 0; x < WORLD_MAP.length; x++) {
+          for (let y = 0; y < WORLD_MAP[0].length; y++) {
+            if (WORLD_MAP[x][y] > 0) {
+              mCtx.fillStyle = "#222";
+              mCtx.fillRect(x * step, y * step, step - 1, step - 1);
+            }
+          }
+        }
+
+        // Player dot
+        mCtx.fillStyle = varColor("--accent");
+        mCtx.fillRect(player.x * step - 2, player.y * step - 2, 4, 4);
+
+        // Direction line
+        mCtx.strokeStyle = varColor("--accent");
+        mCtx.beginPath();
+        mCtx.moveTo(player.x * step, player.y * step);
+        mCtx.lineTo(
+          (player.x + player.dirX * 2) * step,
+          (player.y + player.dirY * 2) * step
+        );
+        mCtx.stroke();
+      }
+
+      function varColor(name) {
+        return getComputedStyle(document.documentElement)
+          .getPropertyValue(name)
+          .trim();
+      }
+
+      function render() {
+        // Clear screen (Ceiling & Floor)
+        ctx.fillStyle = "#080808";
+        ctx.fillRect(0, 0, canvas.width, canvas.height / 2);
+        ctx.fillStyle = "#111";
+        ctx.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
+
+        for (let x = 0; x < canvas.width; x++) {
+          let cameraX = (2 * x) / canvas.width - 1;
+          let rayDirX = player.dirX + player.planeX * cameraX;
+          let rayDirY = player.dirY + player.planeY * cameraX;
+
+          let mapX = Math.floor(player.x);
+          let mapY = Math.floor(player.y);
+
+          let sideDistX, sideDistY;
+          let deltaDistX = Math.abs(1 / rayDirX);
+          let deltaDistY = Math.abs(1 / rayDirY);
+          let perpWallDist;
+
+          let stepX, stepY;
+          let hit = 0;
+          let side;
+
+          if (rayDirX < 0) {
+            stepX = -1;
+            sideDistX = (player.x - mapX) * deltaDistX;
+          } else {
+            stepX = 1;
+            sideDistX = (mapX + 1.0 - player.x) * deltaDistX;
+          }
+          if (rayDirY < 0) {
+            stepY = -1;
+            sideDistY = (player.y - mapY) * deltaDistY;
+          } else {
+            stepY = 1;
+            sideDistY = (mapY + 1.0 - player.y) * deltaDistY;
+          }
+
+          // DDA
+          while (hit === 0) {
+            if (sideDistX < sideDistY) {
+              sideDistX += deltaDistX;
+              mapX += stepX;
+              side = 0;
+            } else {
+              sideDistY += deltaDistY;
+              mapY += stepY;
+              side = 1;
+            }
+            if (WORLD_MAP[mapX][mapY] > 0) hit = 1;
+          }
+
+          if (side === 0)
+            perpWallDist = (mapX - player.x + (1 - stepX) / 2) / rayDirX;
+          else perpWallDist = (mapY - player.y + (1 - stepY) / 2) / rayDirY;
+
+          let lineHeight = Math.floor(canvas.height / perpWallDist);
+          let drawStart = -lineHeight / 2 + canvas.height / 2;
+          let drawEnd = lineHeight / 2 + canvas.height / 2;
+
+          // Brutalist wall coloring
+          let color;
+          const baseVal = Math.min(200, 255 / (perpWallDist * 0.2));
+
+          if (side === 1) {
+            // Y-walls are darker
+            color = `rgb(${baseVal * 0.4}, ${baseVal * 0.4}, ${baseVal * 0.4})`;
+          } else {
+            // X-walls are slightly lighter/textured
+            color = `rgb(${baseVal * 0.6}, ${baseVal * 0.6}, ${baseVal * 0.6})`;
+          }
+
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(x, drawStart);
+          ctx.lineTo(x, drawEnd);
+          ctx.stroke();
+
+          // Add a "wireframe" top/bottom edge for more brutalist style
+          ctx.strokeStyle = `rgba(255, 77, 0, ${0.3 / perpWallDist})`;
+          ctx.beginPath();
+          ctx.moveTo(x, drawStart);
+          ctx.lineTo(x, drawStart + 2);
+          ctx.moveTo(x, drawEnd);
+          ctx.lineTo(x, drawEnd - 2);
+          ctx.stroke();
+        }
+      }
+
+      let lastTime = 0;
+      function loop(time) {
+        const dt = time - lastTime;
+        lastTime = time;
+        document.getElementById("val-fps").innerText = `${Math.round(
+          1000 / dt
+        )} FPS`;
+
+        update();
+        render();
+        drawMinimap();
+        requestAnimationFrame(loop);
+      }
+
+      requestAnimationFrame(loop);
+    </script>
+  </body>
+</html>
