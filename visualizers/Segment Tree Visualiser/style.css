@@ -1,0 +1,57 @@
+.node {
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    background: white;
+    border: 2px solid #0ea5e9;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #334155;
+    z-index: 10;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.node .val {
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 1;
+}
+
+.node .range {
+    font-size: 9px;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+.node.node-visit {
+    border-color: #f59e0b;
+    background: #fef3c7;
+}
+
+.node.node-selected {
+    border-color: #22c55e;
+    background: #dcfce7;
+    transform: scale(1.1);
+    z-index: 20;
+}
+
+.node.node-updated {
+    animation: flash 0.5s;
+    background: #e0f2fe;
+}
+
+@keyframes flash {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); border-color: #f59e0b; }
+    100% { transform: scale(1); }
+}
+
+svg line {
+    stroke: #cbd5e1;
+    stroke-width: 2;
+}
+
