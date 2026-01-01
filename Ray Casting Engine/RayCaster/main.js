@@ -1,9 +1,15 @@
 import { WORLD_MAP } from './map.js';
 import { player } from './player.js';
 import { textures, initTextures, TEXTURE_SIZE } from './textures.js';
+import { renderSprites, spawnSprite } from './sprite.js';
 
 // Initialize procedural textures
 initTextures();
+
+// Spawn some dummy enemies for testing
+spawnSprite(10.5, 10.5, 'enemy');
+spawnSprite(7.5, 7.5, 'enemy');
+spawnSprite(12.5, 5.5, 'enemy');
 
 const canvas = document.getElementById('screen');
 const ctx = canvas.getContext('2d');
@@ -120,6 +126,8 @@ function render() {
     ctx.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
 
     // 2. Ray Casting
+    const zBuffer = new Array(canvas.width).fill(0); // For sprite occlusion
+
     for (let x = 0; x < canvas.width; x++) {
         // Calculate ray position and direction
         const cameraX = 2 * x / canvas.width - 1; // x-coordinate in camera space
@@ -189,6 +197,9 @@ function render() {
             perpWallDist = (sideDistY - deltaDistY);
         }
 
+        // Store in Z-Buffer
+        zBuffer[x] = perpWallDist;
+
         // Calculate height of line to draw on screen
         const lineHeight = Math.floor(canvas.height / perpWallDist);
 
@@ -242,9 +253,12 @@ function render() {
             let val = 255 * intensity;
             const color = `rgb(0, ${Math.floor(val)}, 0)`;
             ctx.fillStyle = color;
-            ctx.fillRect(x, drawStart, 1, drawEnd - drawStart);
+             ctx.fillRect(x, drawStart, 1, drawEnd - drawStart);
         }
     }
+
+    // 3. Render Sprites
+    renderSprites(ctx, canvas, zBuffer);
 
     drawMinimap();
 }

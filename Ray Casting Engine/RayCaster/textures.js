@@ -83,6 +83,60 @@ export function initTextures() {
     textures.walls[0] = null; // Empty
     textures.walls[1] = generateBrickTexture();
     textures.walls[2] = generateStoneTexture(); // We can map other map IDs to this
+    
+    // Sprites
+    textures.sprites = {};
+    textures.sprites['enemy'] = generateEnemyTexture();
+    textures.sprites['projectile'] = generateProjectileTexture();
+
     console.log("Textures generated");
+}
+
+function generateEnemyTexture() {
+    const { canvas, ctx } = createTexture();
+    // Simple face
+    ctx.fillStyle = 'transparent';
+    ctx.clearRect(0,0,TEXTURE_SIZE, TEXTURE_SIZE);
+    
+    ctx.fillStyle = '#ff0000';
+    ctx.beginPath();
+    ctx.arc(32, 32, 28, 0, Math.PI*2);
+    ctx.fill();
+    
+    // Eyes
+    ctx.fillStyle = '#ffff00';
+    ctx.beginPath();
+    ctx.arc(20, 24, 6, 0, Math.PI*2);
+    ctx.arc(44, 24, 6, 0, Math.PI*2);
+    ctx.fill();
+    
+    // Mouth
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(20, 48);
+    ctx.lineTo(44, 48);
+    ctx.stroke();
+
+    return canvas;
+}
+
+function generateProjectileTexture() {
+    const { canvas, ctx } = createTexture();
+    ctx.fillStyle = 'transparent';
+    ctx.clearRect(0,0,TEXTURE_SIZE, TEXTURE_SIZE);
+    
+    // Glowing center
+    const grad = ctx.createRadialGradient(32, 32, 4, 32, 32, 30);
+    grad.addColorStop(0, '#fff');
+    grad.addColorStop(0.5, '#0f0'); // Green laser
+    grad.addColorStop(1, 'transparent');
+    
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(32, 32, 30, 0, Math.PI*2);
+    ctx.fill();
+    
+    return canvas;
 }
 
