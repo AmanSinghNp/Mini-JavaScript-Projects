@@ -1,0 +1,30 @@
+.node {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: white;
+    z-index: 10;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.node-red {
+    background-color: #ef4444; /* Red 500 */
+    border: 2px solid #b91c1c;
+}
+
+.node-black {
+    background-color: #1e293b; /* Slate 800 */
+    border: 2px solid #0f172a;
+}
+
+svg line {
+    stroke: #cbd5e1;
+    stroke-width: 2;
+}
+

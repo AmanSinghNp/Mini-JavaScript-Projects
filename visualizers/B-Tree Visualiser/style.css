@@ -1,0 +1,28 @@
+.node {
+    position: absolute;
+    background: white;
+    border: 2px solid #3b82f6;
+    border-radius: 8px;
+    display: flex;
+    padding: 4px;
+    gap: 2px;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.key {
+    display: inline-block;
+    padding: 2px 6px;
+    background: #eff6ff;
+    border-radius: 4px;
+    border: 1px solid #dbeafe;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1e40af;
+}
+
+svg line {
+    stroke: #cbd5e1;
+    stroke-width: 2;
+}
+
