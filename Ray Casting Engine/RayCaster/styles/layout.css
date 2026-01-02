@@ -1,0 +1,406 @@
+/**
+ * Layout CSS - Page structure, flexbox/grid utilities, and responsive layouts
+ * Replaces Tailwind layout utilities
+ */
+
+/* ============================================
+ * PAGE STRUCTURE
+ * ============================================ */
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ============================================
+ * HEADER
+ * ============================================ */
+
+.header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--color-ui-border);
+  background-color: var(--color-ui-dark);
+  padding: var(--spacing-3) var(--spacing-6);
+  z-index: 20;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  color: var(--color-primary);
+}
+
+.header-title h1 {
+  color: var(--color-primary);
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-shadow: var(--shadow-text-glow);
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-6);
+}
+
+.header-hint {
+  display: none;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-ui-text-muted);
+}
+
+@media (min-width: 768px) {
+  .header-hint {
+    display: flex;
+  }
+}
+
+.header-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  transition: color var(--transition-fast);
+}
+
+.header-button:hover {
+  color: white;
+}
+
+/* ============================================
+ * MAIN CONTENT
+ * ============================================ */
+
+.main-content {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
+  overflow: hidden;
+}
+
+.background-dimmer {
+  display: none; /* Hide dimmer for fullscreen game */
+}
+
+/* ============================================
+ * GAME CONTAINER
+ * ============================================ */
+
+.game-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  border: none;
+  overflow: hidden;
+  z-index: var(--z-game-container);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Fullscreen mode */
+.game-container:fullscreen,
+.game-container:-webkit-full-screen,
+.game-container:-moz-full-screen {
+  width: 100vw;
+  height: 100vh;
+}
+
+#game-viewport {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-bg-black);
+  overflow: hidden;
+}
+
+#screen {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+#weapon-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ============================================
+ * UI OVERLAYS
+ * ============================================ */
+
+.minimap-border {
+  position: absolute;
+  top: var(--spacing-4);
+  left: var(--spacing-4);
+  width: 12rem;
+  height: 12rem;
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(19, 236, 19, 0.3);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-1);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  z-index: var(--z-radar);
+}
+
+#minimap {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-ui-dark);
+  border-radius: var(--border-radius-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.fps-counter {
+  position: absolute;
+  top: var(--spacing-4);
+  right: var(--spacing-4);
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--color-ui-border);
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--border-radius-sm);
+  color: var(--color-ui-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  backdrop-filter: blur(4px);
+  z-index: var(--z-fps-counter);
+}
+
+.fps-counter .value {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+#message-area {
+  position: absolute;
+  top: 5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: var(--z-message-area);
+}
+
+.message-badge {
+  background-color: rgba(19, 236, 19, 0.1);
+  border: 1px solid rgba(19, 236, 19, 0.3);
+  color: var(--color-primary);
+  padding: var(--spacing-1) var(--spacing-4);
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  animation: pulse 2s infinite;
+}
+
+/* ============================================
+ * FOOTER
+ * ============================================ */
+
+.footer {
+  flex: 0 0 auto;
+  background-color: var(--color-ui-dark);
+  color: var(--color-ui-text-dimmer);
+  font-size: var(--font-size-xs);
+  padding: var(--spacing-2) var(--spacing-6);
+  border-top: 1px solid var(--color-ui-border);
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+}
+
+.debug-text {
+  display: flex;
+  gap: var(--spacing-4);
+}
+
+/* ============================================
+ * MOBILE CONTROLS
+ * ============================================ */
+
+.mobile-controls {
+  position: absolute;
+  bottom: var(--spacing-8);
+  left: 0;
+  right: 0;
+  padding: 0 var(--spacing-8);
+  display: flex;
+  justify-content: space-between;
+  z-index: 50;
+  user-select: none;
+}
+
+@media (min-width: 768px) {
+  .mobile-controls {
+    display: none;
+  }
+}
+
+.mobile-button {
+  width: 8rem;
+  height: 8rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  touch-action: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--transition-fast);
+}
+
+.mobile-button:active {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+#btn-shoot:active {
+  background-color: rgba(19, 236, 19, 0.2);
+}
+
+.dpad-label {
+  position: absolute;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: var(--font-size-xs);
+}
+
+.dpad-label.top { top: var(--spacing-2); left: 50%; transform: translateX(-50%); }
+.dpad-label.bottom { bottom: var(--spacing-2); left: 50%; transform: translateX(-50%); }
+.dpad-label.left { left: var(--spacing-2); top: 50%; transform: translateY(-50%); }
+.dpad-label.right { right: var(--spacing-2); top: 50%; transform: translateY(-50%); }
+
+/* ============================================
+ * FLEX UTILITIES
+ * ============================================ */
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-1 { flex: 1; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.gap-1 { gap: var(--spacing-1); }
+.gap-2 { gap: var(--spacing-2); }
+.gap-4 { gap: var(--spacing-4); }
+.gap-6 { gap: var(--spacing-6); }
+
+/* ============================================
+ * POSITION UTILITIES
+ * ============================================ */
+
+.relative { position: relative; }
+.absolute { position: absolute; }
+.inset-0 { inset: 0; }
+
+/* ============================================
+ * SIZE UTILITIES
+ * ============================================ */
+
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+.h-screen { height: 100vh; }
+
+/* ============================================
+ * LEVEL POPUP
+ * ============================================ */
+
+.level-popup {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  backdrop-filter: blur(4px);
+}
+
+.level-popup.hidden {
+  display: none;
+}
+
+.level-popup-content {
+  text-align: center;
+  padding: 3rem;
+  background: rgba(0, 20, 0, 0.95);
+  border: 3px solid var(--color-primary);
+  box-shadow: 
+    0 0 30px rgba(19, 236, 19, 0.3),
+    inset 0 0 20px rgba(19, 236, 19, 0.1);
+}
+
+.level-badge {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: var(--color-primary);
+  text-shadow: 0 0 10px rgba(19, 236, 19, 0.8);
+  margin-bottom: 1rem;
+}
+
+.level-badge span {
+  font-size: 2rem;
+}
+
+.level-title {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--color-primary);
+  text-shadow: 0 0 20px rgba(19, 236, 19, 0.8);
+  margin-bottom: 0.5rem;
+}
+
+.level-message {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  color: var(--color-ui-text-muted);
+  margin-bottom: 2rem;
+}
+
+.level-button {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: black;
+  background: var(--color-primary);
+  border: none;
+  padding: 1rem 2.5rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  box-shadow: 0 0 20px rgba(19, 236, 19, 0.5);
+  transition: all 0.2s ease;
+}
+
+.level-button:hover {
+  background: white;
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+}
+
+.level-button:active {
+  transform: scale(0.95);
+}
+

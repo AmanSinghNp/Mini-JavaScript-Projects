@@ -1,77 +1,87 @@
-/* UI Layer Ordering - Z-Index Management
- * Ensures all canvas and UI elements render in correct order
+/**
+ * UI Layer Ordering - Z-Index Management
+ * Uses CSS custom properties from variables.css for centralized control
+ * 
+ * Layer stack (bottom to top):
+ * 1. World Canvas (#screen)
+ * 2. Radar/Minimap
+ * 3. FPS Counter & Messages
+ * 4. Game Container
+ * 5. Weapon Canvas
+ * 6. Effects Canvas
+ * 7. HUD Panels
+ * 8. CRT Overlay
+ * 9. Crosshair (topmost interactive element)
  */
 
 /* Base game canvas (world rendering) */
 #screen {
   position: relative;
-  z-index: 1;
+  z-index: var(--z-world, 1);
 }
 
 /* Weapon canvas (rendered above world, below effects) */
 #weapon-canvas {
-  z-index: 12 !important;
+  z-index: var(--z-weapon, 12) !important;
 }
 
 /* Effects canvas (damage flash, muzzle flash) */
 #effects-canvas {
-  z-index: 15 !important;
+  z-index: var(--z-effects, 15) !important;
 }
 
 /* Radar/Minimap canvas */
 #minimap {
   position: relative;
-  z-index: 4;
+  z-index: var(--z-radar, 5);
 }
 
 .minimap-border {
-  z-index: 5;
-  /* Ensure minimap is above game canvas but below HUD panels */
+  z-index: var(--z-radar, 5);
 }
 
 /* HUD Panels (tactical HUD system) */
 #hud-container {
-  z-index: 100 !important;
+  z-index: var(--z-hud, 100) !important;
 }
 
 .hud-panel {
-  z-index: 101;
+  z-index: var(--z-hud-panel, 101);
 }
 
 /* Crosshair (above all game elements) */
 #crosshair-container {
-  z-index: 250 !important;
+  z-index: var(--z-crosshair, 250) !important;
 }
 
-/* CRT Overlay (above game elements, below crosshair for visibility) */
+/* CRT Overlay (above HUD, below crosshair for visibility) */
 .crt-overlay {
-  z-index: 200 !important;
+  z-index: var(--z-crt-overlay, 200) !important;
 }
 
-/* Ensure CRT overlay is positioned correctly within game viewport */
 #game-viewport .crt-overlay {
   position: absolute;
-  z-index: 200 !important;
+  z-index: var(--z-crt-overlay, 200) !important;
 }
 
-/* FPS Counter and other debug UI */
+/* FPS Counter and debug UI */
 .fps-counter {
-  z-index: 6;
+  z-index: var(--z-fps-counter, 6);
 }
 
 /* Message area */
 #message-area {
-  z-index: 7;
+  z-index: var(--z-message-area, 7);
 }
 
-/* Ensure proper stacking context */
+/* Container stacking contexts */
 .game-container {
   position: relative;
-  z-index: 10;
+  z-index: var(--z-game-container, 10);
 }
 
 #game-viewport {
   position: relative;
-  z-index: 1;
+  z-index: var(--z-world, 1);
 }
 

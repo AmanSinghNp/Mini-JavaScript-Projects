@@ -4,132 +4,44 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>RayCaster.js - Retro 3D Engine</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <!-- Google Fonts -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@400;500;700&amp;display=swap"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
     <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
       rel="stylesheet"
     />
-    <!-- CRT Visual Effects Stylesheets -->
+    
+    <!-- Vanilla CSS Stylesheets -->
+    <link rel="stylesheet" href="styles/variables.css" />
+    <link rel="stylesheet" href="styles/base.css" />
+    <link rel="stylesheet" href="styles/layout.css" />
     <link rel="stylesheet" href="styles/crt-overlay.css" />
     <link rel="stylesheet" href="styles/phosphor-glow.css" />
-    <!-- Tactical HUD Stylesheets -->
     <link rel="stylesheet" href="styles/hud-panels.css" />
     <link rel="stylesheet" href="styles/animations.css" />
-    <!-- Enhanced Crosshair Stylesheet -->
     <link rel="stylesheet" href="styles/crosshair.css" />
-    <!-- Layer Ordering (Z-Index Management) -->
     <link rel="stylesheet" href="styles/layer-ordering.css" />
-    <script>
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              primary: "#13ec13",
-              "background-light": "#f6f8f6",
-              "background-dark": "#102210",
-              "ui-dark": "#0a140a",
-              "ui-border": "#1a2e1a",
-            },
-            fontFamily: {
-              display: ["Space Grotesk", "sans-serif"],
-              body: ["Noto Sans", "sans-serif"],
-            },
-            borderRadius: {
-              DEFAULT: "0.25rem",
-              lg: "0.5rem",
-              xl: "0.75rem",
-              full: "9999px",
-            },
-            boxShadow: {
-              glow: "0 0 10px rgba(19, 236, 19, 0.3), 0 0 20px rgba(19, 236, 19, 0.1)",
-              crt: "inset 0 0 20px rgba(0,0,0,0.5)",
-            },
-          },
-        },
-      };
-    </script>
-    <style>
-      body {
-        font-family: "Space Grotesk", "Noto Sans", sans-serif;
-        overflow: hidden; /* Prevent scrolling for immersive feel */
-      }
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #102210;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #1a2e1a;
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #13ec13;
-      }
-
-    </style>
   </head>
-  <body
-    class="bg-background-light dark:bg-background-dark text-white h-screen flex flex-col"
-  >
-    <!-- Top Navigation Bar -->
-    <header
-      class="flex-none flex items-center justify-between whitespace-nowrap border-b border-ui-border bg-ui-dark px-6 py-3 z-20"
-    >
-      <div class="flex items-center gap-4 text-primary">
-        <div class="size-6 flex items-center justify-center">
-          <span class="material-symbols-outlined text-2xl"
-            >videogame_asset</span
-          >
-        </div>
-        <h1
-          class="text-primary text-xl font-bold tracking-widest uppercase font-display drop-shadow-[0_0_5px_rgba(19,236,19,0.5)]"
-        >
-          RayCaster.js
-        </h1>
-      </div>
-      <div class="flex items-center gap-6">
-        <div class="hidden md:flex items-center gap-2 text-sm text-[#9db99d]">
-          <span class="material-symbols-outlined text-base">help</span>
-          <span>Controls: WASD to Move, Arrows to Look</span>
-        </div>
-        <button
-          class="flex items-center justify-center text-primary hover:text-white transition-colors"
-        >
-          <span class="material-symbols-outlined">settings</span>
-        </button>
-      </div>
-    </header>
+  <body>
     <!-- Main Game Area -->
-    <main
-      class="flex-1 relative flex items-center justify-center p-4 lg:p-8 overflow-hidden bg-[url('https://placeholder.pics/svg/300')] bg-cover bg-center"
-      data-alt="Dark abstract grid background pattern"
-    >
+    <main class="main-content">
       <!-- Background Vignette/Dimmer -->
-      <div
-        class="absolute inset-0 bg-background-dark/90 backdrop-blur-sm z-0"
-      ></div>
+      <div class="background-dimmer"></div>
+
       <!-- Game Container -->
-      <div
-        class="game-container relative w-full max-w-6xl aspect-video bg-black rounded-lg border-2 border-ui-border shadow-glow overflow-hidden z-10 flex flex-col"
-      >
-        <!-- The "Canvas" -->
-        <div
-          class="relative flex-1 w-full h-full bg-[#050505] overflow-hidden group"
-          id="game-viewport"
-        >
-          <canvas id="screen" class="w-full h-full block"></canvas>
+      <div class="game-container">
+        <!-- The Canvas -->
+        <div id="game-viewport">
+          <canvas id="screen"></canvas>
 
           <!-- Weapon Canvas Layer -->
-          <canvas id="weapon-canvas" class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 12;"></canvas>
+          <canvas id="weapon-canvas"></canvas>
 
-          <!-- Effects Canvas Layer (for damage flash, muzzle flash) -->
-          <!-- Will be created by EffectsCanvas class -->
+          <!-- Effects Canvas Layer (created by EffectsCanvas class) -->
 
           <!-- CRT Overlay Layer -->
           <div class="crt-overlay">
@@ -154,33 +66,18 @@
           </div>
 
           <!-- Top Left: Mini Map -->
-          <div
-            class="minimap-border absolute top-4 left-4 w-32 h-32 bg-black/80 border border-primary/30 rounded p-1 backdrop-blur-sm shadow-lg"
-          >
-            <canvas
-              id="minimap"
-              class="w-full h-full bg-ui-dark rounded relative overflow-hidden"
-            ></canvas>
+          <div class="minimap-border">
+            <canvas id="minimap"></canvas>
           </div>
 
           <!-- Top Right: FPS Counter -->
-          <div
-            class="fps-counter absolute top-4 right-4 bg-black/60 border border-ui-border px-3 py-1 rounded text-[#9db99d] font-mono text-xs backdrop-blur-sm"
-          >
-            FPS: <span id="fps-counter" class="text-primary font-bold hud-text">60</span>
+          <div class="fps-counter">
+            FPS: <span id="fps-counter" class="value hud-text">60</span>
           </div>
 
           <!-- Messages/Log Area -->
-          <div
-            class="absolute top-20 left-1/2 -translate-x-1/2 text-center"
-            id="message-area"
-            style="display: none"
-          >
-            <div
-              class="bg-primary/10 border border-primary/30 text-primary px-4 py-1 rounded-full text-sm font-display uppercase tracking-widest animate-pulse"
-            >
-              Sector Clear
-            </div>
+          <div id="message-area" style="display: none">
+            <div class="message-badge">Sector Clear</div>
           </div>
         </div>
 
@@ -217,155 +114,64 @@
           </div>
         </div>
 
-        <!-- Legacy HUD / Status Bar (Hidden by default, can be toggled) -->
-        <div
-          class="h-20 bg-ui-dark border-t border-ui-border flex items-center px-6 gap-8 shrink-0"
-          style="display: none;"
-          id="legacy-hud"
-        >
+        <!-- Legacy HUD / Status Bar (Hidden by default) -->
+        <div id="legacy-hud" class="legacy-hud" style="display: none;">
           <!-- Health Section -->
-          <div class="flex flex-col gap-1 w-1/3 max-w-[240px]">
-            <div class="flex justify-between items-end">
-              <span
-                class="hud-text hud-text-pulse text-primary font-bold font-display tracking-widest text-sm"
-                >HEALTH</span
-              >
-              <span class="hud-text hud-text-pulse text-white font-mono text-lg font-bold">100%</span>
+          <div class="legacy-section">
+            <div class="legacy-header">
+              <span class="hud-text hud-text-pulse text-primary font-bold tracking-widest text-sm">HEALTH</span>
+              <span class="hud-text hud-text-pulse font-mono text-lg font-bold">100%</span>
             </div>
-            <!-- Progress Bar Component -->
-            <div
-              class="health-bar h-4 w-full bg-[#1a2e1a] rounded overflow-hidden relative border border-[#2a4e2a]"
-            >
-              <div
-                class="absolute inset-0 bg-[linear-gradient(90deg,transparent_90%,#000_100%)] bg-[length:10px_100%] opacity-30 z-10"
-              ></div>
-              <div
-                class="health-bar-fill h-full bg-primary relative"
-                style="width: 100%"
-              >
-                <div
-                  class="absolute inset-0 bg-white/20 animate-[pulse_2s_infinite]"
-                ></div>
-              </div>
+            <div class="legacy-bar health-bar">
+              <div class="bar-segments"></div>
+              <div class="legacy-bar-fill"></div>
             </div>
           </div>
+
           <!-- Weapon Info Center -->
-          <div
-            class="flex-1 flex flex-col items-center justify-center border-x border-ui-border/30 h-12"
-          >
-            <span
-              class="text-[#5c7a5c] text-xs font-display tracking-widest uppercase mb-1"
-              >Current Weapon</span
-            >
-            <div
-              class="weapon-name flex items-center gap-2 text-white font-display font-bold text-xl tracking-wider uppercase"
-            >
+          <div class="legacy-weapon">
+            <span class="text-dim text-xs tracking-widest uppercase">Current Weapon</span>
+            <div class="weapon-name">
               <span class="material-symbols-outlined text-primary">token</span>
               <span class="hud-text">PISTOL</span>
             </div>
           </div>
+
           <!-- Ammo Section -->
-          <div class="flex flex-col gap-1 w-1/3 max-w-[240px] items-end">
-            <div class="flex justify-between items-end w-full">
-              <span class="ammo-counter text-[#9db99d] font-mono text-lg"
-                ><span id="val-ammo" class="hud-text">50</span
-                ><span class="text-[#4a6b4a] text-sm"
-                  >/<span id="val-max-ammo">50</span></span
-                ></span
-              >
-              <span
-                class="hud-text hud-text-pulse text-primary font-bold font-display tracking-widest text-sm"
-                >AMMO</span
-              >
+          <div class="legacy-section ammo-section">
+            <div class="legacy-header">
+              <span class="ammo-counter text-muted font-mono text-lg">
+                <span id="val-ammo" class="hud-text">50</span>
+                <span class="text-dim text-sm">/<span id="val-max-ammo">50</span></span>
+              </span>
+              <span class="hud-text hud-text-pulse text-primary font-bold tracking-widest text-sm">AMMO</span>
             </div>
-            <!-- Discrete ammo blocks -->
-            <div id="ammo-bar" class="flex gap-1 justify-end w-full">
-              <div
-                class="ammo-block h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm"
-              ></div>
-              <div
-                class="ammo-block h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm"
-              ></div>
-              <div
-                class="ammo-block h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm"
-              ></div>
-              <div
-                class="ammo-block h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm"
-              ></div>
-              <div
-                class="ammo-block h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm"
-              ></div>
-              <div
-                class="ammo-block h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm"
-              ></div>
-              <div
-                class="ammo-block h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm"
-              ></div>
-              <div
-                class="ammo-block h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm"
-              ></div>
-              <div
-                class="ammo-block h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm"
-              ></div>
-              <div
-                class="ammo-block h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm"
-              ></div>
+            <div id="ammo-bar" class="ammo-blocks">
+              <div class="ammo-block active"></div>
+              <div class="ammo-block active"></div>
+              <div class="ammo-block active"></div>
+              <div class="ammo-block active"></div>
+              <div class="ammo-block active"></div>
+              <div class="ammo-block active"></div>
+              <div class="ammo-block active"></div>
+              <div class="ammo-block active"></div>
+              <div class="ammo-block active"></div>
+              <div class="ammo-block active"></div>
             </div>
           </div>
         </div>
-      </div>
-      <!-- Mobile Controls -->
-      <div
-        class="absolute bottom-8 left-0 right-0 px-8 flex justify-between md:hidden z-50 select-none"
-      >
-        <!-- D-Pad -->
-        <div
-          id="dpad"
-          class="size-32 bg-white/10 rounded-full border border-white/20 backdrop-blur-sm active:bg-white/20 transition-colors touch-none relative"
-        >
-          <div
-            class="absolute top-2 left-1/2 -translate-x-1/2 text-white/50 text-xs"
-          >
-            W
-          </div>
-          <div
-            class="absolute bottom-2 left-1/2 -translate-x-1/2 text-white/50 text-xs"
-          >
-            S
-          </div>
-          <div
-            class="absolute left-2 top-1/2 -translate-y-1/2 text-white/50 text-xs"
-          >
-            A
-          </div>
-          <div
-            class="absolute right-2 top-1/2 -translate-y-1/2 text-white/50 text-xs"
-          >
-            D
+
+        <!-- Level Cleared Popup -->
+        <div id="level-popup" class="level-popup hidden">
+          <div class="level-popup-content">
+            <div class="level-badge">LEVEL <span id="level-number">1</span></div>
+            <h2 class="level-title">SECTOR CLEARED</h2>
+            <p class="level-message">All hostiles eliminated</p>
+            <button id="next-level-btn" class="level-button">NEXT SECTOR</button>
           </div>
         </div>
-        <!-- Action Button -->
-        <div
-          id="btn-shoot"
-          class="size-32 bg-white/10 rounded-full border border-white/20 backdrop-blur-sm active:bg-primary/20 transition-colors touch-none flex items-center justify-center"
-        >
-          <span class="material-symbols-outlined text-4xl text-white/70"
-            >my_location</span
-          >
-        </div>
-      </div>
     </main>
-    <!-- Footer / Debug Info -->
-    <footer
-      class="flex-none bg-ui-dark text-[#4a6b4a] text-xs py-2 px-6 border-t border-ui-border flex justify-between font-mono"
-    >
-      <div>RayCaster Engine v1.0.4</div>
-      <div class="flex gap-4 debug-text">
-        <span>X: <span id="debug-x">0.00</span></span>
-        <span>Y: <span id="debug-y">0.00</span></span>
-        <span>DIR: <span id="debug-dir">0.00</span></span>
-      </div>
-    </footer>
+
     <script type="module" src="main.js"></script>
   </body>
 </html>

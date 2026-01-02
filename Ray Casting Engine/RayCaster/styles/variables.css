@@ -1,0 +1,112 @@
+/**
+ * CSS Custom Properties (Variables) for Ray Casting Engine
+ * Centralizes design tokens for colors, spacing, timing, and z-indices
+ */
+
+:root {
+  /* ============================================
+   * COLOR PALETTE
+   * ============================================ */
+  
+  /* Primary - CRT Green */
+  --color-primary: #13ec13;
+  --color-primary-dim: rgba(19, 236, 19, 0.3);
+  --color-primary-glow: rgba(19, 236, 19, 0.5);
+  
+  /* Backgrounds */
+  --color-bg-light: #f6f8f6;
+  --color-bg-dark: #102210;
+  --color-bg-black: #050505;
+  
+  /* UI Elements */
+  --color-ui-dark: #0a140a;
+  --color-ui-border: #1a2e1a;
+  --color-ui-border-light: #2a4e2a;
+  --color-ui-text-muted: #9db99d;
+  --color-ui-text-dim: #5c7a5c;
+  --color-ui-text-dimmer: #4a6b4a;
+  
+  /* Status Colors */
+  --color-health: #13ec13;
+  --color-armor: #3498db;
+  --color-danger: #ff3333;
+  --color-warning: #ffaa00;
+  --color-hit: #ff0000;
+  
+  /* CRT Effects */
+  --color-scanline: rgba(0, 0, 0, 0.15);
+  --color-vignette: rgba(0, 0, 0, 0.5);
+  
+  /* ============================================
+   * Z-INDEX LAYERS
+   * All z-indices in one place for easy reference
+   * ============================================ */
+  --z-world: 1;
+  --z-radar: 5;
+  --z-fps-counter: 6;
+  --z-message-area: 7;
+  --z-game-container: 10;
+  --z-weapon: 12;
+  --z-effects: 15;
+  --z-crosshair: 250;
+  --z-hud: 100;
+  --z-hud-panel: 101;
+  --z-crt-overlay: 200;
+  
+  /* ============================================
+   * TYPOGRAPHY
+   * ============================================ */
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Noto Sans', sans-serif;
+  --font-mono: 'Courier New', Courier, monospace;
+  
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.875rem;   /* 14px */
+  --font-size-base: 1rem;     /* 16px */
+  --font-size-lg: 1.125rem;   /* 18px */
+  --font-size-xl: 1.25rem;    /* 20px */
+  --font-size-2xl: 1.5rem;    /* 24px */
+  
+  /* ============================================
+   * SPACING
+   * ============================================ */
+  --spacing-1: 0.25rem;  /* 4px */
+  --spacing-2: 0.5rem;   /* 8px */
+  --spacing-3: 0.75rem;  /* 12px */
+  --spacing-4: 1rem;     /* 16px */
+  --spacing-6: 1.5rem;   /* 24px */
+  --spacing-8: 2rem;     /* 32px */
+  
+  /* ============================================
+   * BORDERS & RADIUS
+   * ============================================ */
+  --border-radius-sm: 0.25rem;
+  --border-radius-md: 0.5rem;
+  --border-radius-lg: 0.75rem;
+  --border-radius-full: 9999px;
+  
+  /* ============================================
+   * SHADOWS
+   * ============================================ */
+  --shadow-glow: 0 0 10px rgba(19, 236, 19, 0.3), 0 0 20px rgba(19, 236, 19, 0.1);
+  --shadow-crt: inset 0 0 20px rgba(0, 0, 0, 0.5);
+  --shadow-text-glow: 0 0 5px rgba(19, 236, 19, 0.5);
+  
+  /* ============================================
+   * TRANSITIONS & TIMING
+   * ============================================ */
+  --transition-fast: 150ms ease;
+  --transition-normal: 300ms ease;
+  --transition-slow: 500ms ease;
+  
+  /* Animation durations */
+  --duration-damage-flash: 300ms;
+  --duration-muzzle-flash: 100ms;
+  --duration-screen-shake: 200ms;
+  --duration-hit-marker: 200ms;
+}
+
+/* Dark mode is default for this game */
+.dark {
+  color-scheme: dark;
+}

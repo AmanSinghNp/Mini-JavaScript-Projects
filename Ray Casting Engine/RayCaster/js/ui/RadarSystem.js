@@ -4,7 +4,7 @@
  */
 
 export class RadarSystem {
-  constructor(canvasId, radius = 80, scale = 0.5) {
+  constructor(canvasId, radius = 100, scale = 0.3) {
     this.canvas = document.getElementById(canvasId);
     if (!this.canvas) {
       console.error(`RadarSystem: Canvas with id "${canvasId}" not found`);
@@ -13,7 +13,7 @@ export class RadarSystem {
     
     this.ctx = this.canvas.getContext('2d');
     this.radius = radius;
-    this.scale = scale; // World units per pixel
+    this.scale = scale; // World units per pixel (lower = more zoomed in)
     
     // Position in screen corner
     this.centerX = radius + 20;
@@ -35,33 +35,37 @@ export class RadarSystem {
     
     // Performance optimization
     this.frameCount = 0;
-    this.updateEveryNFrames = 1; // Update every frame for smooth animation
+    this.updateEveryNFrames = 1;
     
     // Visibility toggle
     this.isVisible = true;
     
-    // Zoom level
-    this.zoomLevel = 1.0;
+    // Zoom level (higher = more zoomed out, shows more of map)
+    this.zoomLevel = 1.5; // Default: show more of the map
     this.minZoom = 0.5;
-    this.maxZoom = 2.0;
+    this.maxZoom = 3.0;
   }
   
   /**
    * Convert world coordinates to radar screen coordinates
-   * Rotates relative to player facing direction
+   * FIXED MAP VIEW: Map is drawn at fixed positions, player moves on map
    */
-  worldToRadar(worldX, worldY, player) {
-    const dx = worldX - player.x;
-    const dy = worldY - player.y;
+  worldToRadar(worldX, worldY, worldMap) {
+    // Calculate scale to fit entire map in radar
+    const mapWidth = worldMap.length;
+    const mapHeight = worldMap[0].length;
+    const scaleX = (this.radius * 2 - 20) / mapWidth;
+    const scaleY = (this.radius * 2 - 20) / mapHeight;
+    const scale = Math.min(scaleX, scaleY);
     
-    // Rotate relative to player facing direction
-    const angle = Math.atan2(player.dirY, player.dirX);
-    const rotatedX = dx * Math.cos(-angle) - dy * Math.sin(-angle);
-    const rotatedY = dx * Math.sin(-angle) + dy * Math.cos(-angle);
+    // Center the map in the radar
+    const offsetX = (this.radius * 2 - mapWidth * scale) / 2;
+    const offsetY = (this.radius * 2 - mapHeight * scale) / 2;
     
     return {
-      x: (rotatedX / this.scale) * this.zoomLevel,
-      y: (rotatedY / this.scale) * this.zoomLevel
+      x: offsetX + worldX * scale,
+      y: offsetY + worldY * scale,
+      scale: scale
     };
   }
   
@@ -106,62 +110,60 @@ export class RadarSystem {
   }
   
   /**
-   * Draw walls with spatial culling
+   * Draw walls - fixed position map
    */
   drawWalls(player, worldMap) {
-    const viewRange = (this.radius / this.scale) * this.zoomLevel;
+    const mapWidth = worldMap.length;
+    const mapHeight = worldMap[0].length;
     
-    // Only check cells within radar range
-    const minX = Math.max(0, Math.floor(player.x - viewRange));
-    const maxX = Math.min(worldMap.length - 1, Math.ceil(player.x + viewRange));
-    const minY = Math.max(0, Math.floor(player.y - viewRange));
-    const maxY = Math.min(worldMap[0].length - 1, Math.ceil(player.y + viewRange));
+    // Calculate scale to fit map
+    const scaleX = (this.radius * 2 - 20) / mapWidth;
+    const scaleY = (this.radius * 2 - 20) / mapHeight;
+    const scale = Math.min(scaleX, scaleY);
+    
+    const offsetX = 10 + (this.radius * 2 - 20 - mapWidth * scale) / 2;
+    const offsetY = 10 + (this.radius * 2 - 20 - mapHeight * scale) / 2;
     
     this.ctx.fillStyle = this.wallColor;
     
-    for (let x = minX; x <= maxX; x++) {
-      for (let y = minY; y <= maxY; y++) {
+    const cellSize = Math.max(2, scale - 1);
+    
+    for (let x = 0; x < mapWidth; x++) {
+      for (let y = 0; y < mapHeight; y++) {
         if (worldMap[x] && worldMap[x][y] > 0) {
-          const screenPos = this.worldToRadar(x + 0.5, y + 0.5, player);
-          
-          // Only draw if within radar circle
-          if (this.isInRadarRange(screenPos.x, screenPos.y)) {
-            this.ctx.fillRect(
-              this.centerX + screenPos.x - 2,
-              this.centerY + screenPos.y - 2,
-              4, 4
-            );
-          }
+          this.ctx.fillRect(
+            offsetX + x * scale,
+            offsetY + y * scale,
+            cellSize,
+            cellSize
+          );
         }
       }
     }
+    
+    // Store for player drawing
+    this.mapScale = scale;
+    this.mapOffsetX = offsetX;
+    this.mapOffsetY = offsetY;
   }
   
   /**
-   * Draw entities (enemies, pickups) with distance filtering
+   * Draw entities (enemies, pickups) on fixed map
    */
   drawEntities(player, entities) {
-    const viewRange = (this.radius / this.scale) * this.zoomLevel;
+    if (!this.mapScale) return; // Wait for first wall draw
     
     entities.forEach(entity => {
       // Skip projectiles
       if (entity.type === 'projectile') return;
       
-      const dx = entity.x - player.x;
-      const dy = entity.y - player.y;
-      const distance = Math.sqrt(dx ** 2 + dy ** 2);
-      
-      // Only show entities within range
-      if (distance > viewRange) return;
-      
-      const screenPos = this.worldToRadar(entity.x, entity.y, player);
-      
-      // Only draw if within radar circle
-      if (!this.isInRadarRange(screenPos.x, screenPos.y)) return;
+      // Calculate entity position on fixed map
+      const screenX = this.mapOffsetX + entity.x * this.mapScale;
+      const screenY = this.mapOffsetY + entity.y * this.mapScale;
       
       // Draw entity based on type
       this.ctx.save();
-      this.ctx.translate(this.centerX + screenPos.x, this.centerY + screenPos.y);
+      this.ctx.translate(screenX, screenY);
       
       if (entity.type === 'enemy') {
         // Pulsing red dot
@@ -169,22 +171,12 @@ export class RadarSystem {
         this.ctx.fillStyle = this.enemyColor;
         this.ctx.globalAlpha = pulse;
         this.ctx.beginPath();
-        this.ctx.arc(0, 0, 4, 0, Math.PI * 2);
+        this.ctx.arc(0, 0, 3, 0, Math.PI * 2);
         this.ctx.fill();
-        
-        // Direction arrow (pointing toward player)
-        const angle = Math.atan2(dy, dx);
-        const playerAngle = Math.atan2(player.dirY, player.dirX);
-        const relativeAngle = angle - playerAngle;
-        
-        this.ctx.rotate(relativeAngle);
-        this.ctx.fillStyle = this.enemyColor;
-        this.ctx.globalAlpha = pulse;
-        this.ctx.fillRect(4, -2, 6, 4); // Arrow extending from dot
       } else if (entity.type === 'pickup') {
         this.ctx.fillStyle = this.pickupColor;
         this.ctx.globalAlpha = 1.0;
-        this.ctx.fillRect(-3, -3, 6, 6);
+        this.ctx.fillRect(-2, -2, 4, 4);
       }
       
       this.ctx.restore();
@@ -193,10 +185,15 @@ export class RadarSystem {
   
   /**
    * Draw field-of-view cone
+   * STATIC: Cone rotates to show player facing direction
    */
   drawFOVCone(player) {
     this.ctx.save();
     this.ctx.translate(this.centerX, this.centerY);
+    
+    // Get player facing angle for static map
+    const playerAngle = Math.atan2(player.dirY, player.dirX);
+    this.ctx.rotate(playerAngle);
     
     // Calculate FOV from player plane
     const fovAngle = 2 * Math.atan2(
@@ -253,31 +250,41 @@ export class RadarSystem {
   }
   
   /**
-   * Draw player indicator at center
+   * Draw player indicator at actual position on fixed map
    */
-  drawPlayer() {
-    this.ctx.save();
-    this.ctx.translate(this.centerX, this.centerY);
+  drawPlayer(player) {
+    if (!this.mapScale) return; // Wait for first wall draw
     
-    // Player dot
+    // Calculate player position on fixed map
+    const playerScreenX = this.mapOffsetX + player.x * this.mapScale;
+    const playerScreenY = this.mapOffsetY + player.y * this.mapScale;
+    
+    this.ctx.save();
+    this.ctx.translate(playerScreenX, playerScreenY);
+    
+    // Rotate arrow to show player facing direction
+    const playerAngle = Math.atan2(player.dirY, player.dirX);
+    this.ctx.rotate(playerAngle);
+    
+    // Player dot (slightly larger for visibility)
     this.ctx.fillStyle = this.playerColor;
     this.ctx.beginPath();
-    this.ctx.arc(0, 0, 5, 0, Math.PI * 2);
+    this.ctx.arc(0, 0, 4, 0, Math.PI * 2);
     this.ctx.fill();
     
-    // Direction indicator (arrow pointing forward)
+    // Direction indicator (arrow pointing in facing direction)
     this.ctx.strokeStyle = this.playerColor;
     this.ctx.lineWidth = 2;
     this.ctx.beginPath();
     this.ctx.moveTo(0, 0);
-    this.ctx.lineTo(0, -10);
+    this.ctx.lineTo(10, 0);
     this.ctx.stroke();
     
     // Arrow head
     this.ctx.beginPath();
-    this.ctx.moveTo(0, -10);
-    this.ctx.lineTo(-3, -7);
-    this.ctx.lineTo(3, -7);
+    this.ctx.moveTo(10, 0);
+    this.ctx.lineTo(6, -3);
+    this.ctx.lineTo(6, 3);
     this.ctx.closePath();
     this.ctx.fill();
     
@@ -313,38 +320,23 @@ export class RadarSystem {
     // Clear canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     
-    // Circular clipping mask
-    this.ctx.save();
-    this.ctx.beginPath();
-    this.ctx.arc(this.centerX, this.centerY, this.radius, 0, Math.PI * 2);
-    this.ctx.clip();
-    
     // Background
     this.ctx.fillStyle = this.backgroundColor;
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     
-    // Concentric range rings
-    this.drawRangeRings();
-    
-    // World elements (relative to player)
+    // Draw fixed map walls
     this.drawWalls(player, worldMap);
+    
+    // Draw entities on fixed map
     this.drawEntities(player, entities);
-    this.drawFOVCone(player);
     
-    // Player indicator (center)
-    this.drawPlayer();
+    // Player indicator at actual position
+    this.drawPlayer(player);
     
-    // Scanning sweep effect
-    this.drawScannerSweep();
-    
-    this.ctx.restore();
-    
-    // Outer border
-    this.drawRadarBorder();
-    
-    // Update scan animation
-    this.scanAngle += this.scanSpeed;
-    if (this.scanAngle > Math.PI * 2) this.scanAngle = 0;
+    // Draw border
+    this.ctx.strokeStyle = '#0f0';
+    this.ctx.lineWidth = 2;
+    this.ctx.strokeRect(2, 2, this.canvas.width - 4, this.canvas.height - 4);
   }
   
   /**

@@ -19,8 +19,14 @@ export function removeSprite(sprite) {
 }
 
 export function updateSprites(dt) {
+    // Track sprites to remove (avoid modifying array during iteration)
+    const toRemove = new Set();
+    
     for (let i = sprites.length - 1; i >= 0; i--) {
         const sprite = sprites[i];
+        
+        // Skip sprites already marked for removal
+        if (toRemove.has(sprite)) continue;
 
         // Projectile Logic
         if (sprite.type === 'projectile') {
@@ -34,8 +40,8 @@ export function updateSprites(dt) {
             if (mapX >= 0 && mapX < WORLD_MAP.length && 
                 mapY >= 0 && mapY < WORLD_MAP[0].length &&
                 WORLD_MAP[mapX][mapY] > 0) {
-                // Hit wall
-                removeSprite(sprite);
+                // Hit wall - mark for removal
+                toRemove.add(sprite);
                 continue;
             }
 
@@ -44,11 +50,11 @@ export function updateSprites(dt) {
             let killedEnemy = false;
             for (let j = sprites.length - 1; j >= 0; j--) {
                 const other = sprites[j];
-                if (other.type === 'enemy') {
+                if (other.type === 'enemy' && !toRemove.has(other)) {
                     const dist = Math.sqrt((other.x - newX) ** 2 + (other.y - newY) ** 2);
                     if (dist < 0.5) { // Hitbox size
-                        removeSprite(other); // Kill enemy
-                        removeSprite(sprite); // Destroy bullet
+                        toRemove.add(other); // Mark enemy for removal
+                        toRemove.add(sprite); // Mark bullet for removal
                         hitEnemy = true;
                         killedEnemy = true;
                         break;
@@ -70,9 +76,14 @@ export function updateSprites(dt) {
                 
                 // Despawn if too far
                 const distFromPlayer = Math.sqrt((sprite.x - player.x)**2 + (sprite.y - player.y)**2);
-                if (distFromPlayer > 30) removeSprite(sprite);
+                if (distFromPlayer > 30) toRemove.add(sprite);
             }
         }
+    }
+    
+    // Remove all marked sprites after iteration is complete
+    for (const sprite of toRemove) {
+        removeSprite(sprite);
     }
 }
 

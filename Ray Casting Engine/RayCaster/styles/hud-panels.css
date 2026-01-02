@@ -3,16 +3,17 @@
  */
 
 #hud-container {
-  position: fixed;
-  inset: 0;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
   pointer-events: none;
-  z-index: 100;
+  z-index: var(--z-hud, 100);
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   padding: 20px;
   font-family: 'Space Grotesk', 'Noto Sans', monospace;
-  /* Ensure it's above game container but below crosshair */
 }
 
 /* Base Panel Styling */
@@ -29,28 +30,25 @@
 
 /* Left Panel - Vitals */
 .left-panel {
-  clip-path: polygon(
-    10% 0%,      /* Top-left cut */
-    100% 0%,     /* Top-right */
-    100% 100%,   /* Bottom-right */
-    0% 100%      /* Bottom-left */
-  );
+  /* Remove clip-path to avoid cutting content */
+  border-left: 4px solid #0f0;
+  border-top: 4px solid #0f0;
+  border-bottom: 4px solid #0f0;
   border-right: none;
-  border-top: none;
-  border-bottom: none;
+  /* Slant effect with border trick or just keep rectangle */
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }
 
 /* Right Panel - Weapon */
 .right-panel {
-  clip-path: polygon(
-    0% 0%,       /* Top-left */
-    90% 0%,      /* Top-right cut */
-    100% 100%,   /* Bottom-right */
-    0% 100%      /* Bottom-left */
-  );
+  /* Remove clip-path to avoid cutting content */
+  border-right: 4px solid #0f0;
+  border-top: 4px solid #0f0;
+  border-bottom: 4px solid #0f0;
   border-left: none;
-  border-top: none;
-  border-bottom: none;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 /* Panel Header */
@@ -112,24 +110,6 @@
     0 0 8px rgba(0, 255, 0, 0.8),
     0 0 15px rgba(0, 255, 0, 0.5),
     inset 0 0 5px rgba(255, 255, 255, 0.2);
-}
-
-.bar-fill::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.3) 50%,
-    transparent 100%
-  );
-  animation: shimmer 2s infinite;
-}
-
-@keyframes shimmer {
-  0%, 100% { transform: translateX(-100%); }
-  50% { transform: translateX(100%); }
 }
 
 /* Numeric Display */
