@@ -6,6 +6,8 @@ export const player = {
     planeX: 0,
     planeY: 0.66, // FOV approx 66deg
     moveSpeed: 0.05,
-    rotSpeed: 0.03
+    rotSpeed: 0.03,
+    ammo: 50,
+    maxAmmo: 50
 };
 

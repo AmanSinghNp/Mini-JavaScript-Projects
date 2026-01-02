@@ -20,8 +20,12 @@ const fpsCounter = document.getElementById('fps-counter');
 const debugX = document.getElementById('debug-x');
 const debugY = document.getElementById('debug-y');
 const debugDir = document.getElementById('debug-dir');
+const valAmmo = document.getElementById('val-ammo');
+const valMaxAmmo = document.getElementById('val-max-ammo');
+const ammoBar = document.getElementById('ammo-bar');
 
 let lastTime = 0;
+let isPointerLocked = false;
 
     // Input handling
     const keys = {};
@@ -88,8 +92,57 @@ let lastTime = 0;
         });
     }
 
+    // Pointer Lock for Mouse Look
+    canvas.addEventListener('click', () => {
+        if (!isPointerLocked) {
+            canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock || canvas.webkitRequestPointerLock;
+            if (canvas.requestPointerLock) {
+                canvas.requestPointerLock();
+            }
+        }
+    });
+
+    // Handle pointer lock change
+    const pointerLockChange = () => {
+        isPointerLocked = document.pointerLockElement === canvas || 
+                         document.mozPointerLockElement === canvas || 
+                         document.webkitPointerLockElement === canvas;
+    };
+
+    document.addEventListener('pointerlockchange', pointerLockChange);
+    document.addEventListener('mozpointerlockchange', pointerLockChange);
+    document.addEventListener('webkitpointerlockchange', pointerLockChange);
+
+    // Mouse Look
+    let mouseSensitivity = 0.002;
+    document.addEventListener('mousemove', (e) => {
+        if (!isPointerLocked) return;
+        
+        const movementX = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
+        const rotSpeed = -movementX * mouseSensitivity;
+        
+        if (rotSpeed !== 0) {
+            const oldDirX = player.dirX;
+            player.dirX = player.dirX * Math.cos(rotSpeed) - player.dirY * Math.sin(rotSpeed);
+            player.dirY = oldDirX * Math.sin(rotSpeed) + player.dirY * Math.cos(rotSpeed);
+            
+            const oldPlaneX = player.planeX;
+            player.planeX = player.planeX * Math.cos(rotSpeed) - player.planeY * Math.sin(rotSpeed);
+            player.planeY = oldPlaneX * Math.sin(rotSpeed) + player.planeY * Math.cos(rotSpeed);
+        }
+    });
+
     // Shooting
     function shoot() {
+        // Check ammo
+        if (player.ammo <= 0) {
+            return; // Can't shoot without ammo
+        }
+        
+        // Decrement ammo
+        player.ammo--;
+        updateAmmoUI();
+        
         // Spawn projectile slightly in front of player
         const spawnDist = 0.5;
         const pX = player.x + player.dirX * spawnDist;
@@ -100,6 +153,29 @@ let lastTime = 0;
         // Visual kickback (optional)
         // const weaponEl = document.querySelector('.weapon-sprite'); // If we had one
     }
+
+    // Update Ammo UI
+    function updateAmmoUI() {
+        if (valAmmo) valAmmo.innerText = player.ammo;
+        if (valMaxAmmo) valMaxAmmo.innerText = player.maxAmmo;
+        
+        if (ammoBar) {
+            const blocks = ammoBar.querySelectorAll('.ammo-block');
+            const ammoPerBlock = player.maxAmmo / blocks.length;
+            
+            blocks.forEach((block, index) => {
+                const threshold = (index + 1) * ammoPerBlock;
+                if (player.ammo >= threshold) {
+                    block.className = 'ammo-block h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm';
+                } else {
+                    block.className = 'ammo-block h-4 w-2 bg-[#1a2e1a] border border-[#2a4e2a] rounded-sm';
+                }
+            });
+        }
+    }
+
+    // Initialize Ammo UI
+    updateAmmoUI();
 
 function resize() {
     // Make sure the canvas buffer matches the display size for crisp rendering
