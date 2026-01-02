@@ -241,9 +241,9 @@ function update(dt) {
 
     if (strafeStep !== 0) {
         // Strafe direction is perpendicular to direction (rotate 90 deg)
-        // Dir vector (x, y) -> Perpendicular (-y, x)
-        const strafeDirX = -player.dirY;
-        const strafeDirY = player.dirX;
+        // Dir vector (x, y) -> Perpendicular (y, -x) for correct visual orientation
+        const strafeDirX = player.dirY;
+        const strafeDirY = -player.dirX;
 
         const newX = player.x + strafeDirX * strafeStep;
         const newY = player.y + strafeDirY * strafeStep;
