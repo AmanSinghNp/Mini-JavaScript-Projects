@@ -1,0 +1,208 @@
+/* Enhanced Crosshair System - Dynamic feedback and state animations */
+
+#crosshair-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 250;
+  /* Above all game elements and CRT overlay */
+}
+
+#crosshair {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  transition: all 0.1s ease-out;
+}
+
+.crosshair-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 3px;
+  background: #0f0;
+  border-radius: 50%;
+  box-shadow: 0 0 5px #0f0, 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+.crosshair-line {
+  position: absolute;
+  background: #0f0;
+  box-shadow: 0 0 3px #0f0, 0 0 6px rgba(0, 255, 0, 0.3);
+  transition: all 0.15s ease-out;
+}
+
+.crosshair-line.top,
+.crosshair-line.bottom {
+  width: 2px;
+  height: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.crosshair-line.top { top: 0; }
+.crosshair-line.bottom { bottom: 0; }
+
+.crosshair-line.left,
+.crosshair-line.right {
+  width: 8px;
+  height: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.crosshair-line.left { left: 0; }
+.crosshair-line.right { right: 0; }
+
+/* Shooting State - Spread Expansion */
+#crosshair.shooting {
+  width: 60px;
+  height: 60px;
+}
+
+#crosshair.shooting .crosshair-line.top { top: -5px; }
+#crosshair.shooting .crosshair-line.bottom { bottom: -5px; }
+#crosshair.shooting .crosshair-line.left { left: -5px; }
+#crosshair.shooting .crosshair-line.right { right: -5px; }
+
+/* Enemy Detected State - Cyan Tint and Pulse */
+#crosshair.enemy-detected {
+  filter: hue-rotate(120deg); /* Cyan tint */
+}
+
+#crosshair.enemy-detected .crosshair-dot {
+  animation: pulse 0.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    transform: translate(-50%, -50%) scale(1); 
+    opacity: 1;
+  }
+  50% { 
+    transform: translate(-50%, -50%) scale(1.5); 
+    opacity: 0.8;
+  }
+}
+
+/* Hit Marker (X shape) */
+.hit-marker {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.1s;
+  pointer-events: none;
+}
+
+.hit-marker::before,
+.hit-marker::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 2px;
+  background: #fff;
+  box-shadow: 0 0 5px #fff, 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.hit-marker::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.hit-marker::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.hit-marker.active {
+  opacity: 1;
+  animation: hitFade 0.3s ease-out forwards;
+}
+
+@keyframes hitFade {
+  0% { 
+    opacity: 1; 
+    transform: translate(-50%, -50%) scale(0.5); 
+  }
+  100% { 
+    opacity: 0; 
+    transform: translate(-50%, -50%) scale(1.5); 
+  }
+}
+
+/* Kill Indicator */
+.kill-indicator {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #0f0;
+  font-family: 'Courier New', monospace;
+  font-size: 18px;
+  font-weight: bold;
+  text-shadow: 
+    0 0 5px #0f0,
+    0 0 10px rgba(0, 255, 0, 0.5);
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.kill-indicator.active {
+  animation: killPop 0.8s ease-out forwards;
+}
+
+@keyframes killPop {
+  0% { 
+    opacity: 0; 
+    transform: translateX(-50%) translateY(0) scale(0.8); 
+  }
+  20% { 
+    opacity: 1; 
+    transform: translateX(-50%) translateY(-10px) scale(1.2); 
+  }
+  100% { 
+    opacity: 0; 
+    transform: translateX(-50%) translateY(-30px) scale(0.8); 
+  }
+}
+
+/* Low Ammo Warning */
+#low-ammo-warning {
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #ff0;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  font-weight: bold;
+  text-shadow: 
+    0 0 5px #ff0,
+    0 0 10px rgba(255, 255, 0, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  pointer-events: none;
+}
+
+#low-ammo-warning.hidden {
+  display: none;
+}
+
+#low-ammo-warning.blink {
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+

@@ -1,0 +1,77 @@
+/* UI Layer Ordering - Z-Index Management
+ * Ensures all canvas and UI elements render in correct order
+ */
+
+/* Base game canvas (world rendering) */
+#screen {
+  position: relative;
+  z-index: 1;
+}
+
+/* Weapon canvas (rendered above world, below effects) */
+#weapon-canvas {
+  z-index: 12 !important;
+}
+
+/* Effects canvas (damage flash, muzzle flash) */
+#effects-canvas {
+  z-index: 15 !important;
+}
+
+/* Radar/Minimap canvas */
+#minimap {
+  position: relative;
+  z-index: 4;
+}
+
+.minimap-border {
+  z-index: 5;
+  /* Ensure minimap is above game canvas but below HUD panels */
+}
+
+/* HUD Panels (tactical HUD system) */
+#hud-container {
+  z-index: 100 !important;
+}
+
+.hud-panel {
+  z-index: 101;
+}
+
+/* Crosshair (above all game elements) */
+#crosshair-container {
+  z-index: 250 !important;
+}
+
+/* CRT Overlay (above game elements, below crosshair for visibility) */
+.crt-overlay {
+  z-index: 200 !important;
+}
+
+/* Ensure CRT overlay is positioned correctly within game viewport */
+#game-viewport .crt-overlay {
+  position: absolute;
+  z-index: 200 !important;
+}
+
+/* FPS Counter and other debug UI */
+.fps-counter {
+  z-index: 6;
+}
+
+/* Message area */
+#message-area {
+  z-index: 7;
+}
+
+/* Ensure proper stacking context */
+.game-container {
+  position: relative;
+  z-index: 10;
+}
+
+#game-viewport {
+  position: relative;
+  z-index: 1;
+}
+

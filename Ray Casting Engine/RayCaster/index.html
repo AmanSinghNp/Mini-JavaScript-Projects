@@ -13,6 +13,16 @@
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
       rel="stylesheet"
     />
+    <!-- CRT Visual Effects Stylesheets -->
+    <link rel="stylesheet" href="styles/crt-overlay.css" />
+    <link rel="stylesheet" href="styles/phosphor-glow.css" />
+    <!-- Tactical HUD Stylesheets -->
+    <link rel="stylesheet" href="styles/hud-panels.css" />
+    <link rel="stylesheet" href="styles/animations.css" />
+    <!-- Enhanced Crosshair Stylesheet -->
+    <link rel="stylesheet" href="styles/crosshair.css" />
+    <!-- Layer Ordering (Z-Index Management) -->
+    <link rel="stylesheet" href="styles/layer-ordering.css" />
     <script>
       tailwind.config = {
         darkMode: "class",
@@ -62,17 +72,6 @@
         background: #13ec13;
       }
 
-      .scanlines {
-        background: linear-gradient(
-          to bottom,
-          rgba(255, 255, 255, 0),
-          rgba(255, 255, 255, 0) 50%,
-          rgba(0, 0, 0, 0.2) 50%,
-          rgba(0, 0, 0, 0.2)
-        );
-        background-size: 100% 4px;
-        pointer-events: none;
-      }
     </style>
   </head>
   <body
@@ -117,34 +116,46 @@
       ></div>
       <!-- Game Container -->
       <div
-        class="relative w-full max-w-6xl aspect-video bg-black rounded-lg border-2 border-ui-border shadow-glow overflow-hidden z-10 flex flex-col"
+        class="game-container relative w-full max-w-6xl aspect-video bg-black rounded-lg border-2 border-ui-border shadow-glow overflow-hidden z-10 flex flex-col"
       >
         <!-- The "Canvas" -->
         <div
           class="relative flex-1 w-full h-full bg-[#050505] overflow-hidden group"
+          id="game-viewport"
         >
           <canvas id="screen" class="w-full h-full block"></canvas>
 
-          <!-- CRT Scanline Effect Overlay -->
-          <div
-            class="absolute inset-0 scanlines opacity-30 pointer-events-none"
-          ></div>
-          <div
-            class="absolute inset-0 shadow-crt pointer-events-none rounded-lg"
-          ></div>
+          <!-- Weapon Canvas Layer -->
+          <canvas id="weapon-canvas" class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 12;"></canvas>
 
-          <!-- Crosshair -->
-          <div
-            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none text-primary/80"
-          >
-            <span class="material-symbols-outlined text-3xl font-light"
-              >add</span
-            >
+          <!-- Effects Canvas Layer (for damage flash, muzzle flash) -->
+          <!-- Will be created by EffectsCanvas class -->
+
+          <!-- CRT Overlay Layer -->
+          <div class="crt-overlay">
+            <div class="crt-scanlines"></div>
+            <div class="crt-chromatic-aberration"></div>
+            <div class="crt-vignette"></div>
+            <div class="crt-barrel-distortion"></div>
+          </div>
+
+          <!-- Enhanced Crosshair System -->
+          <div id="crosshair-container">
+            <div id="crosshair" class="crosshair-default">
+              <div class="crosshair-dot"></div>
+              <div class="crosshair-line top"></div>
+              <div class="crosshair-line bottom"></div>
+              <div class="crosshair-line left"></div>
+              <div class="crosshair-line right"></div>
+              <div class="hit-marker" id="hit-marker"></div>
+              <div class="kill-indicator" id="kill-indicator">+100</div>
+            </div>
+            <div id="low-ammo-warning" class="hidden">LOW AMMO</div>
           </div>
 
           <!-- Top Left: Mini Map -->
           <div
-            class="absolute top-4 left-4 w-32 h-32 bg-black/80 border border-primary/30 rounded p-1 backdrop-blur-sm shadow-lg"
+            class="minimap-border absolute top-4 left-4 w-32 h-32 bg-black/80 border border-primary/30 rounded p-1 backdrop-blur-sm shadow-lg"
           >
             <canvas
               id="minimap"
@@ -154,9 +165,9 @@
 
           <!-- Top Right: FPS Counter -->
           <div
-            class="absolute top-4 right-4 bg-black/60 border border-ui-border px-3 py-1 rounded text-[#9db99d] font-mono text-xs backdrop-blur-sm"
+            class="fps-counter absolute top-4 right-4 bg-black/60 border border-ui-border px-3 py-1 rounded text-[#9db99d] font-mono text-xs backdrop-blur-sm"
           >
-            FPS: <span id="fps-counter" class="text-primary font-bold">60</span>
+            FPS: <span id="fps-counter" class="text-primary font-bold hud-text">60</span>
           </div>
 
           <!-- Messages/Log Area -->
@@ -173,28 +184,63 @@
           </div>
         </div>
 
-        <!-- HUD / Status Bar -->
+        <!-- Tactical HUD System -->
+        <div id="hud-container">
+          <!-- Left Panel - Vitals -->
+          <div class="hud-panel left-panel" id="vitals-panel">
+            <div class="panel-header">VITALS</div>
+            <div class="status-icon" id="player-face">
+              <canvas id="player-face-canvas" width="64" height="64"></canvas>
+            </div>
+            <div class="bar-container health-bar">
+              <div class="bar-label">HEALTH</div>
+              <div class="bar-fill" id="health-bar-fill" style="width: 100%"></div>
+            </div>
+            <div class="numeric-display" id="health-numeric">100</div>
+            
+            <div class="bar-container armor-bar">
+              <div class="bar-label">ARMOR</div>
+              <div class="bar-fill" id="armor-bar-fill" style="width: 100%"></div>
+            </div>
+            <div class="numeric-display" id="armor-numeric">100</div>
+          </div>
+
+          <!-- Right Panel - Weapon -->
+          <div class="hud-panel right-panel" id="weapon-panel">
+            <div class="panel-header">ARMAMENT</div>
+            <div class="weapon-icon" id="current-weapon">P</div>
+            <div class="ammo-display">
+              <span id="ammo-current">50</span> / <span id="ammo-reserve">200</span>
+            </div>
+            <div class="ammo-grid" id="ammo-visual"></div>
+            <div id="reload-indicator" class="hidden">RELOADING...</div>
+          </div>
+        </div>
+
+        <!-- Legacy HUD / Status Bar (Hidden by default, can be toggled) -->
         <div
           class="h-20 bg-ui-dark border-t border-ui-border flex items-center px-6 gap-8 shrink-0"
+          style="display: none;"
+          id="legacy-hud"
         >
           <!-- Health Section -->
           <div class="flex flex-col gap-1 w-1/3 max-w-[240px]">
             <div class="flex justify-between items-end">
               <span
-                class="text-primary font-bold font-display tracking-widest text-sm"
+                class="hud-text hud-text-pulse text-primary font-bold font-display tracking-widest text-sm"
                 >HEALTH</span
               >
-              <span class="text-white font-mono text-lg font-bold">100%</span>
+              <span class="hud-text hud-text-pulse text-white font-mono text-lg font-bold">100%</span>
             </div>
             <!-- Progress Bar Component -->
             <div
-              class="h-4 w-full bg-[#1a2e1a] rounded overflow-hidden relative border border-[#2a4e2a]"
+              class="health-bar h-4 w-full bg-[#1a2e1a] rounded overflow-hidden relative border border-[#2a4e2a]"
             >
               <div
                 class="absolute inset-0 bg-[linear-gradient(90deg,transparent_90%,#000_100%)] bg-[length:10px_100%] opacity-30 z-10"
               ></div>
               <div
-                class="h-full bg-primary shadow-[0_0_10px_rgba(19,236,19,0.6)] relative"
+                class="health-bar-fill h-full bg-primary relative"
                 style="width: 100%"
               >
                 <div
@@ -212,23 +258,23 @@
               >Current Weapon</span
             >
             <div
-              class="flex items-center gap-2 text-white font-display font-bold text-xl tracking-wider uppercase"
+              class="weapon-name flex items-center gap-2 text-white font-display font-bold text-xl tracking-wider uppercase"
             >
               <span class="material-symbols-outlined text-primary">token</span>
-              PISTOL
+              <span class="hud-text">PISTOL</span>
             </div>
           </div>
           <!-- Ammo Section -->
           <div class="flex flex-col gap-1 w-1/3 max-w-[240px] items-end">
             <div class="flex justify-between items-end w-full">
-              <span class="text-[#9db99d] font-mono text-lg"
-                ><span id="val-ammo">50</span
+              <span class="ammo-counter text-[#9db99d] font-mono text-lg"
+                ><span id="val-ammo" class="hud-text">50</span
                 ><span class="text-[#4a6b4a] text-sm"
                   >/<span id="val-max-ammo">50</span></span
                 ></span
               >
               <span
-                class="text-primary font-bold font-display tracking-widest text-sm"
+                class="hud-text hud-text-pulse text-primary font-bold font-display tracking-widest text-sm"
                 >AMMO</span
               >
             </div>
@@ -314,7 +360,7 @@
       class="flex-none bg-ui-dark text-[#4a6b4a] text-xs py-2 px-6 border-t border-ui-border flex justify-between font-mono"
     >
       <div>RayCaster Engine v1.0.4</div>
-      <div class="flex gap-4">
+      <div class="flex gap-4 debug-text">
         <span>X: <span id="debug-x">0.00</span></span>
         <span>Y: <span id="debug-y">0.00</span></span>
         <span>DIR: <span id="debug-dir">0.00</span></span>

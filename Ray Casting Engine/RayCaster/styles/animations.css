@@ -1,0 +1,80 @@
+/* HUD Animations - Smooth transitions and effects */
+
+/* Bar fill animations */
+.bar-fill {
+  transition: width 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Panel entrance animation */
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.left-panel {
+  animation: slide-in-left 0.5s ease-out, pulse-border 3s ease-in-out infinite;
+}
+
+.right-panel {
+  animation: slide-in-right 0.5s ease-out, pulse-border 3s ease-in-out infinite;
+}
+
+/* Critical health warning */
+@keyframes critical-pulse {
+  0%, 100% {
+    border-color: #0f0;
+    box-shadow: 
+      0 0 0 0 rgba(0, 255, 0, 0.7),
+      inset 0 0 20px rgba(0, 255, 0, 0.1);
+  }
+  50% {
+    border-color: #f00;
+    box-shadow: 
+      0 0 0 4px rgba(255, 0, 0, 0.7),
+      inset 0 0 20px rgba(255, 0, 0, 0.3);
+  }
+}
+
+.hud-panel.critical {
+  animation: critical-pulse 0.5s ease-in-out infinite;
+}
+
+/* Ammo grid block animation */
+.ammo-grid-block {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ammo-grid-block.active {
+  animation: ammo-glow 2s ease-in-out infinite;
+}
+
+@keyframes ammo-glow {
+  0%, 100% {
+    box-shadow: 
+      0 0 5px rgba(0, 255, 0, 0.8),
+      inset 0 0 5px rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 0 10px rgba(0, 255, 0, 1),
+      inset 0 0 8px rgba(255, 255, 255, 0.4);
+  }
+}
+

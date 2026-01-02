@@ -1,7 +1,14 @@
 import { WORLD_MAP } from './map.js';
 import { player } from './player.js';
 import { textures, initTextures, TEXTURE_SIZE } from './textures.js';
-import { renderSprites, spawnSprite, updateSprites } from './sprite.js';
+import { renderSprites, spawnSprite, updateSprites, sprites } from './sprite.js';
+import { EffectsCanvas } from './js/effects-layer.js';
+import { HUDController } from './js/ui/HUDController.js';
+import { WeaponRenderer } from './js/rendering/WeaponRenderer.js';
+import { RadarSystem } from './js/ui/RadarSystem.js';
+import { CrosshairController } from './js/ui/CrosshairController.js';
+import { UIManager } from './js/ui/UIManager.js';
+import { PerformanceProfiler } from './js/performance/ProfilerManager.js';
 
 // Initialize procedural textures
 initTextures();
@@ -15,6 +22,65 @@ const canvas = document.getElementById('screen');
 const ctx = canvas.getContext('2d');
 const minimapCanvas = document.getElementById('minimap');
 const mCtx = minimapCanvas.getContext('2d');
+
+// Initialize Radar System
+let radarSystem = null;
+try {
+    radarSystem = new RadarSystem('minimap', 80, 0.5);
+} catch (error) {
+    console.warn('Radar system initialization failed:', error);
+}
+
+// Initialize Effects Canvas
+const gameViewport = document.getElementById('game-viewport');
+const effectsCanvas = new EffectsCanvas(gameViewport);
+
+// Initialize Weapon Renderer
+let weaponRenderer = null;
+try {
+    weaponRenderer = new WeaponRenderer('weapon-canvas', canvas.width, canvas.height);
+} catch (error) {
+    console.warn('Weapon renderer initialization failed:', error);
+}
+
+// Initialize HUD Controller
+let hudController = null;
+try {
+    hudController = new HUDController(player);
+} catch (error) {
+    console.warn('HUD initialization failed:', error);
+}
+
+// Initialize Crosshair Controller
+let crosshairController = null;
+try {
+    crosshairController = new CrosshairController();
+    // Export for sprite system to access
+    window.crosshairController = crosshairController;
+} catch (error) {
+    console.warn('Crosshair controller initialization failed:', error);
+}
+
+// Initialize Performance Profiler (optional, enable for debugging)
+let profiler = null;
+try {
+    profiler = new PerformanceProfiler();
+    // Enable profiler in development (set to false for production)
+    profiler.setEnabled(false); // Change to true to enable profiling
+    window.profiler = profiler; // Expose for console access
+} catch (error) {
+    console.warn('Performance profiler initialization failed:', error);
+}
+
+// Optional: Initialize UIManager for unified control
+// Uncomment to use UIManager instead of individual system management
+// let uiManager = null;
+// try {
+//     uiManager = new UIManager(player, WORLD_MAP, sprites, canvas, gameViewport);
+//     window.uiManager = uiManager;
+// } catch (error) {
+//     console.warn('UIManager initialization failed:', error);
+// }
 
 const fpsCounter = document.getElementById('fps-counter');
 const debugX = document.getElementById('debug-x');
@@ -32,7 +98,69 @@ const shootCooldown = 100; // milliseconds between shots
     // Input handling
     const keys = {};
     window.addEventListener('keydown', (e) => { 
-        keys[e.code] = true; 
+        keys[e.code] = true;
+        
+        // Weapon inspect easter egg (triple-tap R)
+        if (e.code === 'KeyR') {
+            const now = Date.now();
+            if (now - lastRKeyTime < rKeyWindow) {
+                rKeyPressCount++;
+            } else {
+                rKeyPressCount = 1;
+            }
+            lastRKeyTime = now;
+            
+            if (rKeyPressCount >= 3) {
+                if (weaponRenderer) {
+                    weaponRenderer.triggerInspect();
+                }
+                rKeyPressCount = 0;
+            }
+        }
+        
+        // Radar toggle (M key)
+        if (e.code === 'KeyM') {
+            if (radarSystem) {
+                radarSystem.toggleVisibility();
+            }
+        }
+        
+        // Radar zoom (Numpad + and -)
+        if (e.code === 'NumpadAdd' || e.code === 'Equal') {
+            if (radarSystem) {
+                radarSystem.zoomIn();
+            }
+        }
+        if (e.code === 'NumpadSubtract' || e.code === 'Minus') {
+            if (radarSystem) {
+                radarSystem.zoomOut();
+            }
+        }
+        
+        // Screenshot mode (F12 or PrintScreen) - Hide all UI
+        if (e.code === 'F12' || e.code === 'PrintScreen') {
+            e.preventDefault();
+            if (window.uiManager) {
+                window.uiManager.toggleScreenshotMode();
+            } else {
+                // Fallback: manual toggle
+                const uiElements = document.querySelectorAll('#hud-container, #crosshair-container, #minimap, .fps-counter');
+                uiElements.forEach(el => {
+                    el.style.display = el.style.display === 'none' ? '' : 'none';
+                });
+            }
+        }
+        
+        // Performance profiler toggle (P key)
+        if (e.code === 'KeyP') {
+            if (profiler) {
+                profiler.setEnabled(!profiler.enabled);
+                console.log('Performance profiler:', profiler.enabled ? 'ENABLED' : 'DISABLED');
+                if (profiler.enabled) {
+                    console.log('Use window.profiler.getSummary() to view metrics');
+                }
+            }
+        }
     });
     window.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
@@ -163,6 +291,11 @@ const shootCooldown = 100; // milliseconds between shots
         player.ammo--;
         updateAmmoUI();
         
+        // Update HUD if available
+        if (hudController) {
+            hudController.update();
+        }
+        
         // Spawn projectile slightly in front of player
         const spawnDist = 0.5;
         const pX = player.x + player.dirX * spawnDist;
@@ -170,9 +303,52 @@ const shootCooldown = 100; // milliseconds between shots
         
         spawnSprite(pX, pY, 'projectile', player.dirX, player.dirY, 8.0); // 8.0 speed
         
-        // Visual kickback (optional)
-        // const weaponEl = document.querySelector('.weapon-sprite'); // If we had one
+        // Trigger visual effects
+        effectsCanvas.triggerMuzzleFlash();
+        effectsCanvas.triggerScreenShake();
+        
+        // Trigger weapon recoil
+        if (weaponRenderer) {
+            weaponRenderer.triggerRecoil();
+        }
+        
+        // Trigger crosshair recoil
+        if (crosshairController) {
+            crosshairController.triggerRecoil(20);
+        }
+        
+        // Low ammo warning
+        if (crosshairController) {
+            if (player.ammo < 10) {
+                crosshairController.setLowAmmoWarning(true);
+            } else {
+                crosshairController.setLowAmmoWarning(false);
+            }
+        }
     }
+    
+    // Export damage flash function for use when player takes damage
+    // Example: effectsCanvas.triggerDamageFlash();
+    window.triggerDamageFlash = () => {
+        effectsCanvas.triggerDamageFlash();
+    };
+    
+    // Test damage function (for debugging - can be removed or triggered by enemy hits)
+    window.testDamage = (amount = 10) => {
+        player.health = Math.max(0, player.health - amount);
+        if (hudController) {
+            hudController.update();
+        }
+        effectsCanvas.triggerDamageFlash();
+    };
+    
+    // Test armor damage
+    window.testArmorDamage = (amount = 5) => {
+        player.armor = Math.max(0, player.armor - amount);
+        if (hudController) {
+            hudController.update();
+        }
+    };
 
     // Update Ammo UI
     function updateAmmoUI() {
@@ -186,7 +362,7 @@ const shootCooldown = 100; // milliseconds between shots
             blocks.forEach((block, index) => {
                 const threshold = (index + 1) * ammoPerBlock;
                 if (player.ammo >= threshold) {
-                    block.className = 'ammo-block h-4 w-2 bg-primary shadow-[0_0_5px_rgba(19,236,19,0.8)] rounded-sm';
+                    block.className = 'ammo-block active h-4 w-2 bg-primary rounded-sm';
                 } else {
                     block.className = 'ammo-block h-4 w-2 bg-[#1a2e1a] border border-[#2a4e2a] rounded-sm';
                 }
@@ -206,6 +382,11 @@ function resize() {
     
     minimapCanvas.width = minimapCanvas.clientWidth;
     minimapCanvas.height = minimapCanvas.clientHeight;
+    
+    // Resize weapon canvas
+    if (weaponRenderer) {
+        weaponRenderer.resize(canvas.width, canvas.height);
+    }
 }
 window.addEventListener('resize', resize);
 resize();
@@ -282,6 +463,21 @@ function update(dt) {
     if (debugDir) {
         const angleDeg = Math.atan2(player.dirY, player.dirX) * 180 / Math.PI;
         debugDir.innerText = ((angleDeg + 360) % 360).toFixed(0) + '°';
+    }
+    
+    // Update weapon renderer (movement detection for bobbing)
+    const isMoving = moveStep !== 0 || strafeStep !== 0;
+    if (weaponRenderer) {
+        weaponRenderer.update(dt * 1000, isMoving, player.ammo, player.maxAmmo);
+    }
+    
+    // Update crosshair based on movement
+    if (crosshairController) {
+        const velocity = Math.sqrt(
+            (moveStep !== 0 ? player.moveSpeed : 0) ** 2 + 
+            (strafeStep !== 0 ? player.moveSpeed : 0) ** 2
+        );
+        crosshairController.updateMovementSpread(velocity);
     }
 }
 
@@ -429,7 +625,13 @@ function render() {
     // 3. Render Sprites
     renderSprites(ctx, canvas, zBuffer);
 
-    drawMinimap();
+    // Render radar system (replaces old minimap)
+    if (radarSystem) {
+        radarSystem.render(player, WORLD_MAP, sprites);
+    } else {
+        // Fallback to old minimap if radar system not available
+        drawMinimap();
+    }
 }
 
 function drawMinimap() {
@@ -469,6 +671,11 @@ function drawMinimap() {
 }
 
 function gameLoop(time) {
+    // Performance profiling
+    if (profiler) {
+        profiler.startFrame();
+    }
+    
     const dt = (time - lastTime) / 1000;
     lastTime = time;
 
@@ -477,6 +684,70 @@ function gameLoop(time) {
     updateSprites(dt);
     update(dt);
     render();
+    
+    if (profiler) profiler.mark('worldRender');
+    
+    // Render weapon
+    if (weaponRenderer) {
+        weaponRenderer.render();
+    }
+    
+    if (profiler) profiler.mark('weaponRender');
+    
+    // Update crosshair (spread recovery and enemy detection)
+    if (crosshairController) {
+        crosshairController.update();
+        
+        // Check if crosshair center is over enemy (simple raycast check)
+        // Cast ray from player in facing direction
+        const rayLength = 20; // Check up to 20 units ahead
+        const checkX = player.x + player.dirX * rayLength;
+        const checkY = player.y + player.dirY * rayLength;
+        
+        let enemyDetected = false;
+        for (const sprite of sprites) {
+            if (sprite.type === 'enemy') {
+                const dx = sprite.x - player.x;
+                const dy = sprite.y - player.y;
+                const dist = Math.sqrt(dx ** 2 + dy ** 2);
+                
+                // Check if enemy is roughly in front of player (within FOV)
+                if (dist < rayLength) {
+                    const dot = (dx * player.dirX + dy * player.dirY) / dist;
+                    if (dot > 0.7) { // Roughly in front (cos(45deg) ≈ 0.7)
+                        enemyDetected = true;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        crosshairController.setEnemyDetected(enemyDetected);
+    }
+    
+    if (profiler) profiler.mark('crosshairUpdate');
+    
+    // Update HUD (only when values change, optimized)
+    if (hudController) {
+        hudController.update();
+    }
+    
+    if (profiler) profiler.mark('hudUpdate');
+    
+    // Update radar
+    if (radarSystem) {
+        radarSystem.render(player, WORLD_MAP, sprites);
+    }
+    
+    if (profiler) profiler.mark('radarRender');
+    
+    // Effects canvas has its own animation loop, no explicit update needed
+    if (profiler) profiler.mark('effectsRender');
+    
+    // End profiling
+    if (profiler) {
+        profiler.endFrame();
+    }
     
     requestAnimationFrame(gameLoop);
 }

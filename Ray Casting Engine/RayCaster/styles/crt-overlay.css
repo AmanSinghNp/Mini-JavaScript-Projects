@@ -1,0 +1,106 @@
+/* CRT Overlay Layer - Pure CSS Implementation
+ * Authentic retro monitor effects with zero performance impact
+ */
+
+.crt-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 200;
+  /* Ensure it's above all game elements but below crosshair for visibility */
+}
+
+/* Scanline Effect - Horizontal lines at 2px intervals with 50% transparency alternation */
+.crt-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15) 0px,
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  background-size: 100% 2px;
+  pointer-events: none;
+}
+
+/* RGB Chromatic Aberration - Multiple gradient layers offset by 3px */
+.crt-chromatic-aberration {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* Multiple background layers for RGB separation */
+  background: 
+    /* Red channel offset left */
+    linear-gradient(
+      90deg,
+      rgba(255, 0, 0, 0.06) 0%,
+      transparent 3px,
+      transparent calc(100% - 3px),
+      rgba(255, 0, 0, 0.06) 100%
+    ),
+    /* Green channel (no offset) */
+    linear-gradient(
+      90deg,
+      rgba(0, 255, 0, 0.02) 0%,
+      transparent 0px,
+      transparent 100%,
+      rgba(0, 255, 0, 0.02) 100%
+    ),
+    /* Blue channel offset right */
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 255, 0.06) 0%,
+      transparent -3px,
+      transparent calc(100% + 3px),
+      rgba(0, 0, 255, 0.06) 100%
+    );
+  background-blend-mode: screen;
+  mix-blend-mode: screen;
+}
+
+/* Radial Vignette - 100px blur, 0.9 opacity black */
+.crt-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
+}
+
+/* Barrel Distortion - Subtle position-dependent scale transform */
+.crt-barrel-distortion {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* Using CSS custom properties for dynamic calculation */
+  transform: scale(1.02);
+  transform-origin: center;
+  /* Subtle edge darkening to simulate curvature */
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    transparent 40%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+}
+
+/* Game Container Specific Overlay */
+.game-container .crt-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 200;
+  /* Above canvas and effects, below crosshair */
+}
+
+/* Ensure overlay doesn't interfere with interactions */
+.crt-overlay * {
+  pointer-events: none;
+}
+

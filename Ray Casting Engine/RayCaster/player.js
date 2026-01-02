@@ -8,6 +8,11 @@ export const player = {
     moveSpeed: 0.05,
     rotSpeed: 0.03,
     ammo: 50,
-    maxAmmo: 50
+    maxAmmo: 50,
+    ammoReserve: 200, // Reserve ammo
+    health: 100,
+    maxHealth: 100,
+    armor: 100,
+    maxArmor: 100
 };
 

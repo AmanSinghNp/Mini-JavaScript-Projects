@@ -1,0 +1,112 @@
+/* Phosphor Glow System - Retro CRT Text Effects
+ * Dual-layer text-shadow with pulsing animation for authentic period-accurate aesthetics
+ */
+
+/* Base glow effect for all green UI text (#0f0) */
+.hud-text {
+  color: #0f0;
+  text-shadow: 
+    0 0 5px rgba(0, 255, 0, 0.8),
+    0 0 10px rgba(0, 255, 0, 0.6);
+  will-change: text-shadow;
+  /* Optimize performance by hinting browser about animation */
+}
+
+/* Enhanced glow for critical UI elements */
+.hud-text-strong {
+  color: #0f0;
+  text-shadow: 
+    0 0 8px rgba(0, 255, 0, 1),
+    0 0 15px rgba(0, 255, 0, 0.8),
+    0 0 25px rgba(0, 255, 0, 0.4);
+  will-change: text-shadow;
+}
+
+/* Pulsing glow animation - oscillates shadow intensity between 80-120% over 2 seconds */
+@keyframes pulse-glow {
+  0%, 100% {
+    text-shadow: 
+      0 0 5px rgba(0, 255, 0, 0.64),  /* 80% of 0.8 */
+      0 0 10px rgba(0, 255, 0, 0.48); /* 80% of 0.6 */
+  }
+  50% {
+    text-shadow: 
+      0 0 5px rgba(0, 255, 0, 0.96),  /* 120% of 0.8 */
+      0 0 10px rgba(0, 255, 0, 0.72); /* 120% of 0.6 */
+  }
+}
+
+/* Apply pulsing animation to animated elements */
+.hud-text-pulse {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Health Bar Glow */
+.health-bar {
+  box-shadow: 
+    0 0 5px rgba(0, 255, 0, 0.6),
+    0 0 10px rgba(0, 255, 0, 0.3),
+    inset 0 0 5px rgba(0, 255, 0, 0.2);
+}
+
+.health-bar-fill {
+  box-shadow: 
+    0 0 8px rgba(0, 255, 0, 0.8),
+    0 0 15px rgba(0, 255, 0, 0.5);
+}
+
+/* Ammo Counter Glow */
+.ammo-counter {
+  text-shadow: 
+    0 0 5px rgba(0, 255, 0, 0.8),
+    0 0 10px rgba(0, 255, 0, 0.6);
+}
+
+.ammo-block {
+  box-shadow: 0 0 5px rgba(19, 236, 19, 0.8);
+}
+
+.ammo-block.active {
+  box-shadow: 
+    0 0 8px rgba(19, 236, 19, 1),
+    0 0 15px rgba(19, 236, 19, 0.6);
+}
+
+/* Minimap Border Glow */
+.minimap-border {
+  border-color: rgba(0, 255, 0, 0.3);
+  box-shadow: 
+    0 0 5px rgba(0, 255, 0, 0.4),
+    inset 0 0 5px rgba(0, 255, 0, 0.2);
+}
+
+/* Crosshair Glow */
+.crosshair {
+  text-shadow: 
+    0 0 5px rgba(0, 255, 0, 0.8),
+    0 0 10px rgba(0, 255, 0, 0.6),
+    0 0 15px rgba(0, 255, 0, 0.4);
+  filter: drop-shadow(0 0 3px rgba(0, 255, 0, 0.6));
+}
+
+/* FPS Counter Glow */
+.fps-counter {
+  text-shadow: 
+    0 0 3px rgba(0, 255, 0, 0.6),
+    0 0 6px rgba(0, 255, 0, 0.4);
+}
+
+/* Weapon Name Glow */
+.weapon-name {
+  text-shadow: 
+    0 0 5px rgba(0, 255, 0, 0.8),
+    0 0 10px rgba(0, 255, 0, 0.6);
+}
+
+/* Debug Text Glow (optional, for consistency) */
+.debug-text {
+  text-shadow: 
+    0 0 2px rgba(0, 255, 0, 0.4),
+    0 0 4px rgba(0, 255, 0, 0.2);
+}
+

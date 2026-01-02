@@ -2,6 +2,9 @@ import { player } from './player.js';
 import { textures, TEXTURE_SIZE } from './textures.js';
 import { WORLD_MAP } from './map.js';
 
+// Export crosshair controller reference for sprite system
+window.crosshairController = null;
+
 export const sprites = [];
 
 export function spawnSprite(x, y, type, dirX = 0, dirY = 0, speed = 0) {
@@ -38,6 +41,7 @@ export function updateSprites(dt) {
 
             // Check Enemy Collision
             let hitEnemy = false;
+            let killedEnemy = false;
             for (let j = sprites.length - 1; j >= 0; j--) {
                 const other = sprites[j];
                 if (other.type === 'enemy') {
@@ -46,8 +50,17 @@ export function updateSprites(dt) {
                         removeSprite(other); // Kill enemy
                         removeSprite(sprite); // Destroy bullet
                         hitEnemy = true;
+                        killedEnemy = true;
                         break;
                     }
+                }
+            }
+            
+            // Trigger crosshair feedback on hit
+            if (hitEnemy && window.crosshairController) {
+                window.crosshairController.showHitMarker();
+                if (killedEnemy) {
+                    window.crosshairController.showKillIndicator(100);
                 }
             }
 
