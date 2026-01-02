@@ -25,8 +25,12 @@ export function updateSprites(dt) {
             const newX = sprite.x + sprite.dirX * moveStep;
             const newY = sprite.y + sprite.dirY * moveStep;
 
-            // Check Wall Collision
-            if (WORLD_MAP[Math.floor(newX)] && WORLD_MAP[Math.floor(newX)][Math.floor(newY)] > 0) {
+            // Check Wall Collision (with bounds checking)
+            const mapX = Math.floor(newX);
+            const mapY = Math.floor(newY);
+            if (mapX >= 0 && mapX < WORLD_MAP.length && 
+                mapY >= 0 && mapY < WORLD_MAP[0].length &&
+                WORLD_MAP[mapX][mapY] > 0) {
                 // Hit wall
                 removeSprite(sprite);
                 continue;

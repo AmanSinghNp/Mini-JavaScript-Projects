@@ -26,14 +26,13 @@ const ammoBar = document.getElementById('ammo-bar');
 
 let lastTime = 0;
 let isPointerLocked = false;
+let lastShotTime = 0;
+const shootCooldown = 100; // milliseconds between shots
 
     // Input handling
     const keys = {};
     window.addEventListener('keydown', (e) => { 
         keys[e.code] = true; 
-        if (e.code === 'Space' || e.code === 'ControlLeft') {
-            shoot();
-        }
     });
     window.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
@@ -92,13 +91,26 @@ let isPointerLocked = false;
         });
     }
 
-    // Pointer Lock for Mouse Look
-    canvas.addEventListener('click', () => {
-        if (!isPointerLocked) {
+    // Pointer Lock for Mouse Look (Left Click)
+    canvas.addEventListener('click', (e) => {
+        // Only lock on left click, not right click
+        if (e.button === 0 && !isPointerLocked) {
             canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock || canvas.webkitRequestPointerLock;
             if (canvas.requestPointerLock) {
                 canvas.requestPointerLock();
             }
+        }
+    });
+
+    // Right Mouse Button for Shooting
+    canvas.addEventListener('contextmenu', (e) => {
+        e.preventDefault(); // Prevent context menu
+    });
+    
+    canvas.addEventListener('mousedown', (e) => {
+        if (e.button === 2) { // Right mouse button
+            e.preventDefault();
+            shoot();
         }
     });
 
@@ -134,10 +146,18 @@ let isPointerLocked = false;
 
     // Shooting
     function shoot() {
+        const now = Date.now();
+        // Rate limiting - prevent spam shooting
+        if (now - lastShotTime < shootCooldown) {
+            return;
+        }
+        
         // Check ammo
         if (player.ammo <= 0) {
             return; // Can't shoot without ammo
         }
+        
+        lastShotTime = now;
         
         // Decrement ammo
         player.ammo--;
