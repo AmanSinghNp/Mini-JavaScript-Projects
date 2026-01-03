@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Black-Scholes Greeks Calculator</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#0500e2",
+                        "primary-hover": "#0400b5",
+                        "background-light": "#f8f9fa",
+                        "background-dark": "#0f1115",
+                        "card-light": "#ffffff",
+                        "card-dark": "#181a20",
+                        "text-light": "#1f2937",
+                        "text-dark": "#f3f4f6",
+                        "border-light": "#e5e7eb",
+                        "border-dark": "#2d3039",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                        mono: ["JetBrains Mono", "monospace"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'xl': "0.75rem",
+                        '2xl': "1rem",
+                        '3xl': "1.5rem",
+                    },
+                    boxShadow: {
+                        'none': 'none',
+                    }
+                },
+            },
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .tabular-nums { font-variant-numeric: tabular-nums; }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 3px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #374151;
+        }
+        .tooltip-arrow {
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            width: 8px;
+            height: 8px;
+            background-color: #1f2937;
+        }
+        .dark .tooltip-arrow {
+            background-color: #e5e7eb;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark min-h-screen p-4 md:p-8 flex flex-col items-center">
+
+<main class="w-full max-w-[1200px] grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8">
+    <!-- Left Column: Configuration -->
+    <div class="lg:col-span-7 flex flex-col gap-4">
+        <div class="bg-card-light dark:bg-card-dark rounded-2xl p-6 lg:p-8 border border-border-light dark:border-border-dark">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-900 dark:text-white tracking-tight">Configuration</h2>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Define contract specifications</p>
+                </div>
+                <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                    <span class="material-icons-round">tune</span>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 gap-y-6">
+                <div class="space-y-4">
+                    <!-- Option Type Toggle -->
+                    <div class="flex items-center justify-between group">
+                        <label class="text-gray-500 dark:text-gray-400 text-sm font-medium">Option Type</label>
+                        <div class="bg-gray-50 dark:bg-gray-800/50 p-1 rounded-lg flex w-full max-w-[240px] border border-gray-200 dark:border-gray-700">
+                            <button id="btn-call" class="w-1/2 py-1.5 text-xs font-semibold text-gray-900 dark:text-white bg-white dark:bg-gray-600 rounded-md border border-gray-200 dark:border-gray-500 shadow-sm transition-all">Call</button>
+                            <button id="btn-put" class="w-1/2 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all">Put</button>
+                        </div>
+                    </div>
+
+                    <!-- Stock Price Input -->
+                    <div class="flex items-center justify-between group">
+                        <label class="text-gray-500 dark:text-gray-400 text-sm font-medium">Stock Price (S)</label>
+                        <div class="relative w-full max-w-[240px]">
+                            <input id="input-stock" class="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg py-2 pl-4 pr-10 text-right font-mono text-sm font-semibold text-gray-900 dark:text-white focus:ring-1 focus:ring-primary focus:border-primary transition-all tabular-nums" type="text" value="100.00"/>
+                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
+                        </div>
+                    </div>
+
+                    <!-- Strike Price Input -->
+                    <div class="flex items-center justify-between group">
+                        <label class="text-gray-500 dark:text-gray-400 text-sm font-medium">Strike Price (K)</label>
+                        <div class="relative w-full max-w-[240px]">
+                            <input id="input-strike" class="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg py-2 pl-4 pr-10 text-right font-mono text-sm font-semibold text-gray-900 dark:text-white focus:ring-1 focus:ring-primary focus:border-primary transition-all tabular-nums" type="text" value="105.00"/>
+                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
+                        </div>
+                    </div>
+
+                    <!-- Time to Expiry Stepper -->
+                    <div class="flex items-center justify-between group">
+                        <label class="text-gray-500 dark:text-gray-400 text-sm font-medium">Time to Expiry (T)</label>
+                        <div class="flex items-center w-full max-w-[240px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden transition-colors hover:border-gray-300 dark:hover:border-gray-600">
+                            <button id="btn-time-dec" class="px-3 py-2 text-gray-400 hover:text-primary dark:hover:text-primary-hover border-r border-gray-100 dark:border-gray-800">
+                                <span class="material-icons-round text-sm">remove</span>
+                            </button>
+                            <div class="flex-1 text-right pr-3 font-mono font-semibold text-gray-900 dark:text-white text-sm flex items-center justify-end gap-2">
+                                <span id="val-time" class="tabular-nums">1.00</span>
+                                <span class="text-gray-400 font-sans font-normal text-xs">Yrs</span>
+                            </div>
+                            <button id="btn-time-inc" class="px-3 py-2 text-gray-400 hover:text-primary dark:hover:text-primary-hover border-l border-gray-100 dark:border-gray-800">
+                                <span class="material-icons-round text-sm">add</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="h-px bg-gray-100 dark:bg-gray-800 w-full"></div>
+
+                <div class="space-y-4">
+                    <!-- Volatility Stepper -->
+                    <div class="flex items-center justify-between group">
+                        <label class="text-gray-500 dark:text-gray-400 text-sm font-medium">Volatility (σ)</label>
+                        <div class="flex items-center w-full max-w-[240px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden transition-colors hover:border-gray-300 dark:hover:border-gray-600">
+                            <button id="btn-vol-dec" class="px-3 py-2 text-gray-400 hover:text-primary dark:hover:text-primary-hover border-r border-gray-100 dark:border-gray-800">
+                                <span class="material-icons-round text-sm">remove</span>
+                            </button>
+                            <div class="flex-1 text-right pr-3 font-mono font-semibold text-gray-900 dark:text-white text-sm flex items-center justify-end gap-2">
+                                <span id="val-vol" class="tabular-nums">20.00</span>
+                                <span class="text-gray-400 font-sans font-normal text-xs">%</span>
+                            </div>
+                            <button id="btn-vol-inc" class="px-3 py-2 text-gray-400 hover:text-primary dark:hover:text-primary-hover border-l border-gray-100 dark:border-gray-800">
+                                <span class="material-icons-round text-sm">add</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Risk-Free Rate Stepper -->
+                    <div class="flex items-center justify-between group">
+                        <label class="text-gray-500 dark:text-gray-400 text-sm font-medium">Risk-Free Rate (r)</label>
+                        <div class="flex items-center w-full max-w-[240px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden transition-colors hover:border-gray-300 dark:hover:border-gray-600">
+                            <button id="btn-rate-dec" class="px-3 py-2 text-gray-400 hover:text-primary dark:hover:text-primary-hover border-r border-gray-100 dark:border-gray-800">
+                                <span class="material-icons-round text-sm">remove</span>
+                            </button>
+                            <div class="flex-1 text-right pr-3 font-mono font-semibold text-gray-900 dark:text-white text-sm flex items-center justify-end gap-2">
+                                <span id="val-rate" class="tabular-nums">5.00</span>
+                                <span class="text-gray-400 font-sans font-normal text-xs">%</span>
+                            </div>
+                            <button id="btn-rate-inc" class="px-3 py-2 text-gray-400 hover:text-primary dark:hover:text-primary-hover border-l border-gray-100 dark:border-gray-800">
+                                <span class="material-icons-round text-sm">add</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Dividend Yield Stepper -->
+                    <div class="flex items-center justify-between group">
+                        <label class="text-gray-500 dark:text-gray-400 text-sm font-medium">Dividend Yield (q)</label>
+                        <div class="flex items-center w-full max-w-[240px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden transition-colors hover:border-gray-300 dark:hover:border-gray-600">
+                            <button id="btn-div-dec" class="px-3 py-2 text-gray-400 hover:text-primary dark:hover:text-primary-hover border-r border-gray-100 dark:border-gray-800">
+                                <span class="material-icons-round text-sm">remove</span>
+                            </button>
+                            <div class="flex-1 text-right pr-3 font-mono font-semibold text-gray-900 dark:text-white text-sm flex items-center justify-end gap-2">
+                                <span id="val-div" class="tabular-nums">0.00</span>
+                                <span class="text-gray-400 font-sans font-normal text-xs">%</span>
+                            </div>
+                            <button id="btn-div-inc" class="px-3 py-2 text-gray-400 hover:text-primary dark:hover:text-primary-hover border-l border-gray-100 dark:border-gray-800">
+                                <span class="material-icons-round text-sm">add</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 flex gap-3">
+                <button id="btn-calculate" class="flex-1 bg-primary hover:bg-primary-hover text-white font-medium py-3 rounded-lg border border-transparent transition-all flex items-center justify-center gap-2 text-sm shadow-none">
+                    Calculate
+                </button>
+                <button id="btn-reset" class="p-3 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+                    <span class="material-icons-round text-xl">refresh</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Results -->
+    <div class="lg:col-span-5 space-y-4">
+        <!-- Theoretical Price Card -->
+        <div class="bg-gradient-to-br from-primary to-blue-900 rounded-2xl p-6 text-white relative overflow-hidden border border-blue-900/50">
+            <div class="absolute top-0 right-0 w-48 h-48 bg-white opacity-[0.03] rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+            <div class="relative z-10 flex flex-col justify-between h-full">
+                <div>
+                    <p class="text-blue-200/80 text-[10px] font-bold tracking-widest uppercase mb-2">Theoretical Price</p>
+                    <div class="flex items-baseline gap-3">
+                        <h2 id="output-price" class="text-4xl font-mono font-bold tracking-tight tabular-nums">$0.0000</h2>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center gap-2">
+                    <span id="output-option-type" class="bg-white/10 border border-white/10 px-2 py-1 rounded text-[10px] font-medium text-blue-50 flex items-center">
+                        <span class="material-icons-round text-[10px] mr-1">trending_up</span> Call Option
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Greeks Cards -->
+        <div class="grid grid-cols-1 gap-3">
+            <!-- Comparison Mode Toggle -->
+            <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-800/50 rounded-lg px-3 py-2 border border-gray-200 dark:border-gray-700">
+                <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Calculation Method</span>
+                <div class="flex gap-1 bg-white dark:bg-gray-900 rounded-md p-0.5 border border-gray-200 dark:border-gray-700">
+                    <button id="method-analytical" class="method-btn px-2 py-1 text-[10px] font-semibold rounded transition-all bg-primary text-white">
+                        Analytical
+                    </button>
+                    <button id="method-numerical" class="method-btn px-2 py-1 text-[10px] font-medium rounded transition-all text-gray-500 hover:text-gray-700 dark:text-gray-400">
+                        Numerical
+                    </button>
+                    <button id="method-both" class="method-btn px-2 py-1 text-[10px] font-medium rounded transition-all text-gray-500 hover:text-gray-700 dark:text-gray-400">
+                        Compare
+                    </button>
+                </div>
+            </div>
+            <!-- Delta -->
+            <div class="group relative bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark hover:border-blue-200 dark:hover:border-blue-900 transition-colors">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-primary flex items-center justify-center font-serif italic font-bold text-sm border border-blue-100 dark:border-blue-800/50 cursor-help">
+                            Δ
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Delta</p>
+                            <p id="output-delta" class="text-base font-mono font-bold text-gray-900 dark:text-white tabular-nums">0.0000</p>
+                        </div>
+                    </div>
+                    <div class="h-1 w-12 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                        <div id="bar-delta" class="h-full bg-primary transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="absolute z-50 left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 p-3 bg-gray-900 dark:bg-white rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    <p class="text-xs text-white dark:text-gray-900 leading-relaxed text-center">
+                        Measures the rate of change of the option price with respect to changes in the underlying asset's price.
+                    </p>
+                    <div class="tooltip-arrow bg-gray-900 dark:bg-white"></div>
+                </div>
+            </div>
+
+            <!-- Gamma -->
+            <div class="group relative bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark hover:border-purple-200 dark:hover:border-purple-900 transition-colors">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 flex items-center justify-center font-serif italic font-bold text-sm border border-purple-100 dark:border-purple-800/50 cursor-help">
+                            Γ
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Gamma</p>
+                            <p id="output-gamma" class="text-base font-mono font-bold text-gray-900 dark:text-white tabular-nums">0.0000</p>
+                        </div>
+                    </div>
+                    <div class="h-1 w-12 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                        <div id="bar-gamma" class="h-full bg-purple-500 transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="absolute z-50 left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 p-3 bg-gray-900 dark:bg-white rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    <p class="text-xs text-white dark:text-gray-900 leading-relaxed text-center">
+                        Measures the rate of change of Delta with respect to changes in the underlying asset's price.
+                    </p>
+                    <div class="tooltip-arrow bg-gray-900 dark:bg-white"></div>
+                </div>
+            </div>
+
+            <!-- Theta -->
+            <div class="group relative bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark hover:border-red-200 dark:hover:border-red-900 transition-colors">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center justify-center font-serif italic font-bold text-sm border border-red-100 dark:border-red-800/50 cursor-help">
+                            Θ
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Theta</p>
+                            <p id="output-theta" class="text-base font-mono font-bold text-red-600 dark:text-red-400 tabular-nums">0.0000</p>
+                        </div>
+                    </div>
+                    <div class="h-1 w-12 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                        <div id="bar-theta" class="h-full bg-red-500 transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="absolute z-50 left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 p-3 bg-gray-900 dark:bg-white rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    <p class="text-xs text-white dark:text-gray-900 leading-relaxed text-center">
+                        Measures the rate of decline in the value of an option due to the passage of time (Time Decay).
+                    </p>
+                    <div class="tooltip-arrow bg-gray-900 dark:bg-white"></div>
+                </div>
+            </div>
+
+            <!-- Vega -->
+            <div class="group relative bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark hover:border-green-200 dark:hover:border-green-900 transition-colors">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-8 h-8 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 flex items-center justify-center font-serif italic font-bold text-sm border border-green-100 dark:border-green-800/50 cursor-help">
+                            V
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Vega</p>
+                            <p id="output-vega" class="text-base font-mono font-bold text-gray-900 dark:text-white tabular-nums">0.0000</p>
+                        </div>
+                    </div>
+                    <div class="h-1 w-12 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                        <div id="bar-vega" class="h-full bg-green-500 transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="absolute z-50 left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 p-3 bg-gray-900 dark:bg-white rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    <p class="text-xs text-white dark:text-gray-900 leading-relaxed text-center">
+                        Measures sensitivity to volatility. The change in the option's price for a 1% change in implied volatility.
+                    </p>
+                    <div class="tooltip-arrow bg-gray-900 dark:bg-white"></div>
+                </div>
+            </div>
+
+            <!-- Rho -->
+            <div class="group relative bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark hover:border-orange-200 dark:hover:border-orange-900 transition-colors">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 flex items-center justify-center font-serif italic font-bold text-sm border border-orange-100 dark:border-orange-800/50 cursor-help">
+                            ρ
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Rho</p>
+                            <p id="output-rho" class="text-base font-mono font-bold text-gray-900 dark:text-white tabular-nums">0.0000</p>
+                        </div>
+                    </div>
+                    <div class="h-1 w-12 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                        <div id="bar-rho" class="h-full bg-orange-500 transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="absolute z-50 left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 p-3 bg-gray-900 dark:bg-white rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    <p class="text-xs text-white dark:text-gray-900 leading-relaxed text-center">
+                        Measures sensitivity to the interest rate.
+                    </p>
+                    <div class="tooltip-arrow bg-gray-900 dark:bg-white"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visualization Panel - Full Width -->
+    <div class="lg:col-span-12">
+        <div class="bg-card-light dark:bg-card-dark rounded-2xl p-6 border border-border-light dark:border-border-dark">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white tracking-tight">Greeks Surface</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Sensitivity analysis across stock price and volatility</p>
+                </div>
+                
+                <!-- Greek Selector Buttons -->
+                <div class="flex gap-2">
+                    <button id="viz-delta" class="viz-btn px-3 py-1.5 text-xs font-semibold rounded-lg transition-all bg-primary text-white">
+                        Δ Delta
+                    </button>
+                    <button id="viz-gamma" class="viz-btn px-3 py-1.5 text-xs font-medium rounded-lg transition-all bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700">
+                        Γ Gamma
+                    </button>
+                    <button id="viz-vega" class="viz-btn px-3 py-1.5 text-xs font-medium rounded-lg transition-all bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700">
+                        V Vega
+                    </button>
+                    <button id="viz-theta" class="viz-btn px-3 py-1.5 text-xs font-medium rounded-lg transition-all bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700">
+                        Θ Theta
+                    </button>
+                    <button id="viz-rho" class="viz-btn px-3 py-1.5 text-xs font-medium rounded-lg transition-all bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700">
+                        ρ Rho
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Canvas Container -->
+            <div class="relative bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <canvas id="greeks-heatmap" width="800" height="400" class="w-full"></canvas>
+            </div>
+            
+            <!-- Legend -->
+            <div class="mt-3 flex items-center justify-center gap-6 text-xs text-gray-500 dark:text-gray-400">
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                    <span>Low Value</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-white border border-gray-300"></div>
+                    <span>Mid Value</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <span>High Value</span>
+                </div>
+                <div class="flex items-center gap-2 ml-4">
+                    <div class="w-4 h-0.5 bg-black"></div>
+                    <span>Current Position</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Scripts -->
+<script src="./js/math.js"></script>
+<script src="./js/visualization.js"></script>
+<script src="./js/ui.js"></script>
+
+</body>
+</html>

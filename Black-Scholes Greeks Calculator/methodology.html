@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Methodology - Black-Scholes Greeks Calculator</title>
+    <meta name="description" content="Learn the mathematical framework behind the Black-Scholes option pricing model and how the Greeks are calculated."/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#0500e2",
+                        "primary-hover": "#0400b5",
+                        "background-light": "#f8f9fa",
+                        "background-dark": "#0f1115",
+                        "card-light": "#ffffff",
+                        "card-dark": "#181a20",
+                        "text-light": "#1f2937",
+                        "text-dark": "#f3f4f6",
+                        "border-light": "#e5e7eb",
+                        "border-dark": "#2d3039",
+                    },
+                    fontFamily: {
+                        display: ["Plus Jakarta Sans", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                        mono: ["JetBrains Mono", "monospace"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'xl': "0.75rem",
+                        '2xl': "1rem",
+                        '3xl': "1.5rem",
+                    },
+                },
+            },
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        h1, h2, h3, h4, .font-display { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #e5e7eb;
+            border-radius: 20px;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #2d3039;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark min-h-screen flex flex-col relative overflow-x-hidden transition-colors duration-200">
+
+    <!-- Navigation -->
+    <nav class="w-full fixed top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-2xl">analytics</span>
+                <span class="font-display font-bold text-lg text-gray-900 dark:text-white">BS Greeks</span>
+            </div>
+            <div class="hidden md:flex items-center gap-8">
+                <a class="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors" href="index.html">Home</a>
+                <a class="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors" href="app.html">Calculator</a>
+                <a class="text-sm font-medium text-primary transition-colors" href="#">Methodology</a>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="app.html" class="bg-primary hover:bg-primary-hover text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all shadow-sm shadow-primary/20">
+                    Open Calculator
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <div class="max-w-7xl mx-auto w-full pt-32 pb-24 px-6 flex gap-12 relative">
+        <!-- Sidebar -->
+        <aside class="hidden lg:block w-64 shrink-0 sticky top-32 h-[calc(100vh-10rem)] overflow-y-auto custom-scrollbar pr-4">
+            <h4 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6">Contents</h4>
+            <ul class="space-y-4 text-sm border-l border-border-light dark:border-border-dark ml-2">
+                <li><a class="block pl-4 -ml-px border-l border-primary text-primary font-medium" href="#introduction">Introduction</a></li>
+                <li><a class="block pl-4 -ml-px border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:border-gray-300 transition-all" href="#assumptions">Assumptions</a></li>
+                <li><a class="block pl-4 -ml-px border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:border-gray-300 transition-all" href="#model">The Model</a></li>
+                <li>
+                    <a class="block pl-4 -ml-px border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:border-gray-300 transition-all" href="#greeks">The Greeks</a>
+                    <ul class="mt-2 space-y-2 ml-4">
+                        <li><a class="block text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-white" href="#delta">Delta (Δ)</a></li>
+                        <li><a class="block text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-white" href="#gamma">Gamma (Γ)</a></li>
+                        <li><a class="block text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-white" href="#vega">Vega (ν)</a></li>
+                        <li><a class="block text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-white" href="#theta">Theta (Θ)</a></li>
+                        <li><a class="block text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-white" href="#rho">Rho (ρ)</a></li>
+                    </ul>
+                </li>
+                <li><a class="block pl-4 -ml-px border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:border-gray-300 transition-all" href="#implementation">Implementation</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 max-w-4xl min-w-0">
+            <div class="mb-12">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 mb-6">
+                    <span class="material-symbols-outlined text-primary text-sm">school</span>
+                    <span class="text-xs font-semibold text-primary uppercase tracking-wide">Technical Documentation</span>
+                </div>
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">Black-Scholes & The Greeks</h1>
+                <p class="text-xl text-gray-500 dark:text-gray-400 leading-relaxed">
+                    A comprehensive guide to the mathematical framework behind this options pricing calculator.
+                </p>
+            </div>
+
+            <div class="space-y-16">
+                <!-- Introduction -->
+                <section class="scroll-mt-32" id="introduction">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">1. Introduction to Black-Scholes</h2>
+                    <div class="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 leading-7 font-display">
+                        <p class="mb-4">
+                            The Black-Scholes model, also known as Black-Scholes-Merton, is a mathematical model for the dynamics of a financial market containing derivative investment instruments. From the partial differential equation in the model, one can deduce the Black-Scholes formula, which gives a theoretical estimate of the price of European-style options.
+                        </p>
+                        <p>
+                            Published in 1973 by Fischer Black and Myron Scholes, and later expanded by Robert Merton, this model revolutionized the options market. Scholes and Merton received the 1997 Nobel Prize in Economics for this work (Black had passed away in 1995).
+                        </p>
+                    </div>
+                </section>
+
+                <!-- Assumptions -->
+                <section class="scroll-mt-32" id="assumptions">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">2. Assumptions of the Model</h2>
+                    <div class="bg-white dark:bg-card-dark border border-border-light dark:border-border-dark rounded-2xl p-6 shadow-sm">
+                        <ul class="space-y-4">
+                            <li class="flex gap-4">
+                                <span class="material-symbols-outlined text-primary shrink-0">check_circle</span>
+                                <div>
+                                    <h4 class="font-bold text-gray-900 dark:text-white">Log-normal Distribution</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">The price of the underlying asset follows a geometric Brownian motion with constant drift and volatility.</p>
+                                </div>
+                            </li>
+                            <li class="flex gap-4">
+                                <span class="material-symbols-outlined text-primary shrink-0">check_circle</span>
+                                <div>
+                                    <h4 class="font-bold text-gray-900 dark:text-white">No Arbitrage</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">There are no riskless arbitrage opportunities in the market.</p>
+                                </div>
+                            </li>
+                            <li class="flex gap-4">
+                                <span class="material-symbols-outlined text-primary shrink-0">check_circle</span>
+                                <div>
+                                    <h4 class="font-bold text-gray-900 dark:text-white">Constant Risk-Free Rate</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">The risk-free interest rate is constant and known throughout the option's life.</p>
+                                </div>
+                            </li>
+                            <li class="flex gap-4">
+                                <span class="material-symbols-outlined text-primary shrink-0">check_circle</span>
+                                <div>
+                                    <h4 class="font-bold text-gray-900 dark:text-white">European Options</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">The options can only be exercised at the time of expiration (not early exercise).</p>
+                                </div>
+                            </li>
+                            <li class="flex gap-4">
+                                <span class="material-symbols-outlined text-primary shrink-0">check_circle</span>
+                                <div>
+                                    <h4 class="font-bold text-gray-900 dark:text-white">No Transaction Costs</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">There are no transaction costs or taxes associated with trading.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+
+                <!-- The Model -->
+                <section class="scroll-mt-32" id="model">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">3. The Pricing Formula</h2>
+                    <p class="text-gray-600 dark:text-gray-300 mb-6 font-display">The value of a call option <em>C</em> or put option <em>P</em> is calculated as:</p>
+                    
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div class="bg-gray-50 dark:bg-card-dark rounded-xl p-6 border border-border-light dark:border-border-dark">
+                            <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Call Option Price</h4>
+                            <div class="font-mono text-lg text-gray-900 dark:text-white overflow-x-auto pb-2">
+                                C = S·e<sup>−qT</sup>·N(d₁) − K·e<sup>−rT</sup>·N(d₂)
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-card-dark rounded-xl p-6 border border-border-light dark:border-border-dark">
+                            <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Put Option Price</h4>
+                            <div class="font-mono text-lg text-gray-900 dark:text-white overflow-x-auto pb-2">
+                                P = K·e<sup>−rT</sup>·N(−d₂) − S·e<sup>−qT</sup>·N(−d₁)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 bg-blue-50 dark:bg-blue-900/10 rounded-xl p-6 border border-blue-100 dark:border-blue-800/30">
+                        <h4 class="text-sm font-semibold text-primary mb-3">Where d₁ and d₂ are defined as:</h4>
+                        <div class="space-y-4 font-mono text-sm md:text-base text-gray-800 dark:text-blue-100">
+                            <p>d₁ = [ln(S/K) + (r − q + σ²/2)T] / (σ√T)</p>
+                            <p>d₂ = d₁ − σ√T</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 bg-white dark:bg-card-dark rounded-xl p-6 border border-border-light dark:border-border-dark">
+                        <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Variable Definitions</h4>
+                        <div class="grid md:grid-cols-2 gap-4 text-sm">
+                            <div class="flex gap-3">
+                                <span class="font-mono text-primary font-bold">S</span>
+                                <span class="text-gray-600 dark:text-gray-400">Current stock price</span>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="font-mono text-primary font-bold">K</span>
+                                <span class="text-gray-600 dark:text-gray-400">Strike price</span>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="font-mono text-primary font-bold">T</span>
+                                <span class="text-gray-600 dark:text-gray-400">Time to expiration (years)</span>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="font-mono text-primary font-bold">σ</span>
+                                <span class="text-gray-600 dark:text-gray-400">Volatility (annualized)</span>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="font-mono text-primary font-bold">r</span>
+                                <span class="text-gray-600 dark:text-gray-400">Risk-free interest rate</span>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="font-mono text-primary font-bold">q</span>
+                                <span class="text-gray-600 dark:text-gray-400">Continuous dividend yield</span>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="font-mono text-primary font-bold">N(x)</span>
+                                <span class="text-gray-600 dark:text-gray-400">Standard normal CDF</span>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="font-mono text-primary font-bold">N'(x)</span>
+                                <span class="text-gray-600 dark:text-gray-400">Standard normal PDF</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- The Greeks -->
+                <section class="scroll-mt-32" id="greeks">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-8">4. Calculating the Greeks</h2>
+                    <p class="text-gray-600 dark:text-gray-300 mb-8 font-display">
+                        The "Greeks" are partial derivatives of the option price with respect to various parameters. They measure different dimensions of risk in an options position.
+                    </p>
+
+                    <div class="space-y-12">
+                        <!-- Delta -->
+                        <div class="scroll-mt-36" id="delta">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-mono text-xl font-bold">Δ</div>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Delta</h3>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 font-display">
+                                Delta measures the rate of change of the option value with respect to changes in the underlying asset's price. It represents the equivalent position in shares.
+                            </p>
+                            <div class="bg-gray-900 text-gray-100 rounded-lg p-4 font-mono text-sm border border-gray-700">
+                                <div class="mb-2 text-gray-500">// Call Delta (with dividend yield)</div>
+                                <div class="mb-4">Δ_call = e<sup>−qT</sup> · N(d₁)</div>
+                                <div class="mb-2 text-gray-500">// Put Delta</div>
+                                <div>Δ_put = e<sup>−qT</sup> · (N(d₁) − 1)</div>
+                            </div>
+                        </div>
+
+                        <!-- Gamma -->
+                        <div class="scroll-mt-36" id="gamma">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-600 dark:text-purple-400 font-mono text-xl font-bold">Γ</div>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Gamma</h3>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 font-display">
+                                Gamma measures the rate of change of Delta with respect to the underlying price. It's the second derivative of option value with respect to price, measuring convexity.
+                            </p>
+                            <div class="bg-gray-900 text-gray-100 rounded-lg p-4 font-mono text-sm border border-gray-700">
+                                <div class="mb-2 text-gray-500">// Gamma (Same for Call & Put)</div>
+                                <div>Γ = e<sup>−qT</sup> · N'(d₁) / (S · σ · √T)</div>
+                            </div>
+                        </div>
+
+                        <!-- Vega -->
+                        <div class="scroll-mt-36" id="vega">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center text-green-600 dark:text-green-400 font-mono text-xl font-bold">ν</div>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Vega</h3>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 font-display">
+                                Vega measures sensitivity to volatility. It represents the change in option value for a 1% change in implied volatility.
+                            </p>
+                            <div class="bg-gray-900 text-gray-100 rounded-lg p-4 font-mono text-sm border border-gray-700">
+                                <div class="mb-2 text-gray-500">// Vega (Same for Call & Put)</div>
+                                <div>ν = S · e<sup>−qT</sup> · N'(d₁) · √T</div>
+                            </div>
+                        </div>
+
+                        <!-- Theta -->
+                        <div class="scroll-mt-36" id="theta">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center text-red-600 dark:text-red-400 font-mono text-xl font-bold">Θ</div>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Theta</h3>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 font-display">
+                                Theta measures time decay — how the option's value decreases as time passes, assuming all else remains constant. Typically negative for long options.
+                            </p>
+                            <div class="bg-gray-900 text-gray-100 rounded-lg p-4 font-mono text-sm overflow-x-auto border border-gray-700">
+                                <div class="mb-2 text-gray-500">// Call Theta (annualized)</div>
+                                <div class="mb-4">Θ_call = −(S·e<sup>−qT</sup>·N'(d₁)·σ)/(2√T) − r·K·e<sup>−rT</sup>·N(d₂) + q·S·e<sup>−qT</sup>·N(d₁)</div>
+                                <div class="mb-2 text-gray-500">// Put Theta</div>
+                                <div>Θ_put = −(S·e<sup>−qT</sup>·N'(d₁)·σ)/(2√T) + r·K·e<sup>−rT</sup>·N(−d₂) − q·S·e<sup>−qT</sup>·N(−d₁)</div>
+                            </div>
+                        </div>
+
+                        <!-- Rho -->
+                        <div class="scroll-mt-36" id="rho">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-600 dark:text-orange-400 font-mono text-xl font-bold">ρ</div>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Rho</h3>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 font-display">
+                                Rho measures sensitivity to interest rate changes. It represents the change in option value for a 1% change in the risk-free rate.
+                            </p>
+                            <div class="bg-gray-900 text-gray-100 rounded-lg p-4 font-mono text-sm border border-gray-700">
+                                <div class="mb-2 text-gray-500">// Call Rho</div>
+                                <div class="mb-4">ρ_call = K · T · e<sup>−rT</sup> · N(d₂)</div>
+                                <div class="mb-2 text-gray-500">// Put Rho</div>
+                                <div>ρ_put = −K · T · e<sup>−rT</sup> · N(−d₂)</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Implementation -->
+                <section class="scroll-mt-32" id="implementation">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">5. Implementation Details</h2>
+                    <div class="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 leading-7 font-display">
+                        <p class="mb-4">
+                            This calculator uses the <strong>Abramowitz and Stegun approximation</strong> for the cumulative normal distribution function (CDF), which provides accuracy to 6 decimal places.
+                        </p>
+                    </div>
+                    <div class="bg-gray-900 text-gray-100 rounded-lg p-4 font-mono text-sm border border-gray-700 mt-4 overflow-x-auto">
+                        <div class="text-gray-500 mb-2">// Cumulative Normal Distribution (Abramowitz & Stegun)</div>
+                        <div class="text-blue-300">function</div> <span class="text-yellow-300">normalCDF</span>(x) {
+                        <div class="ml-4">const a1 = 0.254829592;</div>
+                        <div class="ml-4">const a2 = -0.284496736;</div>
+                        <div class="ml-4">const a3 = 1.421413741;</div>
+                        <div class="ml-4">const a4 = -1.453152027;</div>
+                        <div class="ml-4">const a5 = 1.061405429;</div>
+                        <div class="ml-4">const p = 0.3275911;</div>
+                        <div class="ml-4 text-gray-500">// ... approximation algorithm</div>
+                        }
+                    </div>
+                    <div class="mt-8 flex gap-4">
+                        <a href="app.html" class="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover text-white rounded-lg font-semibold transition-all">
+                            <span class="material-symbols-outlined">calculate</span>
+                            Try the Calculator
+                        </a>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-50 dark:bg-card-dark border-t border-border-light dark:border-border-dark py-12 mt-auto">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <p class="text-gray-500 dark:text-gray-400 text-sm">
+                Built with pure JavaScript. Based on the Black-Scholes-Merton model (1973).
+            </p>
+            <div class="mt-4 flex justify-center gap-6">
+                <a href="index.html" class="text-sm text-primary hover:underline">Home</a>
+                <a href="app.html" class="text-sm text-primary hover:underline">Calculator</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
