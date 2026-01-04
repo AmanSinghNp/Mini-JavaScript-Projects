@@ -487,7 +487,6 @@
     function initVisualization() {
         // Check if visualization elements exist
         if (!elements.greeksHeatmap) {
-            console.log('Visualization canvas not found, skipping heatmap init');
             return;
         }
 
@@ -530,7 +529,6 @@
 
         // Initial render
         heatmap.render(state.selectedGreek, state.optionType);
-        console.log('Greeks heatmap visualization initialized');
     }
 
     // ========================================
@@ -555,8 +553,6 @@
 
         // Run initial calculation
         calculate();
-
-        console.log('Black-Scholes Calculator initialized');
     }
 
     // Run initialization when DOM is ready

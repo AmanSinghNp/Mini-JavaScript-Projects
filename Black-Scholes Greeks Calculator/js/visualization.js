@@ -40,12 +40,27 @@ class GreeksHeatmap {
     }
 
     /**
-     * Update canvas dimensions
+     * Update canvas dimensions with HiDPI support
      */
     _updateDimensions() {
+        // Get the display size from CSS
         const rect = this.canvas.getBoundingClientRect();
-        this.width = this.canvas.width;
-        this.height = this.canvas.height;
+        const displayWidth = rect.width;
+        const displayHeight = rect.height;
+        
+        // Get the device pixel ratio (2 on Retina, 1 on standard)
+        const dpr = window.devicePixelRatio || 1;
+        
+        // Set the canvas internal resolution to match physical pixels
+        this.canvas.width = Math.floor(displayWidth * dpr);
+        this.canvas.height = Math.floor(displayHeight * dpr);
+        
+        // Scale the context to draw at higher resolution
+        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        
+        // Use display dimensions for calculations (not internal resolution)
+        this.width = displayWidth;
+        this.height = displayHeight;
         
         const { padding } = this.config;
         this.plotWidth = this.width - padding.left - padding.right;
