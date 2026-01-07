@@ -41,6 +41,12 @@
   const TILE_SERVER = "https://tile.openstreetmap.org";
   const TILE_SIZE = 256; // Standard tile size in pixels
 
+  // LocalStorage keys
+  const STORAGE_KEYS = {
+    markers: "locationTracker_markers",
+    mapState: "locationTracker_mapState",
+  };
+
   /**
    * Initialize canvas with proper DPR handling
    */
@@ -351,11 +357,71 @@
   }
 
   /**
+   * Save markers to localStorage
+   */
+  function saveMarkers() {
+    try {
+      localStorage.setItem(STORAGE_KEYS.markers, JSON.stringify(state.markers));
+    } catch (error) {
+      console.error("Failed to save markers:", error);
+    }
+  }
+
+  /**
+   * Load markers from localStorage
+   */
+  function loadMarkers() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.markers);
+      if (saved) {
+        state.markers = JSON.parse(saved);
+      }
+    } catch (error) {
+      console.error("Failed to load markers:", error);
+      state.markers = [];
+    }
+  }
+
+  /**
+   * Save map state (center, zoom) to localStorage
+   */
+  function saveMapState() {
+    try {
+      const mapState = {
+        center: state.center,
+        zoom: state.zoom,
+      };
+      localStorage.setItem(STORAGE_KEYS.mapState, JSON.stringify(mapState));
+    } catch (error) {
+      console.error("Failed to save map state:", error);
+    }
+  }
+
+  /**
+   * Load map state from localStorage
+   */
+  function loadMapState() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.mapState);
+      if (saved) {
+        const mapState = JSON.parse(saved);
+        if (mapState.center && mapState.zoom) {
+          state.center = mapState.center;
+          state.zoom = Math.max(2, Math.min(18, mapState.zoom));
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load map state:", error);
+    }
+  }
+
+  /**
    * Add a marker to the map
    * @param {Object} marker - Marker object
    */
   function addMarker(marker) {
     state.markers.push(marker);
+    saveMarkers();
     renderMap();
   }
 
@@ -372,6 +438,7 @@
       state.editingMarker = null;
       markerFormSection.classList.add("hidden");
     }
+    saveMarkers();
     renderMap();
     renderLocationsList();
   }
@@ -584,8 +651,13 @@
       state.panOffset.y = 0;
     }
 
+    saveMapState();
     renderMap();
   }
+
+  // Initialize: Load saved data
+  loadMarkers();
+  loadMapState();
 
   // Initial render
   renderMap();
@@ -668,6 +740,7 @@
       marker.name = markerNameInput.value.trim() || `Location ${state.markers.length}`;
       marker.note = markerNoteInput.value.trim();
       marker.color = markerColorInput.value;
+      saveMarkers();
       renderMap();
       renderLocationsList();
     }
