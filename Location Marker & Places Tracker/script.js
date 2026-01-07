@@ -21,6 +21,11 @@
   const btnZoomOut = document.getElementById("btn-zoom-out");
   const btnExport = document.getElementById("btn-export");
   const fileImport = document.getElementById("file-import");
+  const btnSelectStart = document.getElementById("btn-select-start");
+  const btnSelectEnd = document.getElementById("btn-select-end");
+  const btnClearSelection = document.getElementById("btn-clear-selection");
+  const distanceResult = document.getElementById("distance-result");
+  const distanceValue = distanceResult.querySelector(".distance-value");
 
   // App State
   const state = {
@@ -35,6 +40,7 @@
     distanceStart: null, // Start marker for distance calculation
     distanceEnd: null, // End marker for distance calculation
     panOffset: { x: 0, y: 0 }, // Pan offset in pixels
+    distanceMode: null, // 'start' or 'end' when selecting markers for distance
   };
 
   // Tile server URL (OpenStreetMap)
@@ -273,6 +279,11 @@
 
     // Render markers
     renderMarkers();
+
+    // Render distance line if both markers selected
+    if (state.distanceStart && state.distanceEnd) {
+      renderDistanceLine();
+    }
   }
 
   /**
@@ -333,6 +344,103 @@
 
       ctx.restore();
     });
+  }
+
+  /**
+   * Render line between two markers for distance calculation
+   */
+  function renderDistanceLine() {
+    if (!state.distanceStart || !state.distanceEnd) return;
+
+    const startMarker = state.markers.find((m) => m.id === state.distanceStart);
+    const endMarker = state.markers.find((m) => m.id === state.distanceEnd);
+
+    if (!startMarker || !endMarker) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const canvasWidth = canvas.width / dpr;
+    const canvasHeight = canvas.height / dpr;
+
+    const startPixel = latLonToPixel(
+      startMarker.lat,
+      startMarker.lon,
+      state.zoom,
+      state.center,
+      { width: canvasWidth, height: canvasHeight }
+    );
+
+    const endPixel = latLonToPixel(
+      endMarker.lat,
+      endMarker.lon,
+      state.zoom,
+      state.center,
+      { width: canvasWidth, height: canvasHeight }
+    );
+
+    ctx.save();
+    ctx.strokeStyle = "#3b82f6";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.moveTo(startPixel.x, startPixel.y);
+    ctx.lineTo(endPixel.x, endPixel.y);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  /**
+   * Calculate distance between two lat/lon points using Haversine formula
+   * @param {number} lat1 - Latitude of first point
+   * @param {number} lon1 - Longitude of first point
+   * @param {number} lat2 - Latitude of second point
+   * @param {number} lon2 - Longitude of second point
+   * @returns {Object} Distance in kilometers and miles
+   */
+  function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth's radius in kilometers
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distanceKm = R * c;
+    const distanceMiles = distanceKm * 0.621371;
+
+    return { km: distanceKm, miles: distanceMiles };
+  }
+
+  /**
+   * Update distance display
+   */
+  function updateDistanceDisplay() {
+    if (!state.distanceStart || !state.distanceEnd) {
+      distanceResult.classList.add("hidden");
+      return;
+    }
+
+    const startMarker = state.markers.find((m) => m.id === state.distanceStart);
+    const endMarker = state.markers.find((m) => m.id === state.distanceEnd);
+
+    if (!startMarker || !endMarker) {
+      distanceResult.classList.add("hidden");
+      return;
+    }
+
+    const distance = calculateDistance(
+      startMarker.lat,
+      startMarker.lon,
+      endMarker.lat,
+      endMarker.lon
+    );
+
+    distanceValue.textContent = `${distance.km.toFixed(2)} km (${distance.miles.toFixed(2)} miles)`;
+    distanceResult.classList.remove("hidden");
   }
 
   /**
@@ -764,6 +872,38 @@
     console.log("Import file selected");
   });
 
+  // Distance calculator handlers
+  btnSelectStart.addEventListener("click", () => {
+    state.distanceMode = "start";
+    canvas.style.cursor = "pointer";
+    btnSelectStart.style.background = "#3b82f6";
+    btnSelectStart.style.color = "#fff";
+    btnSelectEnd.style.background = "";
+    btnSelectEnd.style.color = "";
+  });
+
+  btnSelectEnd.addEventListener("click", () => {
+    state.distanceMode = "end";
+    canvas.style.cursor = "pointer";
+    btnSelectEnd.style.background = "#3b82f6";
+    btnSelectEnd.style.color = "#fff";
+    btnSelectStart.style.background = "";
+    btnSelectStart.style.color = "";
+  });
+
+  btnClearSelection.addEventListener("click", () => {
+    state.distanceStart = null;
+    state.distanceEnd = null;
+    state.distanceMode = null;
+    canvas.style.cursor = "crosshair";
+    btnSelectStart.style.background = "";
+    btnSelectStart.style.color = "";
+    btnSelectEnd.style.background = "";
+    btnSelectEnd.style.color = "";
+    updateDistanceDisplay();
+    renderMap();
+  });
+
   // Canvas click handler - Place marker
   let clickTimeout;
   canvas.addEventListener("click", (e) => {
@@ -814,6 +954,21 @@
       }
 
       if (clickedMarker) {
+        // Check if in distance selection mode
+        if (state.distanceMode === "start") {
+          state.distanceStart = clickedMarker.id;
+          state.distanceMode = null;
+          updateDistanceDisplay();
+          renderMap();
+          return;
+        } else if (state.distanceMode === "end") {
+          state.distanceEnd = clickedMarker.id;
+          state.distanceMode = null;
+          updateDistanceDisplay();
+          renderMap();
+          return;
+        }
+
         // Select existing marker
         state.selectedMarker =
           state.selectedMarker === clickedMarker.id ? null : clickedMarker.id;
