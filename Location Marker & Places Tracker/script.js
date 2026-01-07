@@ -264,6 +264,111 @@
 
     // Wait for all tiles to load
     await Promise.all(tilePromises);
+
+    // Render markers
+    renderMarkers();
+  }
+
+  /**
+   * Render all markers on the map
+   */
+  function renderMarkers() {
+    const dpr = window.devicePixelRatio || 1;
+    const canvasWidth = canvas.width / dpr;
+    const canvasHeight = canvas.height / dpr;
+
+    state.markers.forEach((marker) => {
+      const pixel = latLonToPixel(
+        marker.lat,
+        marker.lon,
+        state.zoom,
+        state.center,
+        { width: canvasWidth, height: canvasHeight }
+      );
+
+      // Only render if marker is visible
+      if (
+        pixel.x < -20 ||
+        pixel.x > canvasWidth + 20 ||
+        pixel.y < -20 ||
+        pixel.y > canvasHeight + 20
+      ) {
+        return;
+      }
+
+      // Draw marker pin
+      const markerSize = 20;
+      const isSelected = state.selectedMarker === marker.id;
+
+      ctx.save();
+
+      // Draw shadow
+      ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+      ctx.beginPath();
+      ctx.arc(pixel.x + 1, pixel.y + markerSize + 1, markerSize / 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw pin body
+      ctx.fillStyle = marker.color || "#3b82f6";
+      ctx.beginPath();
+      ctx.arc(pixel.x, pixel.y, markerSize / 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw border
+      ctx.strokeStyle = isSelected ? "#fff" : "rgba(255, 255, 255, 0.8)";
+      ctx.lineWidth = isSelected ? 3 : 2;
+      ctx.stroke();
+
+      // Draw inner circle
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.arc(pixel.x, pixel.y, markerSize / 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    });
+  }
+
+  /**
+   * Create a new marker
+   * @param {number} lat - Latitude
+   * @param {number} lon - Longitude
+   * @param {string} name - Marker name
+   * @param {string} note - Marker note
+   * @param {string} color - Marker color
+   * @returns {Object} Marker object
+   */
+  function createMarker(lat, lon, name = "", note = "", color = "#3b82f6") {
+    return {
+      id: `marker-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      lat,
+      lon,
+      name: name || `Location ${state.markers.length + 1}`,
+      note,
+      color,
+      timestamp: Date.now(),
+    };
+  }
+
+  /**
+   * Add a marker to the map
+   * @param {Object} marker - Marker object
+   */
+  function addMarker(marker) {
+    state.markers.push(marker);
+    renderMap();
+  }
+
+  /**
+   * Remove a marker from the map
+   * @param {string} markerId - Marker ID
+   */
+  function removeMarker(markerId) {
+    state.markers = state.markers.filter((m) => m.id !== markerId);
+    if (state.selectedMarker === markerId) {
+      state.selectedMarker = null;
+    }
+    renderMap();
   }
 
   /**
@@ -433,7 +538,20 @@
   // Form handlers
   markerForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    console.log("Form submitted");
+
+    if (!state.editingMarker) return;
+
+    const marker = state.markers.find((m) => m.id === state.editingMarker);
+    if (marker) {
+      marker.name = markerNameInput.value.trim() || `Location ${state.markers.length}`;
+      marker.note = markerNoteInput.value.trim();
+      marker.color = markerColorInput.value;
+      renderMap();
+    }
+
+    markerFormSection.classList.add("hidden");
+    state.editingMarker = null;
+    markerForm.reset();
   });
 
   btnCancelForm.addEventListener("click", () => {
@@ -450,13 +568,74 @@
     console.log("Import file selected");
   });
 
-  // Canvas click handler (placeholder for marker placement)
+  // Canvas click handler - Place marker
+  let clickTimeout;
   canvas.addEventListener("click", (e) => {
-    if (state.isDragging) {
-      // Don't place marker if we just finished dragging
-      return;
-    }
-    console.log("Canvas clicked");
+    // Clear any existing timeout
+    clearTimeout(clickTimeout);
+
+    // Small delay to distinguish from drag end
+    clickTimeout = setTimeout(() => {
+      if (state.isDragging) {
+        // Don't place marker if we just finished dragging
+        return;
+      }
+
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const canvasWidth = canvas.width / dpr;
+      const canvasHeight = canvas.height / dpr;
+
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+
+      // Convert click to lat/lon
+      const latLon = pixelToLatLon(
+        clickX,
+        clickY,
+        state.zoom,
+        state.center,
+        { width: canvasWidth, height: canvasHeight }
+      );
+
+      // Check if clicking on existing marker
+      let clickedMarker = null;
+      for (const marker of state.markers) {
+        const pixel = latLonToPixel(
+          marker.lat,
+          marker.lon,
+          state.zoom,
+          state.center,
+          { width: canvasWidth, height: canvasHeight }
+        );
+        const distance = Math.sqrt(
+          Math.pow(clickX - pixel.x, 2) + Math.pow(clickY - pixel.y, 2)
+        );
+        if (distance < 15) {
+          clickedMarker = marker;
+          break;
+        }
+      }
+
+      if (clickedMarker) {
+        // Select existing marker
+        state.selectedMarker =
+          state.selectedMarker === clickedMarker.id ? null : clickedMarker.id;
+        renderMap();
+      } else {
+        // Create new marker
+        const newMarker = createMarker(latLon.lat, latLon.lon);
+        addMarker(newMarker);
+
+        // Open form to edit marker
+        state.editingMarker = newMarker.id;
+        markerNameInput.value = newMarker.name;
+        markerNoteInput.value = newMarker.note;
+        markerColorInput.value = newMarker.color;
+        formTitle.textContent = "Add Location";
+        markerFormSection.classList.remove("hidden");
+      }
+    }, 100);
   });
 
 })();
