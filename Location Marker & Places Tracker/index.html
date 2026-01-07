@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Location Marker & Places Tracker</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- Map Canvas Area -->
+      <div class="map-container">
+        <canvas id="map-canvas"></canvas>
+        <div class="map-controls">
+          <button id="btn-zoom-in" class="control-btn" title="Zoom In">+</button>
+          <button id="btn-zoom-out" class="control-btn" title="Zoom Out">−</button>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <header class="sidebar-header">
+          <h1>Places Tracker</h1>
+          <p class="subtitle">Click on the map to add markers</p>
+        </header>
+
+        <div class="sidebar-content">
+          <!-- Saved Locations List -->
+          <section class="locations-section">
+            <h2>Saved Locations</h2>
+            <ul id="locations-list" class="locations-list">
+              <!-- Locations will be populated here -->
+            </ul>
+          </section>
+
+          <!-- Marker Form (hidden initially) -->
+          <section id="marker-form-section" class="marker-form-section hidden">
+            <h2 id="form-title">Add Location</h2>
+            <form id="marker-form">
+              <div class="form-group">
+                <label for="marker-name">Name</label>
+                <input
+                  type="text"
+                  id="marker-name"
+                  placeholder="Location name"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="marker-note">Note</label>
+                <textarea
+                  id="marker-note"
+                  placeholder="Add a note about this location..."
+                  rows="3"
+                ></textarea>
+              </div>
+              <div class="form-group">
+                <label for="marker-color">Color</label>
+                <input type="color" id="marker-color" value="#3b82f6" />
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" id="btn-cancel-form" class="btn btn-secondary">Cancel</button>
+              </div>
+            </form>
+          </section>
+
+          <!-- Distance Calculator -->
+          <section class="distance-section">
+            <h2>Distance Calculator</h2>
+            <div class="distance-controls">
+              <button id="btn-select-start" class="btn btn-outline">Select Start</button>
+              <button id="btn-select-end" class="btn btn-outline">Select End</button>
+              <button id="btn-clear-selection" class="btn btn-secondary">Clear</button>
+            </div>
+            <div id="distance-result" class="distance-result hidden">
+              <p class="distance-value"></p>
+            </div>
+          </section>
+
+          <!-- Export/Import -->
+          <section class="data-section">
+            <h2>Data Management</h2>
+            <div class="data-actions">
+              <button id="btn-export" class="btn btn-outline">Export JSON</button>
+              <label for="file-import" class="btn btn-outline">Import JSON</label>
+              <input type="file" id="file-import" accept=".json" class="hidden" />
+            </div>
+          </section>
+        </div>
+      </aside>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
+
