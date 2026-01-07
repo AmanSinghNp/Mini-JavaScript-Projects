@@ -368,7 +368,128 @@
     if (state.selectedMarker === markerId) {
       state.selectedMarker = null;
     }
+    if (state.editingMarker === markerId) {
+      state.editingMarker = null;
+      markerFormSection.classList.add("hidden");
+    }
     renderMap();
+    renderLocationsList();
+  }
+
+  /**
+   * Select a marker and center map on it
+   * @param {string} markerId - Marker ID
+   */
+  function selectMarker(markerId) {
+    const marker = state.markers.find((m) => m.id === markerId);
+    if (marker) {
+      state.selectedMarker = markerId;
+      state.center = { lat: marker.lat, lon: marker.lon };
+      state.panOffset = { x: 0, y: 0 };
+      renderMap();
+      renderLocationsList();
+    }
+  }
+
+  /**
+   * Edit a marker
+   * @param {string} markerId - Marker ID
+   */
+  function editMarker(markerId) {
+    const marker = state.markers.find((m) => m.id === markerId);
+    if (marker) {
+      state.editingMarker = markerId;
+      markerNameInput.value = marker.name;
+      markerNoteInput.value = marker.note;
+      markerColorInput.value = marker.color;
+      formTitle.textContent = "Edit Location";
+      markerFormSection.classList.remove("hidden");
+    }
+  }
+
+  /**
+   * Render the locations list in the sidebar
+   */
+  function renderLocationsList() {
+    locationsList.innerHTML = "";
+
+    if (state.markers.length === 0) {
+      const emptyMsg = document.createElement("li");
+      emptyMsg.className = "empty-message";
+      emptyMsg.textContent = "No locations saved. Click on the map to add one.";
+      emptyMsg.style.padding = "12px";
+      emptyMsg.style.color = "#999";
+      emptyMsg.style.fontSize = "14px";
+      emptyMsg.style.textAlign = "center";
+      locationsList.appendChild(emptyMsg);
+      return;
+    }
+
+    state.markers.forEach((marker) => {
+      const li = document.createElement("li");
+      li.className = "location-item";
+      if (state.selectedMarker === marker.id) {
+        li.classList.add("selected");
+      }
+
+      const header = document.createElement("div");
+      header.className = "location-item-header";
+
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "location-name";
+      const colorDot = document.createElement("span");
+      colorDot.className = "location-color";
+      colorDot.style.backgroundColor = marker.color;
+      nameSpan.appendChild(colorDot);
+      nameSpan.appendChild(document.createTextNode(marker.name));
+      header.appendChild(nameSpan);
+
+      const actions = document.createElement("div");
+      actions.className = "location-actions";
+
+      const editBtn = document.createElement("button");
+      editBtn.className = "btn-icon";
+      editBtn.textContent = "✏️";
+      editBtn.title = "Edit";
+      editBtn.onclick = (e) => {
+        e.stopPropagation();
+        editMarker(marker.id);
+      };
+      actions.appendChild(editBtn);
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "btn-icon delete";
+      deleteBtn.textContent = "🗑️";
+      deleteBtn.title = "Delete";
+      deleteBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (confirm(`Delete "${marker.name}"?`)) {
+          removeMarker(marker.id);
+        }
+      };
+      actions.appendChild(deleteBtn);
+
+      header.appendChild(actions);
+      li.appendChild(header);
+
+      const coords = document.createElement("div");
+      coords.className = "location-coords";
+      coords.textContent = `${marker.lat.toFixed(4)}, ${marker.lon.toFixed(4)}`;
+      li.appendChild(coords);
+
+      if (marker.note) {
+        const note = document.createElement("div");
+        note.className = "location-note";
+        note.textContent = marker.note;
+        li.appendChild(note);
+      }
+
+      li.onclick = () => {
+        selectMarker(marker.id);
+      };
+
+      locationsList.appendChild(li);
+    });
   }
 
   /**
@@ -468,6 +589,7 @@
 
   // Initial render
   renderMap();
+  renderLocationsList();
 
   // Pan functionality - Mouse drag
   canvas.addEventListener("mousedown", (e) => {
@@ -547,6 +669,7 @@
       marker.note = markerNoteInput.value.trim();
       marker.color = markerColorInput.value;
       renderMap();
+      renderLocationsList();
     }
 
     markerFormSection.classList.add("hidden");
@@ -627,13 +750,14 @@
         const newMarker = createMarker(latLon.lat, latLon.lon);
         addMarker(newMarker);
 
-        // Open form to edit marker
-        state.editingMarker = newMarker.id;
-        markerNameInput.value = newMarker.name;
-        markerNoteInput.value = newMarker.note;
-        markerColorInput.value = newMarker.color;
-        formTitle.textContent = "Add Location";
-        markerFormSection.classList.remove("hidden");
+      // Open form to edit marker
+      state.editingMarker = newMarker.id;
+      markerNameInput.value = newMarker.name;
+      markerNoteInput.value = newMarker.note;
+      markerColorInput.value = newMarker.color;
+      formTitle.textContent = "Add Location";
+      markerFormSection.classList.remove("hidden");
+      renderLocationsList();
       }
     }, 100);
   });
