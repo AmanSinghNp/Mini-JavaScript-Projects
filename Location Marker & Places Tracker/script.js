@@ -266,18 +266,171 @@
     await Promise.all(tilePromises);
   }
 
+  /**
+   * Set zoom level and update map
+   * @param {number} newZoom - New zoom level
+   * @param {Object} focusPoint - Optional point to zoom towards {x, y} in pixels
+   */
+  function setZoom(newZoom, focusPoint = null) {
+    const minZoom = 2;
+    const maxZoom = 18;
+    newZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
+
+    if (focusPoint) {
+      // Zoom towards a specific point
+      const dpr = window.devicePixelRatio || 1;
+      const canvasWidth = canvas.width / dpr;
+      const canvasHeight = canvas.height / dpr;
+
+      // Get the lat/lon of the focus point before zoom
+      const focusLatLon = pixelToLatLon(
+        focusPoint.x,
+        focusPoint.y,
+        state.zoom,
+        state.center,
+        { width: canvasWidth, height: canvasHeight }
+      );
+
+      state.zoom = newZoom;
+
+      // Adjust center so focus point stays in same place
+      const newFocusPixel = latLonToPixel(
+        focusLatLon.lat,
+        focusLatLon.lon,
+        state.zoom,
+        state.center,
+        { width: canvasWidth, height: canvasHeight }
+      );
+
+      const deltaX = focusPoint.x - newFocusPixel.x;
+      const deltaY = focusPoint.y - newFocusPixel.y;
+
+      // Convert pixel delta to lat/lon delta
+      const deltaLatLon = pixelToLatLon(
+        canvasWidth / 2 + deltaX,
+        canvasHeight / 2 + deltaY,
+        state.zoom,
+        state.center,
+        { width: canvasWidth, height: canvasHeight }
+      );
+
+      state.center.lat = deltaLatLon.lat;
+      state.center.lon = deltaLatLon.lon;
+      state.panOffset.x = 0;
+      state.panOffset.y = 0;
+    } else {
+      state.zoom = newZoom;
+    }
+
+    renderMap();
+  }
+
+  /**
+   * Pan the map by pixel offset
+   * @param {number} deltaX - X offset in pixels
+   * @param {number} deltaY - Y offset in pixels
+   */
+  function panMap(deltaX, deltaY) {
+    state.panOffset.x += deltaX;
+    state.panOffset.y += deltaY;
+
+    // If pan offset gets too large, update center and reset offset
+    const threshold = TILE_SIZE;
+    if (
+      Math.abs(state.panOffset.x) > threshold ||
+      Math.abs(state.panOffset.y) > threshold
+    ) {
+      const dpr = window.devicePixelRatio || 1;
+      const canvasWidth = canvas.width / dpr;
+      const canvasHeight = canvas.height / dpr;
+
+      // Convert pan offset to lat/lon change
+      const newCenter = pixelToLatLon(
+        canvasWidth / 2 - state.panOffset.x,
+        canvasHeight / 2 - state.panOffset.y,
+        state.zoom,
+        state.center,
+        { width: canvasWidth, height: canvasHeight }
+      );
+
+      state.center = newCenter;
+      state.panOffset.x = 0;
+      state.panOffset.y = 0;
+    }
+
+    renderMap();
+  }
+
   // Initial render
   renderMap();
 
-  // Event listeners (placeholders for now)
+  // Pan functionality - Mouse drag
+  canvas.addEventListener("mousedown", (e) => {
+    if (e.button !== 0) return; // Only left mouse button
+    state.isDragging = true;
+    state.dragStart.x = e.clientX;
+    state.dragStart.y = e.clientY;
+    canvas.style.cursor = "grabbing";
+  });
+
+  canvas.addEventListener("mousemove", (e) => {
+    if (state.isDragging) {
+      const deltaX = e.clientX - state.dragStart.x;
+      const deltaY = e.clientY - state.dragStart.y;
+      state.dragStart.x = e.clientX;
+      state.dragStart.y = e.clientY;
+      panMap(deltaX, deltaY);
+    }
+  });
+
+  canvas.addEventListener("mouseup", () => {
+    if (state.isDragging) {
+      state.isDragging = false;
+      canvas.style.cursor = "crosshair";
+    }
+  });
+
+  canvas.addEventListener("mouseleave", () => {
+    if (state.isDragging) {
+      state.isDragging = false;
+      canvas.style.cursor = "crosshair";
+    }
+  });
+
+  // Zoom functionality - Mouse wheel
+  canvas.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -1 : 1;
+    const rect = canvas.getBoundingClientRect();
+    const focusPoint = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    };
+    setZoom(state.zoom + delta, focusPoint);
+  });
+
+  // Zoom buttons
   btnZoomIn.addEventListener("click", () => {
-    console.log("Zoom in clicked");
+    const dpr = window.devicePixelRatio || 1;
+    const canvasWidth = canvas.width / dpr;
+    const canvasHeight = canvas.height / dpr;
+    setZoom(state.zoom + 1, {
+      x: canvasWidth / 2,
+      y: canvasHeight / 2,
+    });
   });
 
   btnZoomOut.addEventListener("click", () => {
-    console.log("Zoom out clicked");
+    const dpr = window.devicePixelRatio || 1;
+    const canvasWidth = canvas.width / dpr;
+    const canvasHeight = canvas.height / dpr;
+    setZoom(state.zoom - 1, {
+      x: canvasWidth / 2,
+      y: canvasHeight / 2,
+    });
   });
 
+  // Form handlers
   markerForm.addEventListener("submit", (e) => {
     e.preventDefault();
     console.log("Form submitted");
@@ -297,8 +450,12 @@
     console.log("Import file selected");
   });
 
-  // Canvas click handler (placeholder)
+  // Canvas click handler (placeholder for marker placement)
   canvas.addEventListener("click", (e) => {
+    if (state.isDragging) {
+      // Don't place marker if we just finished dragging
+      return;
+    }
     console.log("Canvas clicked");
   });
 
