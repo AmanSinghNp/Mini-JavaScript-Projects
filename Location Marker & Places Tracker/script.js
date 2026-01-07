@@ -864,12 +864,136 @@
     markerForm.reset();
   });
 
+  /**
+   * Export markers to JSON file
+   */
+  function exportMarkers() {
+    const data = {
+      markers: state.markers,
+      version: "1.0",
+      exportDate: new Date().toISOString(),
+    };
+
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `location-markers-${new Date().toISOString().split("T")[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  /**
+   * Import markers from JSON file
+   * @param {File} file - JSON file to import
+   */
+  function importMarkers(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+
+        // Validate data structure
+        if (!data.markers || !Array.isArray(data.markers)) {
+          alert("Invalid file format. Expected markers array.");
+          return;
+        }
+
+        // Validate each marker
+        const validMarkers = data.markers.filter((marker) => {
+          return (
+            marker &&
+            typeof marker.lat === "number" &&
+            typeof marker.lon === "number" &&
+            !isNaN(marker.lat) &&
+            !isNaN(marker.lon) &&
+            marker.lat >= -90 &&
+            marker.lat <= 90 &&
+            marker.lon >= -180 &&
+            marker.lon <= 180
+          );
+        });
+
+        if (validMarkers.length === 0) {
+          alert("No valid markers found in file.");
+          return;
+        }
+
+        // Ask user if they want to merge or replace
+        const action = confirm(
+          `Found ${validMarkers.length} valid markers.\n\n` +
+            `Click OK to replace existing markers, or Cancel to merge.`
+        );
+
+        if (action) {
+          // Replace
+          state.markers = validMarkers.map((marker) => ({
+            ...marker,
+            id:
+              marker.id ||
+              `marker-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            timestamp: marker.timestamp || Date.now(),
+          }));
+        } else {
+          // Merge (add new markers, skip duplicates by lat/lon)
+          validMarkers.forEach((importedMarker) => {
+            const exists = state.markers.some(
+              (existing) =>
+                Math.abs(existing.lat - importedMarker.lat) < 0.0001 &&
+                Math.abs(existing.lon - importedMarker.lon) < 0.0001
+            );
+
+            if (!exists) {
+              state.markers.push({
+                ...importedMarker,
+                id:
+                  importedMarker.id ||
+                  `marker-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                timestamp: importedMarker.timestamp || Date.now(),
+              });
+            }
+          });
+        }
+
+        saveMarkers();
+        renderMap();
+        renderLocationsList();
+        alert(`Successfully imported ${validMarkers.length} markers.`);
+      } catch (error) {
+        console.error("Import error:", error);
+        alert("Failed to import markers. Please check the file format.");
+      }
+    };
+
+    reader.onerror = () => {
+      alert("Failed to read file.");
+    };
+
+    reader.readAsText(file);
+  }
+
   btnExport.addEventListener("click", () => {
-    console.log("Export clicked");
+    if (state.markers.length === 0) {
+      alert("No markers to export.");
+      return;
+    }
+    exportMarkers();
   });
 
   fileImport.addEventListener("change", (e) => {
-    console.log("Import file selected");
+    const file = e.target.files[0];
+    if (file) {
+      if (file.type !== "application/json" && !file.name.endsWith(".json")) {
+        alert("Please select a JSON file.");
+        e.target.value = "";
+        return;
+      }
+      importMarkers(file);
+      e.target.value = ""; // Reset file input
+    }
   });
 
   // Distance calculator handlers
