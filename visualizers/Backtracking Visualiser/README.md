@@ -14,3 +14,5 @@ An interactive visualization of the **N-Queens Problem** using Backtracking.
 2.  Set N (4-8) and speed.
 3.  Click **Solve** to watch the algorithm find a solution.
 
+
+

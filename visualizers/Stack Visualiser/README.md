@@ -16,3 +16,5 @@ An interactive visualization of a **Stack** data structure.
 2.  Use the input field to push values.
 3.  Click buttons to perform operations.
 
+
+

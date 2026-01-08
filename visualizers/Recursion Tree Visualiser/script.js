@@ -166,3 +166,5 @@ function toggleControls(enable) {
 runBtn.addEventListener('click', runFib);
 clearBtn.addEventListener('click', clear);
 
+
+

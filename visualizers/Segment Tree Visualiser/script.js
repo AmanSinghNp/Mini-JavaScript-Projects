@@ -234,3 +234,5 @@ window.addEventListener('resize', () => { updateLayout(); drawTree(); });
 arrayInput.value = "1, 3, 5, 7, 9, 11";
 buildTree([1, 3, 5, 7, 9, 11]);
 
+
+

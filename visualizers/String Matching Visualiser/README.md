@@ -14,3 +14,5 @@ An interactive visualization of the **Knuth-Morris-Pratt (KMP)** algorithm.
 2.  Enter a Text string and a Pattern string.
 3.  Click **Run** to start the visualization.
 
+
+

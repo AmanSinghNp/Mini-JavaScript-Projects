@@ -14,3 +14,5 @@ An interactive visualization of a **Segment Tree** for range queries.
 2.  Input an array to build the tree.
 3.  Use the controls to query ranges or update values.
 
+
+

@@ -13,3 +13,5 @@ An interactive visualization of a **Deque** (Double-Ended Queue).
 1.  Open `index.html` in your web browser.
 2.  Enter a value and use the Front/Rear buttons to modify the deque.
 
+
+

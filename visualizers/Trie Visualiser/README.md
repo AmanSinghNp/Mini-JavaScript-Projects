@@ -14,3 +14,5 @@ An interactive visualization of a **Trie** for storing strings.
 2.  Insert words (e.g., "cat", "car") to see them share nodes.
 3.  Search for words to highlight the traversal path.
 
+
+

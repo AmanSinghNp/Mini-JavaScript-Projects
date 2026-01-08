@@ -80,7 +80,9 @@ let isShuffled = false;
 let shuffledPlaylist = [];
 let originalPlaylistOrder = [];
 let repeatMode = "off"; // "off", "all", "one"
-let favorites = JSON.parse(localStorage.getItem("music-player-favorites") || "[]");
+let favorites = JSON.parse(
+  localStorage.getItem("music-player-favorites") || "[]"
+);
 let isLoading = false;
 let navigationHistory = [];
 let currentHistoryIndex = -1;
@@ -142,10 +144,14 @@ function loadTrack(index) {
 
   // Error handling
   audio.addEventListener("error", handleAudioError, { once: true });
-  audio.addEventListener("canplay", () => {
-    isLoading = false;
-    showLoadingState(false);
-  }, { once: true });
+  audio.addEventListener(
+    "canplay",
+    () => {
+      isLoading = false;
+      showLoadingState(false);
+    },
+    { once: true }
+  );
 }
 
 function handleAudioError(e) {
@@ -171,7 +177,8 @@ function showLoadingState(show) {
 function showError(message) {
   // Create a simple toast notification
   const toast = document.createElement("div");
-  toast.className = "fixed top-20 right-8 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in";
+  toast.className =
+    "fixed top-20 right-8 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in";
   toast.textContent = message;
   document.body.appendChild(toast);
   setTimeout(() => {
@@ -211,7 +218,9 @@ function nextTrack() {
   let nextIndex;
   if (isShuffled && shuffledPlaylist.length > 0) {
     const currentTrack = currentPlaylist[currentTrackIndex];
-    const currentShuffledIndex = shuffledPlaylist.findIndex(s => s.id === currentTrack.id);
+    const currentShuffledIndex = shuffledPlaylist.findIndex(
+      (s) => s.id === currentTrack.id
+    );
     nextIndex = currentShuffledIndex + 1;
     if (nextIndex >= shuffledPlaylist.length) {
       if (repeatMode === "all") {
@@ -223,7 +232,7 @@ function nextTrack() {
       }
     }
     const nextTrack = shuffledPlaylist[nextIndex];
-    const actualIndex = currentPlaylist.findIndex(s => s.id === nextTrack.id);
+    const actualIndex = currentPlaylist.findIndex((s) => s.id === nextTrack.id);
     loadTrack(actualIndex);
   } else {
     nextIndex = currentTrackIndex + 1;
@@ -250,7 +259,9 @@ function prevTrack() {
   let prevIndex;
   if (isShuffled && shuffledPlaylist.length > 0) {
     const currentTrack = currentPlaylist[currentTrackIndex];
-    const currentShuffledIndex = shuffledPlaylist.findIndex(s => s.id === currentTrack.id);
+    const currentShuffledIndex = shuffledPlaylist.findIndex(
+      (s) => s.id === currentTrack.id
+    );
     prevIndex = currentShuffledIndex - 1;
     if (prevIndex < 0) {
       if (repeatMode === "all") {
@@ -260,7 +271,7 @@ function prevTrack() {
       }
     }
     const prevTrack = shuffledPlaylist[prevIndex];
-    const actualIndex = currentPlaylist.findIndex(s => s.id === prevTrack.id);
+    const actualIndex = currentPlaylist.findIndex((s) => s.id === prevTrack.id);
     loadTrack(actualIndex);
   } else {
     prevIndex = currentTrackIndex - 1;
@@ -281,7 +292,10 @@ function shufflePlaylist() {
   // Fisher-Yates shuffle
   for (let i = shuffledPlaylist.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [shuffledPlaylist[i], shuffledPlaylist[j]] = [shuffledPlaylist[j], shuffledPlaylist[i]];
+    [shuffledPlaylist[i], shuffledPlaylist[j]] = [
+      shuffledPlaylist[j],
+      shuffledPlaylist[i],
+    ];
   }
 }
 
@@ -301,10 +315,10 @@ function toggleRepeat() {
   const modes = ["off", "all", "one"];
   const currentIndex = modes.indexOf(repeatMode);
   repeatMode = modes[(currentIndex + 1) % modes.length];
-  
+
   const icon = repeatBtn.querySelector(".material-symbols-outlined");
   repeatBtn.classList.remove("text-primary", "text-gray-400", "active");
-  
+
   if (repeatMode === "off") {
     repeatBtn.classList.add("text-gray-400");
     icon.textContent = "repeat";
@@ -350,30 +364,38 @@ function setupEventListeners() {
 
   // Seek - Click and drag
   progressContainer.addEventListener("click", setProgress);
-  setupDraggableSlider(progressContainer, (percent) => {
-    if (audio.duration) {
-      audio.currentTime = (percent / 100) * audio.duration;
+  setupDraggableSlider(
+    progressContainer,
+    (percent) => {
+      if (audio.duration) {
+        audio.currentTime = (percent / 100) * audio.duration;
+      }
+    },
+    () => {
+      if (audio.duration) {
+        return (audio.currentTime / audio.duration) * 100;
+      }
+      return 0;
     }
-  }, () => {
-    if (audio.duration) {
-      return (audio.currentTime / audio.duration) * 100;
-    }
-    return 0;
-  });
+  );
 
   // Volume - Click and drag
   volumeBtn.addEventListener("click", toggleMute);
   volumeContainer.addEventListener("click", setVolume);
-  setupDraggableSlider(volumeContainer, (percent) => {
-    const volume = percent / 100;
-    audio.volume = volume;
-    volumeBar.style.width = `${percent}%`;
-    localStorage.setItem("music-player-volume", volume);
-    updateVolumeIcon(volume);
-    lastVolume = volume;
-  }, () => {
-    return audio.volume * 100;
-  });
+  setupDraggableSlider(
+    volumeContainer,
+    (percent) => {
+      const volume = percent / 100;
+      audio.volume = volume;
+      volumeBar.style.width = `${percent}%`;
+      localStorage.setItem("music-player-volume", volume);
+      updateVolumeIcon(volume);
+      lastVolume = volume;
+    },
+    () => {
+      return audio.volume * 100;
+    }
+  );
 
   // Featured Play Button
   const featuredPlayBtn = document.getElementById("featured-play-btn");
@@ -391,10 +413,10 @@ function setupEventListeners() {
     searchInput.addEventListener("input", (e) => {
       clearTimeout(searchTimeout);
       const searchTerm = e.target.value.toLowerCase();
-      
+
       // Show/hide clear button
       updateClearSearchButton(searchTerm.length > 0);
-      
+
       searchTimeout = setTimeout(() => {
         const filteredSongs = songs.filter(
           (song) =>
@@ -441,7 +463,7 @@ function setupEventListeners() {
 
   // Navigation buttons
   const headerButtons = document.querySelectorAll("header button");
-  headerButtons.forEach(btn => {
+  headerButtons.forEach((btn) => {
     const icon = btn.querySelector(".material-symbols-outlined");
     if (icon) {
       if (icon.textContent.includes("chevron_left") && !btn.id) {
@@ -456,7 +478,7 @@ function setupEventListeners() {
 
   // Add to Library button
   const allButtons = document.querySelectorAll("button");
-  allButtons.forEach(btn => {
+  allButtons.forEach((btn) => {
     if (btn.textContent.includes("Add to Library") && !btn.id) {
       btn.id = "add-to-library-btn";
       btn.addEventListener("click", addToLibrary);
@@ -467,7 +489,9 @@ function setupEventListeners() {
   });
 
   // Expand player button
-  const expandPlayerBtn = document.querySelector("#current-track-art")?.parentElement?.querySelector("button");
+  const expandPlayerBtn = document
+    .querySelector("#current-track-art")
+    ?.parentElement?.querySelector("button");
   if (expandPlayerBtn && !expandPlayerBtn.id) {
     expandPlayerBtn.id = "expand-player-btn";
     expandPlayerBtn.addEventListener("click", expandPlayer);
@@ -672,7 +696,7 @@ function updateVolumeIcon(vol) {
 // Placeholder render functions
 function renderNewReleases(songsToRender = songs) {
   const grid = document.getElementById("new-releases-grid");
-  
+
   if (songsToRender.length === 0) {
     grid.innerHTML = `
       <div class="col-span-full flex flex-col items-center justify-center py-12 text-center">
@@ -683,7 +707,7 @@ function renderNewReleases(songsToRender = songs) {
     `;
     return;
   }
-  
+
   grid.innerHTML = songsToRender
     .map((song) => {
       // Find the original index in the main songs array to ensure playback works correctly
@@ -750,13 +774,13 @@ window.playPlaylist = (index) => {
 function toggleFavorite() {
   const currentTrack = currentPlaylist[currentTrackIndex];
   const index = favorites.indexOf(currentTrack.id);
-  
+
   if (index > -1) {
     favorites.splice(index, 1);
   } else {
     favorites.push(currentTrack.id);
   }
-  
+
   localStorage.setItem("music-player-favorites", JSON.stringify(favorites));
   updateFavoriteButton(currentTrack.id);
 }
@@ -765,7 +789,7 @@ function updateFavoriteButton(trackId) {
   if (!favoriteBtn) return;
   const icon = favoriteBtn.querySelector(".material-symbols-outlined");
   const isFavorite = favorites.includes(trackId);
-  
+
   if (isFavorite) {
     favoriteBtn.classList.add("text-primary", "active");
     favoriteBtn.classList.remove("text-gray-400");
@@ -784,10 +808,11 @@ function showQueue() {
     queueModal.classList.toggle("hidden");
     return;
   }
-  
+
   const modal = document.createElement("div");
   modal.id = "queue-modal";
-  modal.className = "fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4";
+  modal.className =
+    "fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4";
   modal.innerHTML = `
     <div class="bg-[#1a2c22] rounded-xl p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
       <div class="flex items-center justify-between mb-4">
@@ -797,21 +822,35 @@ function showQueue() {
         </button>
       </div>
       <div class="space-y-2" id="queue-list">
-        ${currentPlaylist.map((song, index) => `
-          <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-[#254632] cursor-pointer ${index === currentTrackIndex ? 'bg-[#254632]' : ''}" onclick="playSongFromQueue(${index})">
-            <div class="size-12 rounded-md bg-cover bg-center shrink-0" style='background-image: url("${song.cover}");'></div>
+        ${currentPlaylist
+          .map(
+            (song, index) => `
+          <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-[#254632] cursor-pointer ${
+            index === currentTrackIndex ? "bg-[#254632]" : ""
+          }" onclick="playSongFromQueue(${index})">
+            <div class="size-12 rounded-md bg-cover bg-center shrink-0" style='background-image: url("${
+              song.cover
+            }");'></div>
             <div class="flex-1 min-w-0">
-              <p class="text-white text-sm font-medium truncate">${song.title}</p>
+              <p class="text-white text-sm font-medium truncate">${
+                song.title
+              }</p>
               <p class="text-gray-400 text-xs truncate">${song.artist}</p>
             </div>
-            ${index === currentTrackIndex ? '<span class="material-symbols-outlined text-primary">volume_up</span>' : ''}
+            ${
+              index === currentTrackIndex
+                ? '<span class="material-symbols-outlined text-primary">volume_up</span>'
+                : ""
+            }
           </div>
-        `).join("")}
+        `
+          )
+          .join("")}
       </div>
     </div>
   `;
   document.body.appendChild(modal);
-  
+
   modal.addEventListener("click", (e) => {
     if (e.target === modal) {
       modal.classList.add("hidden");
@@ -864,7 +903,9 @@ function addToHistory(state) {
 function renderContent(state) {
   if (state.type === "home") {
     renderNewReleases(songs);
-    document.getElementById("main-content").scrollTo({ top: 0, behavior: "smooth" });
+    document
+      .getElementById("main-content")
+      .scrollTo({ top: 0, behavior: "smooth" });
   } else if (state.type === "search") {
     renderNewReleases(state.results);
   }
@@ -880,7 +921,9 @@ function addToLibrary() {
 function showAllReleases() {
   addToHistory({ type: "all-releases" });
   renderNewReleases(songs);
-  document.getElementById("main-content").scrollTo({ top: 0, behavior: "smooth" });
+  document
+    .getElementById("main-content")
+    .scrollTo({ top: 0, behavior: "smooth" });
 }
 
 // Expand player
@@ -903,8 +946,10 @@ function updateClearSearchButton(show) {
   if (show && !clearBtn) {
     clearBtn = document.createElement("button");
     clearBtn.id = "clear-search-btn";
-    clearBtn.className = "absolute inset-y-0 right-0 pr-3 flex items-center text-[#95c6a9] hover:text-white";
-    clearBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 20px">close</span>';
+    clearBtn.className =
+      "absolute inset-y-0 right-0 pr-3 flex items-center text-[#95c6a9] hover:text-white";
+    clearBtn.innerHTML =
+      '<span class="material-symbols-outlined" style="font-size: 20px">close</span>';
     clearBtn.addEventListener("click", clearSearch);
     const searchContainer = searchInput.parentElement;
     searchContainer.classList.add("relative");
@@ -914,18 +959,7 @@ function updateClearSearchButton(show) {
   }
 }
 
-
 // Run init
 init();
-
-
-
-
-
-
-
-
-
-
 
 

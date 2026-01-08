@@ -14,3 +14,5 @@ An interactive visualization of the **0/1 Knapsack Problem** using Dynamic Progr
 2.  Add items (Weight, Value) and set Knapsack Capacity.
 3.  Click **Run** to animate the table filling process.
 
+
+

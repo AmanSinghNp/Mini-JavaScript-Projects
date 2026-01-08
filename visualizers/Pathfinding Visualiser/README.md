@@ -15,3 +15,5 @@ An interactive visualization of **Pathfinding Algorithms** on a grid.
 2.  Draw walls by clicking/dragging on the grid.
 3.  Select an algorithm and click **Run**.
 
+
+

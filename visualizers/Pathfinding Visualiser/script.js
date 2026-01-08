@@ -358,3 +358,5 @@ astarBtn.addEventListener('click', () => {
 // Init
 createGrid();
 
+
+

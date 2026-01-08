@@ -134,3 +134,5 @@ speedInput.addEventListener('input', (e) => delayMs = parseInt(e.target.value));
 // Init
 createBoard();
 
+
+

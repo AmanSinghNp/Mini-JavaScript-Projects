@@ -14,3 +14,5 @@ An interactive visualization of a **Fenwick Tree** for efficient prefix sums and
 1.  Open `index.html` in your web browser.
 2.  Build the tree and perform queries or updates.
 
+
+

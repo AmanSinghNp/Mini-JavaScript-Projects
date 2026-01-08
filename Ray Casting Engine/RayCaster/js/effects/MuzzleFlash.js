@@ -50,3 +50,5 @@ export function drawMuzzleFlash(ctx, x, y, fadeProgress = 1.0) {
   ctx.restore();
 }
 
+
+
