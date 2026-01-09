@@ -62,6 +62,20 @@ A sleek, distraction-free typing test to measure your WPM.
 - **Key Features:** Real-time WPM & accuracy tracking, character-by-character feedback, test history with localStorage, and animated caret.
 - **Tech Stack:** DOM Events, LocalStorage, Tailwind CSS, JetBrains Mono.
 
+### [Black-Scholes Greeks Calculator](./Black-Scholes%20Greeks%20Calculator/)
+
+An options pricing calculator implementing the Black-Scholes model.
+
+- **Key Features:** Calculate option prices (Call/Put), compute all Greeks (Delta, Gamma, Theta, Vega, Rho), analytical vs numerical method comparison, and interactive heatmap visualization.
+- **Tech Stack:** TypeScript/JavaScript, Tailwind CSS, Canvas API.
+
+### [Pocket Matching Engine](./Pocket%20Matching%20Engine/)
+
+A real-time order matching engine simulation demonstrating Price-Time Priority algorithm.
+
+- **Key Features:** Buy/Sell limit order entry, live order book display, trade log with partial fills, and demo mode for algorithm visualization.
+- **Tech Stack:** ES6 Classes, Tailwind CSS, Dark mode support.
+
 ---
 
 ## 🎮 Games

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Pocket Matching Engine | Price-Time Priority</title>
+    <meta name="description" content="A real-time order matching engine simulation demonstrating Price-Time Priority queue algorithm for limit orders."/>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Pocket Matching Engine"/>
+    <meta property="og:description" content="Real-time order matching engine simulation with Price-Time Priority"/>
+    <meta property="og:type" content="website"/>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#0500e2",
+                        "primary-hover": "#0400b5",
+                        "background-light": "#f8f9fa",
+                        "background-dark": "#0f1115",
+                        "card-light": "#ffffff",
+                        "card-dark": "#181a20",
+                        "text-light": "#1f2937",
+                        "text-dark": "#f3f4f6",
+                        "border-light": "#e5e7eb",
+                        "border-dark": "#2d3039",
+                        "buy-green": "#10b981",
+                        "buy-green-light": "#d1fae5",
+                        "buy-green-dark": "#065f46",
+                        "sell-red": "#ef4444",
+                        "sell-red-light": "#fee2e2",
+                        "sell-red-dark": "#991b1b",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                        mono: ["JetBrains Mono", "monospace"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'xl': "0.75rem",
+                        '2xl': "1rem",
+                        '3xl': "1.5rem",
+                    },
+                },
+            },
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .tabular-nums { font-variant-numeric: tabular-nums; }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 3px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #374151;
+        }
+        .trade-log-scroll {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .order-book-scroll {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        @keyframes flash-green {
+            0%, 100% { background-color: transparent; }
+            50% { background-color: rgba(16, 185, 129, 0.2); }
+        }
+        @keyframes flash-red {
+            0%, 100% { background-color: transparent; }
+            50% { background-color: rgba(239, 68, 68, 0.2); }
+        }
+        .flash-buy { animation: flash-green 0.3s ease-out; }
+        .flash-sell { animation: flash-red 0.3s ease-out; }
+        @keyframes slide-in {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide-in { animation: slide-in 0.2s ease-out; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark min-h-screen p-4 md:p-8 flex flex-col items-center">
+
+<!-- Header -->
+<header class="w-full max-w-[1400px] mb-6">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight flex items-center gap-3">
+                <span class="material-icons-round text-primary text-3xl">swap_horiz</span>
+                Pocket Matching Engine
+            </h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Price-Time Priority Order Matching Simulation</p>
+        </div>
+        <button id="btn-theme" class="p-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+            <span class="material-icons-round text-xl dark:hidden">dark_mode</span>
+            <span class="material-icons-round text-xl hidden dark:block">light_mode</span>
+        </button>
+    </div>
+</header>
+
+<main class="w-full max-w-[1400px] grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
+    
+    <!-- Left Column: Order Entry -->
+    <div class="lg:col-span-4 space-y-4">
+        
+        <!-- Buy Order Panel -->
+        <div class="bg-card-light dark:bg-card-dark rounded-2xl p-6 border border-border-light dark:border-border-dark">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-xl bg-buy-green-light dark:bg-buy-green/20 flex items-center justify-center">
+                    <span class="material-icons-round text-buy-green text-xl">trending_up</span>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-gray-900 dark:text-white">Limit Buy</h2>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Place a buy order</p>
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs text-gray-500 dark:text-gray-400 font-medium block mb-2">Quantity</label>
+                    <div class="relative">
+                        <input id="buy-qty" type="number" min="1" value="10" class="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg py-3 px-4 text-right font-mono text-sm font-semibold text-gray-900 dark:text-white focus:ring-2 focus:ring-buy-green focus:border-buy-green transition-all tabular-nums"/>
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">QTY</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 dark:text-gray-400 font-medium block mb-2">Limit Price</label>
+                    <div class="relative">
+                        <input id="buy-price" type="number" min="0.01" step="0.01" value="100.00" class="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg py-3 px-4 text-right font-mono text-sm font-semibold text-gray-900 dark:text-white focus:ring-2 focus:ring-buy-green focus:border-buy-green transition-all tabular-nums"/>
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
+                    </div>
+                </div>
+                <button id="btn-buy" class="w-full bg-buy-green hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2">
+                    <span class="material-icons-round text-lg">add_circle</span>
+                    Place Buy Order
+                </button>
+            </div>
+        </div>
+        
+        <!-- Sell Order Panel -->
+        <div class="bg-card-light dark:bg-card-dark rounded-2xl p-6 border border-border-light dark:border-border-dark">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-xl bg-sell-red-light dark:bg-sell-red/20 flex items-center justify-center">
+                    <span class="material-icons-round text-sell-red text-xl">trending_down</span>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-gray-900 dark:text-white">Limit Sell</h2>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Place a sell order</p>
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs text-gray-500 dark:text-gray-400 font-medium block mb-2">Quantity</label>
+                    <div class="relative">
+                        <input id="sell-qty" type="number" min="1" value="10" class="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg py-3 px-4 text-right font-mono text-sm font-semibold text-gray-900 dark:text-white focus:ring-2 focus:ring-sell-red focus:border-sell-red transition-all tabular-nums"/>
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">QTY</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 dark:text-gray-400 font-medium block mb-2">Limit Price</label>
+                    <div class="relative">
+                        <input id="sell-price" type="number" min="0.01" step="0.01" value="100.00" class="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg py-3 px-4 text-right font-mono text-sm font-semibold text-gray-900 dark:text-white focus:ring-2 focus:ring-sell-red focus:border-sell-red transition-all tabular-nums"/>
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
+                    </div>
+                </div>
+                <button id="btn-sell" class="w-full bg-sell-red hover:bg-red-600 text-white font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2">
+                    <span class="material-icons-round text-lg">remove_circle</span>
+                    Place Sell Order
+                </button>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="flex gap-3">
+            <button id="btn-clear" class="flex-1 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium py-3 rounded-lg transition-all flex items-center justify-center gap-2 text-sm">
+                <span class="material-icons-round text-lg">clear_all</span>
+                Clear All
+            </button>
+            <button id="btn-sample" class="flex-1 bg-primary hover:bg-primary-hover text-white font-medium py-3 rounded-lg transition-all flex items-center justify-center gap-2 text-sm">
+                <span class="material-icons-round text-lg">play_arrow</span>
+                Run Demo
+            </button>
+        </div>
+    </div>
+    
+    <!-- Middle Column: Order Books -->
+    <div class="lg:col-span-4 space-y-4">
+        
+        <!-- Buy Order Book -->
+        <div class="bg-card-light dark:bg-card-dark rounded-2xl p-6 border border-border-light dark:border-border-dark">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-buy-green"></div>
+                    <h3 class="font-bold text-gray-900 dark:text-white">Buy Orders (Bids)</h3>
+                </div>
+                <span id="buy-count" class="text-xs bg-buy-green-light dark:bg-buy-green/20 text-buy-green px-2 py-1 rounded-full font-mono">0</span>
+            </div>
+            <div class="order-book-scroll">
+                <table class="w-full text-sm">
+                    <thead class="sticky top-0 bg-gray-50 dark:bg-gray-800">
+                        <tr class="text-xs text-gray-500 dark:text-gray-400 uppercase">
+                            <th class="text-left py-2 px-2 font-medium">ID</th>
+                            <th class="text-right py-2 px-2 font-medium">Qty</th>
+                            <th class="text-right py-2 px-2 font-medium">Price</th>
+                            <th class="text-right py-2 px-2 font-medium">Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="buy-book" class="font-mono">
+                        <tr class="text-gray-400 dark:text-gray-600">
+                            <td colspan="4" class="text-center py-8 text-sm">No buy orders</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Sell Order Book -->
+        <div class="bg-card-light dark:bg-card-dark rounded-2xl p-6 border border-border-light dark:border-border-dark">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-sell-red"></div>
+                    <h3 class="font-bold text-gray-900 dark:text-white">Sell Orders (Asks)</h3>
+                </div>
+                <span id="sell-count" class="text-xs bg-sell-red-light dark:bg-sell-red/20 text-sell-red px-2 py-1 rounded-full font-mono">0</span>
+            </div>
+            <div class="order-book-scroll">
+                <table class="w-full text-sm">
+                    <thead class="sticky top-0 bg-gray-50 dark:bg-gray-800">
+                        <tr class="text-xs text-gray-500 dark:text-gray-400 uppercase">
+                            <th class="text-left py-2 px-2 font-medium">ID</th>
+                            <th class="text-right py-2 px-2 font-medium">Qty</th>
+                            <th class="text-right py-2 px-2 font-medium">Price</th>
+                            <th class="text-right py-2 px-2 font-medium">Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sell-book" class="font-mono">
+                        <tr class="text-gray-400 dark:text-gray-600">
+                            <td colspan="4" class="text-center py-8 text-sm">No sell orders</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Column: Trade Log -->
+    <div class="lg:col-span-4">
+        <div class="bg-card-light dark:bg-card-dark rounded-2xl p-6 border border-border-light dark:border-border-dark h-full">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="material-icons-round text-primary">receipt_long</span>
+                    <h3 class="font-bold text-gray-900 dark:text-white">Trade Log</h3>
+                </div>
+                <span id="trade-count" class="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-mono">0 trades</span>
+            </div>
+            <div id="trade-log" class="trade-log-scroll space-y-2">
+                <div class="text-gray-400 dark:text-gray-600 text-sm text-center py-8">
+                    <span class="material-icons-round text-4xl mb-2 block opacity-50">hourglass_empty</span>
+                    Waiting for trades...
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bottom: Stats Panel -->
+    <div class="lg:col-span-12">
+        <div class="bg-gradient-to-br from-gray-900 to-gray-800 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-6 border border-gray-700">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="text-center">
+                    <p class="text-gray-400 text-xs uppercase tracking-wider mb-1">Total Volume</p>
+                    <p id="stat-volume" class="text-2xl font-mono font-bold text-white tabular-nums">0</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-gray-400 text-xs uppercase tracking-wider mb-1">Total Trades</p>
+                    <p id="stat-trades" class="text-2xl font-mono font-bold text-white tabular-nums">0</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-gray-400 text-xs uppercase tracking-wider mb-1">Last Trade Price</p>
+                    <p id="stat-last-price" class="text-2xl font-mono font-bold text-white tabular-nums">—</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-gray-400 text-xs uppercase tracking-wider mb-1">Spread</p>
+                    <p id="stat-spread" class="text-2xl font-mono font-bold text-white tabular-nums">—</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Algorithm Explanation -->
+    <div class="lg:col-span-12">
+        <div class="bg-card-light dark:bg-card-dark rounded-2xl p-6 border border-border-light dark:border-border-dark">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="material-icons-round text-primary">school</span>
+                <h3 class="font-bold text-gray-900 dark:text-white">How Price-Time Priority Works</h3>
+            </div>
+            <div class="grid md:grid-cols-3 gap-4 text-sm text-gray-600 dark:text-gray-400">
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                    <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold mb-3">1</div>
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Price Priority</h4>
+                    <p>The best price always gets matched first. For buys, higher prices have priority. For sells, lower prices have priority.</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                    <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold mb-3">2</div>
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Time Priority</h4>
+                    <p>At the same price level, earlier orders get matched first (FIFO - First In, First Out).</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                    <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold mb-3">3</div>
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Partial Fills</h4>
+                    <p>Orders can be partially filled. The remaining quantity stays in the book until fully matched or cancelled.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="w-full max-w-[1400px] mt-8 text-center text-xs text-gray-500 dark:text-gray-500">
+    <p>Built to demonstrate order matching engine logic. © 2026</p>
+</footer>
+
+<!-- Scripts -->
+<script src="./js/engine.js"></script>
+<script src="./js/ui.js"></script>
+
+</body>
+</html>
