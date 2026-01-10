@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Order Book Ray Caster | Market Impact Visualizer</title>
+    <meta name="description" content="A physics-based visualization of market order slippage and impact. Watch your order 'walk the book' as it consumes liquidity."/>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Order Book Ray Caster"/>
+    <meta property="og:description" content="Visualize market impact and slippage with physics-based order book simulation"/>
+    <meta property="og:type" content="website"/>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#0500e2",
+                        "primary-hover": "#0400b5",
+                        "background-light": "#f8f9fa",
+                        "background-dark": "#0f1115",
+                        "card-light": "#ffffff",
+                        "card-dark": "#181a20",
+                        "text-light": "#1f2937",
+                        "text-dark": "#f3f4f6",
+                        "border-light": "#e5e7eb",
+                        "border-dark": "#2d3039",
+                        "buy-green": "#10b981",
+                        "buy-green-light": "#d1fae5",
+                        "buy-green-dark": "#065f46",
+                        "sell-red": "#ef4444",
+                        "sell-red-light": "#fee2e2",
+                        "sell-red-dark": "#991b1b",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                        mono: ["JetBrains Mono", "monospace"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'xl': "0.75rem",
+                        '2xl': "1rem",
+                        '3xl': "1.5rem",
+                    },
+                },
+            },
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .tabular-nums { font-variant-numeric: tabular-nums; }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 3px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #374151;
+        }
+        #canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .canvas-container {
+            min-height: 450px;
+            height: 450px;
+        }
+        @media (min-width: 1024px) {
+            .canvas-container {
+                height: 500px;
+            }
+        }
+        /* Custom radio button styles */
+        .order-type-radio input[type="radio"] {
+            display: none;
+        }
+        .order-type-radio input[type="radio"]:checked + label {
+            border-color: transparent;
+        }
+        .order-type-radio input[type="radio"][value="buy"]:checked + label {
+            background-color: #10b981;
+            color: white;
+        }
+        .order-type-radio input[type="radio"][value="sell"]:checked + label {
+            background-color: #ef4444;
+            color: white;
+        }
+        /* Slider styling */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-track {
+            height: 8px;
+            border-radius: 4px;
+            background: #e5e7eb;
+        }
+        .dark input[type="range"]::-webkit-slider-track {
+            background: #374151;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #0500e2;
+            margin-top: -6px;
+            box-shadow: 0 2px 6px rgba(5, 0, 226, 0.3);
+        }
+        input[type="range"]::-moz-range-track {
+            height: 8px;
+            border-radius: 4px;
+            background: #e5e7eb;
+        }
+        .dark input[type="range"]::-moz-range-track {
+            background: #374151;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #0500e2;
+            border: none;
+            box-shadow: 0 2px 6px rgba(5, 0, 226, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark min-h-screen p-4 md:p-8 flex flex-col items-center">
+
+<!-- Header -->
+<header class="w-full max-w-[1400px] mb-6">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight flex items-center gap-3">
+                <span class="material-icons-round text-primary text-3xl">sports_baseball</span>
+                Order Book Ray Caster
+            </h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Visualize Market Impact & Slippage</p>
+        </div>
+        <button id="btn-theme" class="p-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all" aria-label="Toggle dark mode">
+            <span class="material-icons-round text-xl dark:hidden">dark_mode</span>
+            <span class="material-icons-round text-xl hidden dark:block">light_mode</span>
+        </button>
+    </div>
+</header>
+
+<main class="w-full max-w-[1400px] grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
+    
+    <!-- Left Column: Controls -->
+    <div class="lg:col-span-3 space-y-4">
+        
+        <!-- Order Configuration -->
+        <div class="bg-card-light dark:bg-card-dark rounded-2xl p-6 border border-border-light dark:border-border-dark">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <span class="material-icons-round text-primary text-xl">tune</span>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-gray-900 dark:text-white">Order Config</h2>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Set your market order</p>
+                </div>
+            </div>
+            
+            <!-- Order Type Toggle -->
+            <div class="mb-6">
+                <label class="text-xs text-gray-500 dark:text-gray-400 font-medium block mb-3">Order Type</label>
+                <div class="grid grid-cols-2 gap-2 order-type-radio">
+                    <div>
+                        <input type="radio" name="order-type" id="type-buy" value="buy" checked>
+                        <label for="type-buy" class="block text-center py-3 px-4 rounded-lg border-2 border-gray-200 dark:border-gray-700 font-semibold text-sm cursor-pointer transition-all hover:border-buy-green">
+                            <span class="material-icons-round text-lg align-middle mr-1">trending_up</span>
+                            Buy
+                        </label>
+                    </div>
+                    <div>
+                        <input type="radio" name="order-type" id="type-sell" value="sell">
+                        <label for="type-sell" class="block text-center py-3 px-4 rounded-lg border-2 border-gray-200 dark:border-gray-700 font-semibold text-sm cursor-pointer transition-all hover:border-sell-red">
+                            <span class="material-icons-round text-lg align-middle mr-1">trending_down</span>
+                            Sell
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Size Slider -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-3">
+                    <label class="text-xs text-gray-500 dark:text-gray-400 font-medium">Order Size (Mass)</label>
+                    <span id="size-value" class="text-sm font-mono font-bold text-primary">50</span>
+                </div>
+                <input type="range" id="order-size" min="10" max="200" value="50" class="w-full">
+                <div class="flex justify-between text-xs text-gray-400 mt-1">
+                    <span>10</span>
+                    <span>200</span>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="space-y-3">
+                <button id="btn-fire" class="w-full bg-primary hover:bg-primary-hover text-white font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2">
+                    <span class="material-icons-round text-lg">rocket_launch</span>
+                    Fire Order
+                </button>
+                <button id="btn-reset" class="w-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium py-3 rounded-lg transition-all flex items-center justify-center gap-2 text-sm">
+                    <span class="material-icons-round text-lg">refresh</span>
+                    Reset Book
+                </button>
+            </div>
+        </div>
+        
+        <!-- Stats Panel -->
+        <div class="bg-gradient-to-br from-gray-900 to-gray-800 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-5 border border-gray-700">
+            <h3 class="text-white font-bold mb-4 flex items-center gap-2">
+                <span class="material-icons-round text-primary">analytics</span>
+                Impact Stats
+            </h3>
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-400 text-xs uppercase tracking-wider">Orders Hit</span>
+                    <span id="stat-orders" class="font-mono font-bold text-white tabular-nums">0</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-400 text-xs uppercase tracking-wider">Volume Consumed</span>
+                    <span id="stat-volume" class="font-mono font-bold text-white tabular-nums">0</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-400 text-xs uppercase tracking-wider">Slippage</span>
+                    <span id="stat-slippage" class="font-mono font-bold text-sell-red tabular-nums">$0.00</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-400 text-xs uppercase tracking-wider">Last Fill Price</span>
+                    <span id="stat-avg-price" class="font-mono font-bold text-white tabular-nums">—</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Column: Canvas -->
+    <div class="lg:col-span-9">
+        <div class="bg-card-light dark:bg-card-dark rounded-2xl border border-border-light dark:border-border-dark overflow-hidden canvas-container">
+            <canvas id="canvas"></canvas>
+        </div>
+    </div>
+    
+    <!-- Bottom: Explanation -->
+    <div class="lg:col-span-12">
+        <div class="bg-card-light dark:bg-card-dark rounded-2xl p-6 border border-border-light dark:border-border-dark">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="material-icons-round text-primary">school</span>
+                <h3 class="font-bold text-gray-900 dark:text-white">How "Walking the Book" Works</h3>
+            </div>
+            <div class="grid md:grid-cols-4 gap-4 text-sm text-gray-600 dark:text-gray-400">
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                    <div class="w-8 h-8 rounded-lg bg-buy-green/20 text-buy-green flex items-center justify-center font-bold mb-3">
+                        <span class="material-icons-round">sports_baseball</span>
+                    </div>
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">The Ball = Your Order</h4>
+                    <p>The ball represents your market order. Its size (mass) equals your order quantity.</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                    <div class="w-8 h-8 rounded-lg bg-sell-red/20 text-sell-red flex items-center justify-center font-bold mb-3">
+                        <span class="material-icons-round">view_week</span>
+                    </div>
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Bricks = Limit Orders</h4>
+                    <p>Each brick is a limit order at a price level. Width represents the volume at that price.</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                    <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold mb-3">
+                        <span class="material-icons-round">bolt</span>
+                    </div>
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Impact Physics</h4>
+                    <p>Large orders smash through small bricks (slippage). Small orders stop at first large brick.</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                    <div class="w-8 h-8 rounded-lg bg-yellow-500/20 text-yellow-500 flex items-center justify-center font-bold mb-3">
+                        <span class="material-icons-round">trending_down</span>
+                    </div>
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Slippage</h4>
+                    <p>The price difference from first to last fill. More bricks destroyed = more slippage.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="w-full max-w-[1400px] mt-8 text-center text-xs text-gray-500 dark:text-gray-500">
+    <p>Built to visualize order book liquidity dynamics. © 2026</p>
+</footer>
+
+<!-- Scripts -->
+<script src="./js/classes.js"></script>
+<script src="./js/orderbook.js"></script>
+<script src="./js/renderer.js"></script>
+<script src="./js/main.js"></script>
+
+</body>
+</html>
