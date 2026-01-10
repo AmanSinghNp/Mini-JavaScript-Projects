@@ -76,6 +76,13 @@ A real-time order matching engine simulation demonstrating Price-Time Priority a
 - **Key Features:** Buy/Sell limit order entry, live order book display, trade log with partial fills, and demo mode for algorithm visualization.
 - **Tech Stack:** ES6 Classes, Tailwind CSS, Dark mode support.
 
+### [Spread Controller](./Spread%20Controller/)
+
+An interactive dashboard for the Avellaneda-Stoikov market making model - a "thermostat for money."
+
+- **Key Features:** Real-time bid/ask price calculation, inventory position slider, risk aversion control, time remaining adjustment, visual skew indicator, and formula explanation.
+- **Tech Stack:** Vanilla JavaScript, Tailwind CSS, Dark mode support.
+
 ---
 
 ## 🎮 Games
