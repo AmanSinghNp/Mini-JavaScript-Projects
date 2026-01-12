@@ -83,6 +83,27 @@ An interactive dashboard for the Avellaneda-Stoikov market making model - a "the
 - **Key Features:** Real-time bid/ask price calculation, inventory position slider, risk aversion control, time remaining adjustment, visual skew indicator, and formula explanation.
 - **Tech Stack:** Vanilla JavaScript, Tailwind CSS, Dark mode support.
 
+### [The Market Firehose](./The%20Market%20Firehose/)
+
+A real-time cryptocurrency ticker dashboard streaming data from Binance WebSocket.
+
+- **Key Features:** Live streaming of 1000+ trading pairs, Game Loop Pattern for high-frequency DOM updates, price flash animations, connection status indicator with auto-reconnect, and latency display.
+- **Tech Stack:** WebSocket API, DOM Manipulation, CSS Grid, JetBrains Mono.
+
+### [Order Book Ray Caster](./Order%20Book%20Ray%20Caster/)
+
+A physics-based visualization of market order slippage and impact - watch your order "walk the book" as it consumes liquidity.
+
+- **Key Features:** Interactive order configuration, buy/sell order simulation, real-time impact stats (orders hit, volume consumed, slippage), and physics-based brick destruction.
+- **Tech Stack:** Canvas API, Tailwind CSS, ES6 Classes, Dark mode support.
+
+### [Ray Casting Engine](./Ray%20Casting%20Engine/)
+
+A retro-style 3D FPS raycaster engine built from scratch with vanilla JavaScript.
+
+- **Key Features:** Textured walls, sprite rendering, enemy AI, collision detection, minimap/radar, health/armor system, level progression, and fullscreen mode.
+- **Tech Stack:** HTML5 Canvas, ES6 Modules, Vector Math, Game Loop.
+
 ---
 
 ## 🎮 Games
@@ -120,13 +141,31 @@ A brick-breaking arcade game powered by the custom physics engine.
 ## 🛠️ Utilities & Tools
 
 - **[Calculator](./Calculator/):** A fully functional calculator with history tracking, keyboard support, and order-of-operations logic.
+- **[Code Editor](./Code%20Editor/):** A browser-based code editor with syntax highlighting and live preview.
 - **[QR Code Generator](./QR%20Code%20generator/):** Instantly generate and download QR codes for text or URLs using the QR Server API.
+- **[Location Marker & Places Tracker](./Location%20Marker%20%26%20Places%20Tracker/):** Track and save your favorite locations with an interactive map interface.
 - **[Persistent TODO List](./Persistent%20TODO%20List/):** Manage tasks with add/delete functionality and LocalStorage persistence.
 - **[Stop Watch](./Stop%20Watch/):** Simple timer with start, stop, and reset controls.
 - **[Color Flipper](./Color%20Flipper/):** Background color generator demonstrating basic DOM manipulation.
 - **[Random Quote Generator](./Random%20Quote%20Generator/):** Displays random inspirational quotes.
 - **[Palindrome Checker](./Palindrome%20Checker/):** Checks whether input text reads the same forwards and backwards.
-- **[Stack Visualizer](./Stack%20Visualization/):** Interactive visualization of Stack data structure operations (Push, Pop, Peek) with animations.
+
+---
+
+## 📊 Data Structure & Algorithm Visualizers
+
+### [Visualizers Collection](./visualizers/)
+
+A comprehensive collection of 22 interactive data structure and algorithm visualizations.
+
+**Linear Structures:**
+- Stack, Queue, Deque, Linked List, Priority Queue
+
+**Trees:**
+- Binary Search Tree (BST), AVL Tree, Red-Black Tree, B-Tree, Heap, Trie, Segment Tree, Fenwick Tree, Disjoint Set
+
+**Algorithms:**
+- Sorting Algorithms, Graph Traversal (BFS/DFS), Pathfinding (Dijkstra/A*), Backtracking (N-Queens), Dynamic Programming (Knapsack), String Matching (KMP), Recursion Tree, Hash Table
 
 ---
 
@@ -163,9 +202,9 @@ A brick-breaking arcade game powered by the custom physics engine.
 ## 🧰 Technologies Used
 
 - **Core:** HTML5, CSS3, Vanilla JavaScript (ES6+)
-- **APIs:** Canvas API, Audio API, LocalStorage, Fetch API
-- **Advanced:** Service Workers (PWA), ES Modules, Custom Vector Math
-- **External Services:** Open-Meteo API, QR Server API
+- **APIs:** Canvas API, Audio API, WebSocket API, LocalStorage, Fetch API
+- **Advanced:** Service Workers (PWA), ES Modules, Custom Vector Math, Raycasting
+- **External Services:** Open-Meteo API, QR Server API, Binance WebSocket
 
 ## 📜 Commit Message Style
 

@@ -21,6 +21,11 @@ export function circleRect(
   rectWidth,
   rectHeight
 ) {
+  // Early return for invalid inputs
+  if (circleRadius <= 0 || rectWidth <= 0 || rectHeight <= 0) {
+    return null;
+  }
+
   // Find the closest point on the rectangle to the circle center
   const closestX = Math.max(
     rectPos.x,
@@ -82,6 +87,11 @@ export function circleRect(
  * @returns {Object|null} Collision info or null if no collision
  */
 export function circleCircle(pos1, radius1, pos2, radius2) {
+  // Early return for invalid inputs
+  if (radius1 <= 0 || radius2 <= 0) {
+    return null;
+  }
+
   const dx = pos2.x - pos1.x;
   const dy = pos2.y - pos1.y;
   const distanceSquared = dx * dx + dy * dy;

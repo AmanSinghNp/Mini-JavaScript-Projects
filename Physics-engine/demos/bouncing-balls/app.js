@@ -322,6 +322,9 @@ function setupEventListeners() {
       dragBall.opacity = 0.7;
       dragOffset = mousePos.subtract(ball.position);
 
+      // Clear trail for cleaner drag visual
+      dragBall.trail = [];
+
       // Initialize mouse tracking
       mouseHistory = [];
       trackMousePosition(mousePos);
@@ -448,7 +451,27 @@ function stopAnimation() {
   if (isRunning) {
     isRunning = false;
     cancelAnimationFrame(animationId);
+    
+    // Render one static frame with pause indicator
+    renderPausedFrame();
   }
+}
+
+/**
+ * Render a single static frame showing pause state
+ */
+function renderPausedFrame() {
+  // Clear canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // Draw all balls in their current positions
+  balls.forEach((ball) => ball.draw());
+  
+  // Draw pause indicator
+  drawPauseIndicator();
+  
+  // Update debug info
+  updateDebugInfo();
 }
 
 /**
@@ -472,6 +495,11 @@ function animate() {
 
   // Draw all balls
   balls.forEach((ball) => ball.draw());
+
+  // Draw pause indicator if paused (won't show during animation, but useful for single-frame renders)
+  if (!isRunning) {
+    drawPauseIndicator();
+  }
 
   // Update debug info
   updateDebugInfo();
@@ -497,6 +525,31 @@ function updateDebugInfo() {
       Energy: ${totalKineticEnergy.toFixed(1)}
     `;
   }
+}
+
+/**
+ * Draw pause indicator on canvas
+ */
+function drawPauseIndicator() {
+  ctx.save();
+  
+  // Semi-transparent overlay
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  // Pause text
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+  ctx.font = 'bold 48px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('PAUSED', canvas.width / 2, canvas.height / 2);
+  
+  // Subtitle
+  ctx.font = '16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+  ctx.fillText('Press P to resume', canvas.width / 2, canvas.height / 2 + 40);
+  
+  ctx.restore();
 }
 
 /**

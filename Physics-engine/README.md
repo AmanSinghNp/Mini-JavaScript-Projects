@@ -1,6 +1,6 @@
 # 🚀 Physics Engine Project
 
-A modular 2D physics engine with multiple interactive demos showcasing real-world physics concepts and game development techniques.
+A modular 2D physics engine with interactive demos showcasing real-world physics concepts and game development techniques.
 
 ## 🏗️ Project Structure
 
@@ -9,17 +9,12 @@ Physics-engine/
 ├── README.md                    # This overview
 ├── core/                        # 🔧 Shared Physics Engine
 │   ├── vector.js               # Enhanced 2D vector mathematics
-│   ├── collision.js            # Collision detection utilities
-│   └── world.js                # Physics world management (future)
-├── systems/                     # ⚙️ Shared Systems
-│   ├── input.js                # Input handling utilities (future)
-│   └── renderer.js             # Canvas rendering helpers (future)
+│   └── collision.js            # Collision detection utilities
 └── demos/                       # 🎮 Interactive Demonstrations
-    ├── bouncing-balls/         # Multi-ball physics sandbox
-    └── breakout/               # Classic brick-breaking game
+    └── bouncing-balls/         # Multi-ball physics sandbox
 ```
 
-## 🎯 Demos Overview
+## 🎯 Demo
 
 ### 🏀 Bouncing Balls Demo
 
@@ -27,37 +22,19 @@ Physics-engine/
 
 An advanced physics sandbox featuring:
 
-- **Extreme Physics**: Exaggerated constants for dramatic motion
+- **Realistic Physics**: Gravity, drag, friction, and bouncing
 - **Multi-Ball Support**: Up to 10 balls with ball-to-ball collisions
 - **Interactive Controls**: Mouse drag-and-throw with inertia
 - **Visual Effects**: 3D rendering, trails, and dynamic shadows
-- **Real-time Physics**: Velocity Verlet integration with 60 FPS
+- **Real-time Physics**: Velocity Verlet integration at 60 FPS
 
 **Features:**
 
-- Explosive collision response with energy amplification
-- Chaos force injection for unpredictable motion
+- Proper collision response with energy dissipation
+- Ball settling (balls come to rest naturally)
 - Multiple input methods (keyboard, mouse, scroll)
-- Advanced force modeling (gravity, drag, friction)
-
-### 🧱 Breakout Game
-
-**Location:** `demos/breakout/`
-
-A complete Breakout clone demonstrating:
-
-- **Shared Engine**: Uses core physics components
-- **Game Mechanics**: Lives, scoring, state management
-- **Advanced Collision**: Circle-rectangle detection with proper reflection
-- **Visual Polish**: Animated brick destruction, trail effects
-- **Multiple Controls**: Keyboard and mouse paddle control
-
-**Features:**
-
-- 6 rows × 10 columns of destructible bricks
-- Progressive scoring (higher rows = more points)
-- Paddle angle physics for ball control
-- Game states: playing, paused, game over, victory
+- Advanced force modeling (gravity, drag, floor friction)
+- Pause functionality with visual indicator
 
 ## 🔧 Core Physics Engine
 
@@ -67,66 +44,60 @@ Enhanced `Vec` class with comprehensive 2D operations:
 
 - Basic math: add, subtract, multiply, divide
 - Advanced operations: normalize, dot product, cross product
-- Utilities: rotation, distance, interpolation
+- Utilities: rotation, distance, interpolation, reflection
+- `limit()` and `setMagnitude()` for convenience
 - Both immutable and mutating versions for performance
 
 ### Collision Detection (`core/collision.js`)
 
 Optimized collision detection utilities:
 
-- Circle-rectangle collision (for Breakout)
+- Circle-rectangle collision
 - Circle-circle collision (for ball interactions)
 - Point-in-shape tests
 - Collision normal and penetration calculation
+- Edge case handling for invalid inputs
 
 ## 🎮 Quick Start
 
-### Running the Demos
+### Running the Demo
 
-1. **Bouncing Balls**: Open `demos/bouncing-balls/index.html`
-2. **Breakout Game**: Open `demos/breakout/index.html`
+1. **Bouncing Balls**: Open `demos/bouncing-balls/index.html` in any modern browser
 
-Both demos work immediately in any modern browser with ES module support.
+The demo works immediately with no build step required.
 
-### Controls Overview
+### Controls
 
-**Bouncing Balls:**
-
-- Mouse: Drag and throw balls
-- Space: Create random ball
-- +/-: Adjust ball size
-- P: Pause/Resume
-- C: Clear all balls
-
-**Breakout:**
-
-- A/D or Arrow Keys: Move paddle
-- Mouse: Direct paddle control
-- P: Pause/Resume
-- R: Restart (when game over)
+- **Mouse Click**: Create new ball at cursor position
+- **Mouse Drag**: Drag and throw balls with inertia
+- **Mouse Wheel**: Adjust size for next ball
+- **Space**: Create random ball
+- **R**: Drop ball from top
+- **+/-**: Adjust ball size
+- **P**: Pause/Resume
+- **C**: Clear all balls
 
 ## 🎓 Educational Value
 
 ### Physics Concepts
 
 - **Kinematics**: Position, velocity, acceleration relationships
-- **Force Dynamics**: Multiple force types and integration
-- **Collision Response**: Elastic and inelastic collisions
-- **Energy Systems**: Conservation, damping, and amplification
+- **Force Dynamics**: Multiple force types and Verlet integration
+- **Collision Response**: Elastic collisions with proper impulse
+- **Energy Systems**: Conservation, damping, and settling
 
 ### Programming Concepts
 
-- **Modular Architecture**: Shared core with game-specific implementations
-- **ES Modules**: Modern JavaScript import/export patterns
+- **Modular Architecture**: Shared core with demo-specific implementations
 - **Canvas Graphics**: Advanced 2D rendering techniques
 - **Game Loops**: Fixed timestep physics with smooth animation
-- **State Management**: Clean game state transitions
+- **Object Pooling**: Memory-efficient vector operations
 
 ### Mathematical Applications
 
 - **Vector Algebra**: 2D vector operations and transformations
 - **Numerical Integration**: Velocity Verlet for stable physics
-- **Collision Geometry**: Circle-rectangle intersection algorithms
+- **Collision Geometry**: Circle intersection algorithms
 - **Trigonometry**: Angle calculations and rotations
 
 ## 🛠️ Development
@@ -143,13 +114,14 @@ Both demos work immediately in any modern browser with ES module support.
 1. Create new directory in `demos/`
 2. Import shared components from `core/`
 3. Implement game-specific logic
-4. Add to this README
+4. Update this README
 
 ## 🚀 Performance
 
 - **Optimized Physics**: Efficient vector operations and collision detection
+- **Spatial Partitioning**: Grid-based optimization for many balls
+- **Object Pooling**: Reduced garbage collection overhead
 - **Smart Rendering**: Minimal overdraw and strategic updates
-- **Memory Management**: Limited object creation and array sizes
 - **60 FPS Target**: Consistent performance across devices
 
 ## 📁 File Organization
@@ -171,7 +143,7 @@ Each demo is **self-contained** with its own:
 ---
 
 **🎮 Ready to explore physics in action?**  
-Start with the [Bouncing Balls Demo](demos/bouncing-balls/) for dramatic physics, or jump into the [Breakout Game](demos/breakout/) for classic gameplay!
+Start with the [Bouncing Balls Demo](demos/bouncing-balls/) for realistic physics simulation!
 
 _Built with modern JavaScript, HTML5 Canvas, and a passion for physics simulation._
 

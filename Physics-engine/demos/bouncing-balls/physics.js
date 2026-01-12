@@ -259,9 +259,9 @@ function integrateMotion(ball, boundaries) {
   ball.acceleration.x = force.x / ball.mass;
   ball.acceleration.y = force.y / ball.mass;
 
-  // Update position (Velocity Verlet)
-  ball.position.x += ball.velocity.x * dt + ax * halfDt * dt;
-  ball.position.y += ball.velocity.y * dt + ay * halfDt * dt;
+  // Update position (Velocity Verlet - correct formula: x += v*dt + 0.5*a*dt²)
+  ball.position.x += ball.velocity.x * dt + 0.5 * ax * dtSquared;
+  ball.position.y += ball.velocity.y * dt + 0.5 * ay * dtSquared;
 
   // Update velocity
   ball.velocity.x += (ax + ball.acceleration.x) * halfDt;
@@ -276,13 +276,18 @@ function integrateMotion(ball, boundaries) {
     ball.velocity.y *= scale;
   }
 
-  // Minimal damping when on ground
-  if (
-    speedSquared < PHYSICS.VELOCITY_THRESHOLD * PHYSICS.VELOCITY_THRESHOLD &&
-    onGround
-  ) {
-    ball.velocity.x *= 0.999;
-    ball.velocity.y *= 0.999;
+  // Ball settling - stop micro-jittering when nearly at rest on ground
+  if (onGround) {
+    const settleThreshold = PHYSICS.VELOCITY_THRESHOLD * PHYSICS.VELOCITY_THRESHOLD;
+    if (speedSquared < settleThreshold) {
+      // Nearly at rest - zero out velocity to prevent perpetual micro-movements
+      ball.velocity.x = 0;
+      ball.velocity.y = 0;
+    } else if (speedSquared < settleThreshold * 4) {
+      // Approaching rest - apply extra damping
+      ball.velocity.x *= 0.95;
+      ball.velocity.y *= 0.95;
+    }
   }
 
   return ball;

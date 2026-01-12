@@ -281,6 +281,67 @@ export class Vec {
     return this;
   }
 
+  /**
+   * Alias for clamp() - limit vector magnitude
+   * @param {number} max - Maximum magnitude
+   * @returns {Vec} New clamped vector
+   */
+  limit(max) {
+    return this.clamp(max);
+  }
+
+  /**
+   * Alias for clampSelf() - limit vector magnitude (mutable)
+   * @param {number} max - Maximum magnitude
+   * @returns {Vec} This vector for chaining
+   */
+  limitSelf(max) {
+    return this.clampSelf(max);
+  }
+
+  /**
+   * Set the magnitude of this vector (immutable)
+   * @param {number} mag - Target magnitude
+   * @returns {Vec} New vector with set magnitude
+   */
+  setMagnitude(mag) {
+    return this.normalize().multiply(mag);
+  }
+
+  /**
+   * Set the magnitude of this vector (mutable)
+   * @param {number} mag - Target magnitude
+   * @returns {Vec} This vector for chaining
+   */
+  setMagnitudeSelf(mag) {
+    return this.normalizeSelf().mulSelf(mag);
+  }
+
+  /**
+   * Reflect vector off a surface with given normal
+   * @param {Vec} normal - Surface normal (should be normalized)
+   * @returns {Vec} Reflected vector
+   */
+  reflect(normal) {
+    const dot = this.dot(normal);
+    return new Vec(
+      this.x - 2 * dot * normal.x,
+      this.y - 2 * dot * normal.y
+    );
+  }
+
+  /**
+   * Reflect vector off a surface with given normal (mutable)
+   * @param {Vec} normal - Surface normal (should be normalized)
+   * @returns {Vec} This vector for chaining
+   */
+  reflectSelf(normal) {
+    const dot = this.dot(normal);
+    this.x -= 2 * dot * normal.x;
+    this.y -= 2 * dot * normal.y;
+    return this;
+  }
+
   // ===== UTILITY METHODS =====
 
   /**
