@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>The Market Firehose | Real-Time Crypto Ticker</title>
+    <meta name="description" content="Real-time cryptocurrency ticker dashboard streaming 1000+ trading pairs from Binance WebSocket."/>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="The Market Firehose"/>
+    <meta property="og:description" content="Real-time cryptocurrency ticker streaming 1000+ pairs"/>
+    <meta property="og:type" content="website"/>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="header-left">
+                <h1>🔥 The Market Firehose</h1>
+                <p class="subtitle">Real-time Binance All Tickers Stream</p>
+            </div>
+            <div class="header-right">
+                <div class="status-badge" id="status-badge">
+                    <span class="status-dot" id="status-dot"></span>
+                    <span class="status-text" id="status-text">Connecting...</span>
+                </div>
+                <div class="symbol-count" id="symbol-count">0 symbols</div>
+            </div>
+        </header>
+
+        <!-- Main Data Grid -->
+        <main>
+            <div class="ticker-grid" id="ticker-grid">
+                <!-- Header Row -->
+                <div class="cell header text-left">Symbol</div>
+                <div class="cell header text-right">Last Price</div>
+                <div class="cell header text-right">24h Change</div>
+                <div class="cell header text-right hide-mobile">Volume</div>
+                
+                <!-- Data rows will be populated dynamically -->
+            </div>
+            
+            <!-- Empty State -->
+            <div class="empty-state" id="empty-state">
+                <div class="empty-icon">📊</div>
+                <p>Waiting for market data...</p>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <p>Built to demonstrate high-frequency DOM updates with the Game Loop Pattern. © 2026</p>
+            <p class="latency" id="latency">Latency: --ms</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="./js/state.js"></script>
+    <script src="./js/websocket.js"></script>
+    <script src="./js/renderer.js"></script>
+    <script src="./js/app.js"></script>
+</body>
+</html>

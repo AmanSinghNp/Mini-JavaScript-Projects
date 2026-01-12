@@ -1,0 +1,311 @@
+/* ============================================
+   The Market Firehose - Style Guide
+   Terminal Aesthetic for High-Frequency Data
+   ============================================ */
+
+:root {
+  /* --- 1. PALETTE (Tailwind-inspired Colors) --- */
+  /* Backgrounds: Dark "Terminal" feel */
+  --bg-primary: #0f172a;   /* Slate-900 */
+  --bg-surface: #1e293b;   /* Slate-800 */
+  --bg-highlight: #334155; /* Slate-700 */
+
+  /* Text Colors */
+  --text-primary: #f8fafc; /* Slate-50 */
+  --text-secondary: #94a3b8; /* Slate-400 */
+  --text-muted: #64748b;   /* Slate-500 */
+
+  /* Semantic Colors (Trading Signals) */
+  --color-up: #22c55e;     /* Green-500 */
+  --color-up-bg: rgba(34, 197, 94, 0.15);
+  
+  --color-down: #ef4444;   /* Red-500 */
+  --color-down-bg: rgba(239, 68, 68, 0.15);
+
+  --color-warning: #eab308; /* Yellow-500 */
+
+  /* --- 2. TYPOGRAPHY --- */
+  --font-mono: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* --- 3. SPACING SCALE (The "4px" grid) --- */
+  --space-1: 0.25rem; /* 4px */
+  --space-2: 0.5rem;  /* 8px */
+  --space-3: 0.75rem; /* 12px */
+  --space-4: 1rem;    /* 16px */
+  --space-6: 1.5rem;  /* 24px */
+  --space-8: 2rem;    /* 32px */
+}
+
+/* --- RESET & DEFAULTS --- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* --- CONTAINER --- */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--space-4);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- HEADER --- */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+  border-bottom: 1px solid var(--bg-highlight);
+  padding-bottom: var(--space-4);
+}
+
+header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-top: var(--space-1);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* --- STATUS BADGE --- */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: var(--bg-highlight);
+  color: var(--text-secondary);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: var(--space-2);
+  background-color: var(--text-muted);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.status-dot.live {
+  background-color: var(--color-up);
+  box-shadow: 0 0 8px var(--color-up);
+}
+
+.status-dot.lagging {
+  background-color: var(--color-warning);
+  box-shadow: 0 0 8px var(--color-warning);
+}
+
+.status-dot.disconnected {
+  background-color: var(--color-down);
+  box-shadow: 0 0 8px var(--color-down);
+}
+
+.symbol-count {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+/* --- MAIN CONTENT --- */
+main {
+  flex: 1;
+  position: relative;
+}
+
+/* --- DATA GRID --- */
+.ticker-grid {
+  display: grid;
+  grid-template-columns: 1fr 120px 100px;
+  gap: 1px;
+  background-color: var(--bg-highlight);
+  border: 1px solid var(--bg-highlight);
+  border-radius: 8px;
+  overflow: hidden;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+
+/* Custom Scrollbar */
+.ticker-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.ticker-grid::-webkit-scrollbar-track {
+  background: var(--bg-surface);
+}
+
+.ticker-grid::-webkit-scrollbar-thumb {
+  background: var(--bg-highlight);
+  border-radius: 4px;
+}
+
+.ticker-grid::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Grid Cells */
+.cell {
+  background-color: var(--bg-surface);
+  padding: var(--space-2) var(--space-4);
+  display: flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.875rem;
+  min-height: 40px;
+}
+
+/* Header Cells - Sticky */
+.cell.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--bg-primary);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+/* Symbol Cell */
+.symbol {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Price Cell */
+.price-cell {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Alignment Utilities */
+.text-right { 
+  justify-content: flex-end; 
+  text-align: right; 
+}
+
+.text-left { 
+  justify-content: flex-start; 
+  text-align: left; 
+}
+
+/* --- FLASH ANIMATIONS --- */
+.flash-up {
+  background-color: var(--color-up-bg) !important;
+  color: var(--color-up) !important;
+}
+
+.flash-down {
+  background-color: var(--color-down-bg) !important;
+  color: var(--color-down) !important;
+}
+
+/* Static Color Utilities */
+.text-up { color: var(--color-up); }
+.text-down { color: var(--color-down); }
+
+/* --- EMPTY STATE --- */
+.empty-state {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.empty-state.hidden {
+  display: none;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: var(--space-4);
+  opacity: 0.5;
+}
+
+/* --- FOOTER --- */
+footer {
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--bg-highlight);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.latency {
+  font-family: var(--font-mono);
+}
+
+/* --- RESPONSIVE --- */
+@media (min-width: 768px) {
+  .ticker-grid {
+    grid-template-columns: 1fr 150px 120px 150px;
+  }
+  
+  .hide-mobile {
+    display: flex;
+  }
+}
+
+@media (max-width: 767px) {
+  .hide-mobile {
+    display: none !important;
+  }
+  
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  footer {
+    flex-direction: column;
+    gap: var(--space-2);
+    text-align: center;
+  }
+}
+
+/* --- ROW HOVER --- */
+.ticker-row:hover .cell {
+  background-color: var(--bg-highlight);
+}
