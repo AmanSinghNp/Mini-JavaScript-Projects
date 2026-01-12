@@ -58,15 +58,16 @@ function connect() {
 
     socket.onmessage = (event) => {
         const now = Date.now();
-        connectionState.latency = now - connectionState.lastMessageTime;
+        
+        // Calculate latency as time since last message (for high-frequency streams this should be small)
+        if (connectionState.lastMessageTime > 0) {
+            connectionState.latency = now - connectionState.lastMessageTime;
+        }
         connectionState.lastMessageTime = now;
         
-        // Update status based on latency (>200ms is lagging)
-        if (connectionState.latency > 200) {
-            setConnectionStatus('lagging');
-        } else {
-            setConnectionStatus('live');
-        }
+        // Update status - we're receiving data so we're live
+        // Only mark as lagging if no messages for > 2 seconds
+        setConnectionStatus('live');
 
         try {
             const data = JSON.parse(event.data);

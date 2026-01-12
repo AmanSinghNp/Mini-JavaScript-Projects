@@ -28,9 +28,15 @@ function updateMarketState(symbol, data) {
     const existing = marketState.get(symbol);
     const prevPrice = existing ? parseFloat(existing.price) : parseFloat(data.c);
     
+    // Calculate 24h change % from open and close
+    const closePrice = parseFloat(data.c);
+    const openPrice = parseFloat(data.o);
+    const changePercent = openPrice > 0 ? ((closePrice - openPrice) / openPrice) * 100 : 0;
+    
     marketState.set(symbol, {
-        price: data.c,           // Current price
-        change: data.P,          // 24h percent change
+        price: data.c,           // Current price (close)
+        open: data.o,            // Open price
+        change: changePercent,   // Calculated 24h percent change
         volume: data.v,          // 24h volume
         prevPrice: prevPrice,
         lastUpdate: Date.now()
