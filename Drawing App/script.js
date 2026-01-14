@@ -19,9 +19,15 @@ const state = {
     tools: {
         pencil: { size: 2, opacity: 100, composite: 'source-over' },
         brush: { size: 12, opacity: 100, composite: 'source-over' },
-        marker: { size: 24, opacity: 50, composite: 'source-over' }, // Simulating marker with low opacity
+        marker: { size: 24, opacity: 50, composite: 'source-over' },
         eraser: { size: 20, opacity: 100, composite: 'destination-out' }
-    }
+    },
+    // Undo/Redo history
+    history: [],
+    historyIndex: -1,
+    maxHistory: 50,
+    // For smooth bezier curves
+    points: []
 };
 
 // Elements
@@ -59,9 +65,41 @@ const ui = {
         deleteModal: document.getElementById('delete-modal'),
         deleteConfirm: document.getElementById('btn-delete-confirm'),
         deleteCancel: document.getElementById('btn-delete-cancel'),
+        undo: document.getElementById('btn-undo'),
+        redo: document.getElementById('btn-redo'),
     },
     settingsPanel: document.getElementById('tool-settings')
 };
+
+// --- Custom Cursor ---
+const cursorCanvas = document.createElement('canvas');
+const cursorCtx = cursorCanvas.getContext('2d');
+cursorCanvas.width = 100;
+cursorCanvas.height = 100;
+
+function updateCursor() {
+    const size = Math.max(state.thickness, 4);
+    const displaySize = Math.min(size, 50);
+    
+    cursorCtx.clearRect(0, 0, 100, 100);
+    cursorCtx.beginPath();
+    cursorCtx.arc(50, 50, displaySize / 2, 0, Math.PI * 2);
+    cursorCtx.strokeStyle = state.currentTool === 'eraser' ? '#fff' : state.color;
+    cursorCtx.lineWidth = 2;
+    cursorCtx.stroke();
+    
+    // Add crosshair for precision
+    cursorCtx.beginPath();
+    cursorCtx.moveTo(50 - 3, 50);
+    cursorCtx.lineTo(50 + 3, 50);
+    cursorCtx.moveTo(50, 50 - 3);
+    cursorCtx.lineTo(50, 50 + 3);
+    cursorCtx.strokeStyle = 'rgba(255,255,255,0.5)';
+    cursorCtx.lineWidth = 1;
+    cursorCtx.stroke();
+    
+    canvas.style.cursor = `url(${cursorCanvas.toDataURL()}) 50 50, crosshair`;
+}
 
 // --- Canvas Management ---
 
@@ -80,7 +118,7 @@ function resizeCanvas() {
             tempCanvas.getContext('2d').drawImage(canvas, 0, 0);
         }
     } catch (e) {
-        console.error("Error saving canvas state:", e);
+        // Ignore errors
     }
 
     canvas.width = rect.width * dpr;
@@ -99,8 +137,57 @@ function resizeCanvas() {
 }
 
 window.addEventListener('resize', resizeCanvas);
-// Initialize canvas size
 resizeCanvas();
+
+// --- History (Undo/Redo) ---
+
+function saveState() {
+    // Remove any redo states
+    if (state.historyIndex < state.history.length - 1) {
+        state.history = state.history.slice(0, state.historyIndex + 1);
+    }
+    
+    // Save current canvas state
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    state.history.push(imageData);
+    
+    // Limit history size
+    if (state.history.length > state.maxHistory) {
+        state.history.shift();
+    } else {
+        state.historyIndex++;
+    }
+    
+    updateHistoryButtons();
+}
+
+function undo() {
+    if (state.historyIndex > 0) {
+        state.historyIndex--;
+        const imageData = state.history[state.historyIndex];
+        ctx.putImageData(imageData, 0, 0);
+        updateHistoryButtons();
+    } else if (state.historyIndex === 0) {
+        // Clear canvas (before first stroke)
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        state.historyIndex = -1;
+        updateHistoryButtons();
+    }
+}
+
+function redo() {
+    if (state.historyIndex < state.history.length - 1) {
+        state.historyIndex++;
+        const imageData = state.history[state.historyIndex];
+        ctx.putImageData(imageData, 0, 0);
+        updateHistoryButtons();
+    }
+}
+
+function updateHistoryButtons() {
+    ui.actions.undo.disabled = state.historyIndex < 0;
+    ui.actions.redo.disabled = state.historyIndex >= state.history.length - 1;
+}
 
 // --- Drawing Engine ---
 
@@ -127,55 +214,62 @@ function startDrawing(e) {
     const { x, y } = getCoordinates(e);
     state.lastX = x;
     state.lastY = y;
+    state.points = [{ x, y }];
     
-    // For single dot
-    draw(e); 
+    // Draw a single dot
+    ctx.beginPath();
+    ctx.arc(x, y, state.thickness / 2, 0, Math.PI * 2);
+    ctx.fillStyle = state.color;
+    ctx.globalAlpha = state.opacity / 100;
+    ctx.globalCompositeOperation = state.currentTool === 'eraser' ? 'destination-out' : 'source-over';
+    ctx.fill();
 }
 
 function draw(e) {
     if (!state.isDrawing) return;
-    e.preventDefault(); // Prevent scrolling on touch
+    e.preventDefault();
 
     const { x, y } = getCoordinates(e);
-    
-    ctx.beginPath();
-    ctx.moveTo(state.lastX, state.lastY);
-    ctx.lineTo(x, y);
+    state.points.push({ x, y });
     
     // Apply styles
-    const toolConfig = state.tools[state.currentTool];
-    
-    // If we are modifying settings globally, use those instead of presets?
-    // Plan suggests tools have specific behaviors. Let's use the global state for thickness/opacity 
-    // but allow tools to have base characteristics or just use the global state as the "active" config.
-    // For simplicity and "Direct Manipulation", let's say the sliders control the CURRENT tool's properties.
-    
     ctx.lineWidth = state.thickness;
     ctx.globalCompositeOperation = state.currentTool === 'eraser' ? 'destination-out' : 'source-over';
-    
-    if (state.currentTool === 'marker') {
-        // Marker effect: usually translucent and stacks.
-        // But standard canvas doesn't "stack" opacity well in one stroke unless we use multiple paths.
-        // For simple implementation: just set global alpha.
-        // If current tool is marker, we might want to force a lower opacity if user hasn't set it, 
-        // but let's respect the slider.
-        ctx.globalAlpha = state.opacity / 100;
-        // Marker typically has square cap? Or sticking to round for smoothness.
-        // ctx.lineCap = 'square'; 
-    } else {
-        ctx.globalAlpha = state.opacity / 100;
-    }
-
+    ctx.globalAlpha = state.opacity / 100;
     ctx.strokeStyle = state.color;
-    ctx.stroke();
+    
+    // Smooth bezier curve drawing
+    if (state.points.length >= 3) {
+        const p1 = state.points[state.points.length - 3];
+        const p2 = state.points[state.points.length - 2];
+        const p3 = state.points[state.points.length - 1];
+        
+        const midX = (p2.x + p3.x) / 2;
+        const midY = (p2.y + p3.y) / 2;
+        
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.quadraticCurveTo(p2.x, p2.y, midX, midY);
+        ctx.stroke();
+    } else {
+        // Fallback to straight line for first few points
+        ctx.beginPath();
+        ctx.moveTo(state.lastX, state.lastY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+    }
     
     state.lastX = x;
     state.lastY = y;
 }
 
 function stopDrawing() {
-    state.isDrawing = false;
-    ctx.beginPath(); // Reset path
+    if (state.isDrawing) {
+        state.isDrawing = false;
+        ctx.beginPath();
+        state.points = [];
+        saveState(); // Save state for undo
+    }
 }
 
 canvas.addEventListener('mousedown', startDrawing);
@@ -192,26 +286,36 @@ canvas.addEventListener('touchend', stopDrawing);
 // Tool Switching
 Object.keys(ui.tools).forEach(toolId => {
     ui.tools[toolId].addEventListener('click', () => {
-        // If clicking active tool, toggle settings
         if (state.currentTool === toolId) {
             state.showSettings = !state.showSettings;
             toggleSettingsPanel();
             return;
         }
 
-        // Switch tool
         state.currentTool = toolId;
-        state.showSettings = false; // Hide settings when switching (or keep open? Plan says "active tool... opens")
+        state.showSettings = false;
         toggleSettingsPanel();
         updateToolUI();
         
-        // Load tool defaults or keep current settings?
-        // Let's load defaults to make tools feel distinct
         state.thickness = state.tools[toolId].size;
         state.opacity = state.tools[toolId].opacity;
         updateSlidersUI();
+        updateCursor();
     });
 });
+
+function selectTool(toolId) {
+    if (ui.tools[toolId]) {
+        state.currentTool = toolId;
+        state.showSettings = false;
+        toggleSettingsPanel();
+        updateToolUI();
+        state.thickness = state.tools[toolId].size;
+        state.opacity = state.tools[toolId].opacity;
+        updateSlidersUI();
+        updateCursor();
+    }
+}
 
 function toggleSettingsPanel() {
     if (state.showSettings) {
@@ -227,11 +331,9 @@ function updateToolUI() {
         if (id === state.currentTool) {
             btn.classList.add('tool-active');
             btn.classList.remove('hover:bg-white/5');
-            // Update icon fill
             const icon = btn.querySelector('.material-symbols-outlined');
             if (icon) icon.style.fontVariationSettings = "'FILL' 1";
             
-            // Show indicator dot
             let dot = btn.querySelector('.bg-primary');
             if (!dot) {
                 dot = document.createElement('div');
@@ -239,7 +341,6 @@ function updateToolUI() {
                 btn.appendChild(dot);
             }
             
-            // Set active color styles
             btn.classList.add('bg-gradient-to-b', 'from-[#2a3830]', 'to-[#1e2923]');
             if (icon) icon.classList.add('text-primary');
             if (icon) icon.classList.remove('text-gray-400');
@@ -259,7 +360,7 @@ function updateToolUI() {
     });
 }
 
-// Sliders Logic (Custom Drag)
+// Sliders Logic
 function setupSlider(sliderType) {
     const { container, fill, knob, value } = ui.sliders[sliderType];
     
@@ -268,16 +369,15 @@ function setupSlider(sliderType) {
         let percentage = (clientX - rect.left) / rect.width;
         percentage = Math.max(0, Math.min(1, percentage));
         
-        // Update visual
         fill.style.width = `${percentage * 100}%`;
         knob.style.left = `${percentage * 100}%`;
         
-        // Update state
         if (sliderType === 'thickness') {
             const min = 1, max = 50;
             const val = Math.round(min + percentage * (max - min));
             state.thickness = val;
             value.innerText = `${val}px`;
+            updateCursor();
         } else if (sliderType === 'opacity') {
             const val = Math.round(percentage * 100);
             state.opacity = val;
@@ -303,7 +403,6 @@ function setupSlider(sliderType) {
         isDragging = false;
     });
     
-    // Touch support for sliders
     container.addEventListener('touchstart', (e) => {
         isDragging = true;
         update(e.touches[0].clientX);
@@ -311,7 +410,7 @@ function setupSlider(sliderType) {
     
     window.addEventListener('touchmove', (e) => {
         if (isDragging) {
-            e.preventDefault(); // Prevent scroll
+            e.preventDefault();
             update(e.touches[0].clientX);
         }
     }, { passive: false });
@@ -323,14 +422,12 @@ setupSlider('thickness');
 setupSlider('opacity');
 
 function updateSlidersUI() {
-    // Thickness
     const tMin = 1, tMax = 50;
     const tPercent = (state.thickness - tMin) / (tMax - tMin);
     ui.sliders.thickness.fill.style.width = `${tPercent * 100}%`;
     ui.sliders.thickness.knob.style.left = `${tPercent * 100}%`;
     ui.sliders.thickness.value.innerText = `${state.thickness}px`;
     
-    // Opacity
     const oPercent = state.opacity / 100;
     ui.sliders.opacity.fill.style.width = `${oPercent * 100}%`;
     ui.sliders.opacity.knob.style.left = `${oPercent * 100}%`;
@@ -339,12 +436,14 @@ function updateSlidersUI() {
 
 
 // Colors
-ui.colors.btn.addEventListener('click', () => {
+ui.colors.btn.addEventListener('click', (e) => {
+    e.stopPropagation();
     ui.colors.popover.classList.toggle('hidden');
 });
 
 ui.colors.swatches.forEach(swatch => {
     swatch.addEventListener('click', (e) => {
+        e.stopPropagation();
         const color = e.target.dataset.color;
         setColor(color);
     });
@@ -357,9 +456,17 @@ ui.colors.system.addEventListener('input', (e) => {
 function setColor(color) {
     state.color = color;
     ui.colors.display.style.backgroundColor = color;
-    // Update gradient overlay slightly to reflect tone? Or just keep generic rainbow
-    // ui.colors.popover.classList.add('hidden'); // Optional: close on select
+    updateCursor();
 }
+
+// Close color popover when clicking outside
+document.addEventListener('click', (e) => {
+    if (!ui.colors.popover.classList.contains('hidden') && 
+        !ui.colors.popover.contains(e.target) && 
+        !ui.colors.btn.contains(e.target)) {
+        ui.colors.popover.classList.add('hidden');
+    }
+});
 
 // Clear / Delete
 ui.actions.clear.addEventListener('click', () => {
@@ -371,49 +478,79 @@ ui.actions.deleteCancel.addEventListener('click', () => {
 });
 
 ui.actions.deleteConfirm.addEventListener('click', () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Use raw width/height
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     ui.actions.deleteModal.classList.add('hidden');
+    // Reset history
+    state.history = [];
+    state.historyIndex = -1;
+    updateHistoryButtons();
 });
+
+// Undo/Redo buttons
+ui.actions.undo.addEventListener('click', undo);
+ui.actions.redo.addEventListener('click', redo);
 
 // Export
 ui.actions.export.addEventListener('click', () => {
-    // Create a temporary link
     const link = document.createElement('a');
     link.download = 'artwork.png';
-    // To handle transparency correctly or add white background:
-    // User might want transparent or white. Default to transparent png from canvas.
-    // If we want a white background:
+    
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = canvas.width;
     tempCanvas.height = canvas.height;
     const tempCtx = tempCanvas.getContext('2d');
     
-    // Fill white
     tempCtx.fillStyle = '#ffffff';
     tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-    // Draw original
     tempCtx.drawImage(canvas, 0, 0);
     
     link.href = tempCanvas.toDataURL();
     link.click();
 });
 
-// Initialization
-// Start with tool settings hidden
+// --- Keyboard Shortcuts ---
+document.addEventListener('keydown', (e) => {
+    // Don't trigger shortcuts when typing in inputs
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    
+    // Tool shortcuts
+    switch (e.key.toLowerCase()) {
+        case 'b':
+            selectTool('brush');
+            break;
+        case 'p':
+            selectTool('pencil');
+            break;
+        case 'e':
+            selectTool('eraser');
+            break;
+        case 'm':
+            selectTool('marker');
+            break;
+        case 'escape':
+            // Close all popovers
+            ui.colors.popover.classList.add('hidden');
+            ui.settingsPanel.classList.add('hidden');
+            ui.actions.deleteModal.classList.add('hidden');
+            state.showSettings = false;
+            break;
+    }
+    
+    // Undo/Redo shortcuts
+    if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'z' && !e.shiftKey) {
+            e.preventDefault();
+            undo();
+        } else if (e.key === 'y' || (e.key === 'z' && e.shiftKey)) {
+            e.preventDefault();
+            redo();
+        }
+    }
+});
+
+// --- Initialization ---
 ui.settingsPanel.classList.add('hidden');
 updateToolUI();
 updateSlidersUI();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+updateCursor();
+updateHistoryButtons();

@@ -3,7 +3,12 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta name="description" content="A beautiful, modern drawing app with multiple brushes, customizable colors, and smooth stroke rendering. Create and export your artwork."/>
+    <meta property="og:title" content="Drawing Canvas"/>
+    <meta property="og:description" content="A modern drawing app with multiple brushes and smooth stroke rendering."/>
+    <meta property="og:type" content="website"/>
     <title>Drawing Canvas</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
     <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -68,13 +73,13 @@
         <!-- Top Bar (Minimal) -->
         <div class="flex justify-between items-center p-6 w-full pointer-events-auto">
             <div class="flex items-center gap-3">
-                <button class="flex items-center justify-center size-10 rounded-full bg-white/80 dark:bg-background-dark/80 backdrop-blur-md shadow-sm hover:bg-gray-100 transition-colors">
+                <button aria-label="Menu" class="flex items-center justify-center size-10 rounded-full bg-white/80 dark:bg-background-dark/80 backdrop-blur-md shadow-sm hover:bg-gray-100 transition-colors">
                     <span class="material-symbols-outlined text-gray-800 dark:text-white text-[20px]">menu</span>
                 </button>
                 <h1 class="text-sm font-medium text-gray-500 dark:text-gray-800 hidden sm:block">Untitled Artwork</h1>
             </div>
             <div class="flex gap-3">
-                <button id="btn-export" class="flex items-center justify-center h-10 px-4 rounded-full bg-white/80 dark:bg-background-dark/80 backdrop-blur-md shadow-sm text-sm font-medium text-gray-800 dark:text-white hover:bg-gray-100 transition-colors">
+                <button id="btn-export" aria-label="Export artwork as PNG" class="flex items-center justify-center h-10 px-4 rounded-full bg-white/80 dark:bg-background-dark/80 backdrop-blur-md shadow-sm text-sm font-medium text-gray-800 dark:text-white hover:bg-gray-100 transition-colors">
                     <span class="material-symbols-outlined text-[18px] mr-2">ios_share</span>
                     Export
                 </button>
@@ -122,20 +127,20 @@
                 <!-- Tools Group -->
                 <div class="flex items-end gap-1 px-2 h-[60px]">
                     <!-- Pencil Tool -->
-                    <button id="tool-pencil" class="group/tool tool-btn relative flex flex-col items-center justify-center w-12 h-14 rounded-xl hover:bg-white/5" data-tool="pencil">
+                    <button id="tool-pencil" aria-label="Pencil tool (P)" class="group/tool tool-btn relative flex flex-col items-center justify-center w-12 h-14 rounded-xl hover:bg-white/5" data-tool="pencil">
                         <span class="material-symbols-outlined text-gray-400 group-hover/tool:text-white transition-colors" style="font-size: 28px; font-variation-settings: 'FILL' 0;">edit</span>
                     </button>
                     <!-- Brush Tool (Active) -->
-                    <button id="tool-brush" class="group/tool tool-btn tool-active relative flex flex-col items-center justify-center w-12 h-14 rounded-xl bg-gradient-to-b from-[#2a3830] to-[#1e2923]" data-tool="brush">
+                    <button id="tool-brush" aria-label="Brush tool (B)" class="group/tool tool-btn tool-active relative flex flex-col items-center justify-center w-12 h-14 rounded-xl bg-gradient-to-b from-[#2a3830] to-[#1e2923]" data-tool="brush">
                         <span class="material-symbols-outlined text-primary" style="font-size: 32px; font-variation-settings: 'FILL' 1;">brush</span>
                         <div class="absolute -bottom-3 w-1 h-1 bg-primary rounded-full"></div>
                     </button>
                     <!-- Eraser Tool -->
-                    <button id="tool-eraser" class="group/tool tool-btn relative flex flex-col items-center justify-center w-12 h-14 rounded-xl hover:bg-white/5" data-tool="eraser">
+                    <button id="tool-eraser" aria-label="Eraser tool (E)" class="group/tool tool-btn relative flex flex-col items-center justify-center w-12 h-14 rounded-xl hover:bg-white/5" data-tool="eraser">
                         <span class="material-symbols-outlined text-gray-400 group-hover/tool:text-white transition-colors" style="font-size: 28px; font-variation-settings: 'FILL' 1;">ink_eraser</span>
                     </button>
                     <!-- Marker Tool -->
-                    <button id="tool-marker" class="group/tool tool-btn relative flex flex-col items-center justify-center w-12 h-14 rounded-xl hover:bg-white/5" data-tool="marker">
+                    <button id="tool-marker" aria-label="Marker tool (M)" class="group/tool tool-btn relative flex flex-col items-center justify-center w-12 h-14 rounded-xl hover:bg-white/5" data-tool="marker">
                         <span class="material-symbols-outlined text-gray-400 group-hover/tool:text-white transition-colors" style="font-size: 28px; font-variation-settings: 'FILL' 0;">ink_highlighter</span>
                     </button>
                 </div>
@@ -143,16 +148,27 @@
                 <div class="h-8 w-px bg-white/10 mx-1"></div>
                 <!-- Color Picker -->
                 <div class="flex items-center gap-3 px-2">
-                    <button id="btn-color-picker" class="relative group size-10 rounded-full ring-2 ring-white/20 hover:ring-white/50 transition-all overflow-hidden">
+                    <button id="btn-color-picker" aria-label="Color picker" class="relative group size-10 rounded-full ring-2 ring-white/20 hover:ring-white/50 transition-all overflow-hidden">
                         <div id="current-color-gradient" class="absolute inset-0 bg-gradient-to-br from-red-500 via-yellow-500 to-blue-500 opacity-20"></div>
                         <div id="current-color-display" class="absolute inset-1 rounded-full bg-primary shadow-inner"></div>
                     </button>
                 </div>
                 <!-- Separator -->
                 <div class="h-8 w-px bg-white/10 mx-1"></div>
+                <!-- Undo/Redo -->
+                <div class="flex items-center gap-1 px-1">
+                    <button id="btn-undo" aria-label="Undo (Ctrl+Z)" class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-white/10 text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors" disabled>
+                        <span class="material-symbols-outlined" style="font-size: 22px;">undo</span>
+                    </button>
+                    <button id="btn-redo" aria-label="Redo (Ctrl+Y)" class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-white/10 text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors" disabled>
+                        <span class="material-symbols-outlined" style="font-size: 22px;">redo</span>
+                    </button>
+                </div>
+                <!-- Separator -->
+                <div class="h-8 w-px bg-white/10 mx-1"></div>
                 <!-- Actions -->
                 <div class="flex items-center gap-1 px-2">
-                    <button id="btn-clear" class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-red-500/20 hover:text-red-400 text-gray-400 transition-colors">
+                    <button id="btn-clear" aria-label="Clear canvas" class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-red-500/20 hover:text-red-400 text-gray-400 transition-colors">
                         <span class="material-symbols-outlined" style="font-size: 24px;">delete</span>
                     </button>
                 </div>
@@ -208,8 +224,6 @@
     <script src="script.js"></script>
 </body>
 </html>
-
-
 
 
 
