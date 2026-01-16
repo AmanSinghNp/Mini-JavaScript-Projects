@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Glass Box AI - Phase 2 Demo</title>
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <div class="header-content">
+            <h1>Glass Box AI</h1>
+            <div id="controls">
+              <div class="control-group">
+                  <select id="architecture-select">
+                    <option value="2,2,1">XOR (2-2-1)</option>
+                    <option value="2,4,1">2-4-1</option>
+                    <option value="2,4,2,1">Deep (2-4-2-1)</option>
+                  </select>
+              </div>
+
+              <div class="separator"></div>
+              
+              <button id="btn-toggle" class="primary-btn">Start</button>
+              <button id="btn-reset" class="secondary-btn">Reset</button>
+
+              <div class="separator"></div>
+
+              <div class="control-group">
+                <label>LR: <span id="val-lr">0.1</span></label>
+                <input type="range" id="sl-lr" min="0.001" max="1.0" step="0.001" value="0.1">
+              </div>
+
+              <div class="control-group">
+                <label>Steps/Frame: <span id="val-speed">50</span></label>
+                <input type="range" id="sl-speed" min="1" max="200" step="1" value="50">
+              </div>
+
+              <div class="control-group">
+                 <select id="sel-probe">
+                   <option value="0,0">Probe: [0,0]</option>
+                   <option value="0,1">Probe: [0,1]</option>
+                   <option value="1,0">Probe: [1,0]</option>
+                   <option value="1,1">Probe: [1,1]</option>
+                 </select>
+              </div>
+
+              <div class="stats-group">
+                Loss: <span id="val-loss">0.000</span> (avg)
+              </div>
+            </div>
+        </div>
+      </header>
+      <div id="main-content">
+          <div id="network-container" class="panel">
+              <!-- Network Here -->
+          </div>
+          <div id="heatmap-container" class="panel">
+              <canvas id="boundary-canvas"></canvas>
+              <div class="panel-label">Decision Boundary</div>
+          </div>
+      </div>
+      
+      <div id="info-panel">
+          <div class="legend panel">
+            <h3>Legend</h3>
+            <div class="legend-item"><span class="swatch neuron-active"></span>Active Neuron</div>
+            <div class="legend-item"><span class="swatch neuron-inactive"></span>Inactive Neuron</div>
+            <div class="legend-item"><span class="swatch line-pos"></span>Positive Weight</div>
+            <div class="legend-item"><span class="swatch line-neg"></span>Negative Weight</div>
+          </div>
+          <div class="probe-output panel">
+             <h3>Probe Analysis</h3>
+             <div class="stat-row">Input: <span id="probe-input-val">[0, 0]</span></div>
+             <div class="stat-row">Target: <span id="probe-target-val">0</span></div>
+             <div class="stat-row">Output: <span id="probe-output-val">0.00</span></div>
+             <div class="stat-row">Error: <span id="probe-error-val">0.00</span></div>
+          </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
