@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manga Motion Reader</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Komika+Axis&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <header class="main-header">
+            <h1>MANGA MOTION</h1>
+            <p class="subtitle">Physics-Based Reading Engine</p>
+        </header>
+
+        <main class="manga-container" id="manga-container">
+            <!-- Panels will be injected here or hardcoded for demo -->
+            <div class="panel-wrapper" data-speed="1.0">
+                <div class="panel-content panel-1">
+                    <span class="panel-number">01</span>
+                    <div class="speech-bubble">It starts...</div>
+                </div>
+            </div>
+
+            <div class="panel-wrapper" data-speed="1.2">
+                <div class="panel-content panel-2">
+                    <span class="panel-number">02</span>
+                    <div class="action-lines"></div>
+                </div>
+            </div>
+
+            <div class="panel-wrapper" data-speed="0.8">
+                <div class="panel-content panel-3">
+                    <span class="panel-number">03</span>
+                     <div class="speech-bubble right">Wait!</div>
+                </div>
+            </div>
+            
+            <div class="panel-wrapper" data-speed="1.5">
+                <div class="panel-content panel-4">
+                    <span class="panel-number">04</span>
+                    <div class="impact-text">WHAM!</div>
+                </div>
+            </div>
+
+             <div class="panel-wrapper" data-speed="1.1">
+                <div class="panel-content panel-5">
+                    <span class="panel-number">05</span>
+                </div>
+            </div>
+        </main>
+        
+        <div class="scroll-indicator">SCROLL</div>
+    </div>
+    
+    <script type="module" src="app.js"></script>
+</body>
+</html>
