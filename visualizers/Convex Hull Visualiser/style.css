@@ -1,0 +1,9 @@
+/* Convex Hull Styles */
+
+canvas {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+#canvas {
+    touch-action: none;
+}

@@ -35,6 +35,9 @@ This project provides a visual playground to understand how various data structu
 - [String Matching (KMP)](./String%20Matching%20Visualiser/index.html)
 - [Recursion Tree](./Recursion%20Tree%20Visualiser/index.html)
 - [Hash Table](./Hash%20Table%20Visualiser/index.html)
+- [Convex Hull (Graham Scan)](./Convex%20Hull%20Visualiser/index.html)
+- [LRU Cache](./LRU%20Cache%20Visualiser/index.html)
+- [Binary Search](./Binary%20Search%20Visualiser/index.html)
 
 ## How to Run
 
