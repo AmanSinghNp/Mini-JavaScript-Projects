@@ -22,9 +22,13 @@
             <div class="controls">
                 <div class="tool-panel">
                     <h2>Tools</h2>
-                    <div class="tool active" data-type="none">Select</div>
-                    <!-- Tools will be added in Phase 2 -->
-                    <div class="tool" data-type="mirror" style="opacity: 0.5; pointer-events: none;">Mirror (Coming Soon)</div>
+                    <div class="tool active" data-type="mirror_l">
+                        <span>/</span> Left Mirror
+                    </div>
+                    <!-- Reuse class for consistent styling -->
+                    <div class="tool" data-type="delete">
+                        <span>x</span> Delete
+                    </div>
                 </div>
                 <div class="info-panel">
                     <button id="resetBtn">Reset Level</button>
