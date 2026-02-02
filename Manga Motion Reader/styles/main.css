@@ -1,0 +1,84 @@
+
+:root {
+    /* Frieren Palette */
+    --c-bg: #EAE6DA;          /* Parchment / Old Paper */
+    --c-text: #4A3B32;        /* Dark Earthy Brown */
+    --c-gold: #D4AF37;        /* Gold Foil */
+    --c-gold-glow: #F9E79F;   /* Faint fluid glow */
+    --c-magic-blue: #A9D0F5;  /* Pale Mana Blue */
+    --c-magic-deep: #2E5A88;  /* Deep Mana */
+    --c-panel-bg: #FFFFFF;
+    
+    --f-serif: 'Cormorant Garamond', 'Times New Roman', serif;
+    --f-sans: 'Roboto Condensed', sans-serif;
+    
+    --spacing: 2rem;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--c-bg);
+    color: var(--c-text);
+    font-family: var(--f-serif); /* Arcane feel */
+    overflow-x: hidden;
+}
+
+/* Scrollbar styling for that magical feel */
+::-webkit-scrollbar {
+    width: 10px;
+}
+::-webkit-scrollbar-track {
+    background: var(--c-bg);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--c-text);
+    border: 2px solid var(--c-bg);
+    border-radius: 5px;
+}
+
+#app {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+}
+
+.main-header {
+    text-align: center;
+    padding: 8rem 0 4rem;
+    position: relative;
+    z-index: 100;
+}
+
+h1 {
+    font-family: var(--f-serif);
+    font-size: 4rem;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--c-text);
+    text-shadow: 0 0 10px var(--c-gold-glow);
+    position: relative;
+    display: inline-block;
+}
+
+/* Decorative lines around title */
+h1::before, h1::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--c-gold), transparent);
+}
+h1::before { right: 100%; margin-right: 20px; }
+h1::after { left: 100%; margin-left: 20px; }
+
+.subtitle {
+    font-family: var(--f-sans);
+    font-size: 1.2rem;
+    color: var(--c-gold);
+    letter-spacing: 0.1em;
+    margin-top: 1rem;
+    font-variant: small-caps;
+}

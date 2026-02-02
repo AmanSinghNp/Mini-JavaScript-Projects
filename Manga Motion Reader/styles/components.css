@@ -1,0 +1,60 @@
+
+/* Timeline Helper */
+.grimoire-timeline {
+    position: fixed;
+    top: 50px;
+    right: 20px;
+    width: 40px;
+    height: 85vh;
+    z-index: 150;
+    display: flex;
+    justify-content: center;
+}
+
+.timeline-svg {
+    width: 2px;
+    height: 100%;
+    background: var(--c-text); /* The line */
+    opacity: 0.3;
+    border-radius: 2px;
+}
+
+.timeline-marker {
+    position: absolute;
+    top: 0;
+    width: 24px;
+    height: 24px;
+    background: var(--c-gold);
+    border: 2px solid var(--c-text);
+    border-radius: 50%;
+    transform: translateY(0);
+    transition: transform 0.1s linear; /* Smooth visual update */
+    box-shadow: 0 0 10px var(--c-gold-glow);
+}
+
+/* Analyze Lens */
+.analyze-lens {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 2px solid var(--c-magic-blue);
+    
+    /* The Magic Blur Effect */
+    backdrop-filter: hue-rotate(90deg) blur(2px) contrast(1.2);
+    -webkit-backdrop-filter: hue-rotate(90deg) blur(2px) contrast(1.2);
+    
+    background: rgba(169, 208, 245, 0.1);
+    box-shadow: 
+        0 0 20px var(--c-magic-blue),
+        inset 0 0 20px rgba(169, 208, 245, 0.4);
+        
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+/* Add a crosshair or rune in the center of lens later if needed */

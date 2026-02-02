@@ -1,0 +1,12 @@
+
+.particle-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Let clicks pass through */
+    z-index: 50; /* Above backgound, below panels/UI? Or above panels? */
+    /* Let's put it ON TOP for maximum atmosphere, but pass events */
+    mix-blend-mode: screen; /* Magic glow effect */
+}

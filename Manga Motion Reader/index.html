@@ -3,58 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manga Motion Reader</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Komika+Axis&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+    <title>Manga Motion Reader: Grimoire Edition</title>
+    
+    <!-- Fonts: Cormorant Garamond for that ancient feel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/grimoire.css">
+    <link rel="stylesheet" href="styles/particles.css">
+    <link rel="stylesheet" href="styles/components.css">
 </head>
 <body>
     <div id="app">
-        <div class="progress-bar-container">
-            <div class="progress-bar" id="reading-progress"></div>
-        </div>
+        <!-- Progress Bar (Legacy, kept but hidden if not needed, or we use the new Timeline) -->
+        <!-- <div class="progress-bar-container"><div class="progress-bar" id="reading-progress"></div></div> -->
+        
         <header class="main-header">
-            <h1>MANGA MOTION</h1>
-            <p class="subtitle">Physics-Based Reading Engine</p>
+            <h1>Manga Motion</h1>
+            <p class="subtitle">Grimoire Edition</p>
         </header>
 
         <main class="manga-container" id="manga-container">
-            <!-- Panels will be injected here or hardcoded for demo -->
+            <!-- Panels -->
             <div class="panel-wrapper" data-speed="1.0">
                 <div class="panel-content panel-1">
-                    <span class="panel-number">01</span>
-                    <div class="speech-bubble">It starts...</div>
+                    <span class="panel-number">Page 1</span>
+                    <div class="speech-bubble">The era of magic...</div>
                 </div>
             </div>
 
             <div class="panel-wrapper" data-speed="1.2">
                 <div class="panel-content panel-2">
-                    <span class="panel-number">02</span>
-                    <div class="action-lines"></div>
+                    <span class="panel-number">Page 2</span>
+                    <!-- Content would go here -->
                 </div>
             </div>
 
             <div class="panel-wrapper" data-speed="0.8">
                 <div class="panel-content panel-3">
-                    <span class="panel-number">03</span>
-                     <div class="speech-bubble right">Wait!</div>
+                    <span class="panel-number">Page 3</span>
+                     <div class="speech-bubble right">It flows like water.</div>
                 </div>
             </div>
             
             <div class="panel-wrapper" data-speed="1.5">
                 <div class="panel-content panel-4">
-                    <span class="panel-number">04</span>
-                    <div class="impact-text">WHAM!</div>
+                    <span class="panel-number">Page 4</span>
                 </div>
             </div>
 
              <div class="panel-wrapper" data-speed="1.1">
                 <div class="panel-content panel-5">
-                    <span class="panel-number">05</span>
+                    <span class="panel-number">Page 5</span>
+                    <div style="font-size: 3rem; color: var(--c-gold);">FIN</div>
                 </div>
             </div>
         </main>
         
-        <div class="scroll-indicator">SCROLL</div>
+        <div class="scroll-indicator" style="position:fixed; bottom:20px; right:20px; opacity:0.5;">SCROLL</div>
     </div>
     
     <script type="module" src="app.js"></script>
